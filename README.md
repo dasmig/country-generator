@@ -33,7 +33,7 @@
 
 ## Integration
 
-[`countrygen.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/countrygen.hpp) is the single required file [released here](https://github.com/dasmig/country-generator/releases). You need to add
+[`countrygen.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/countrygen.hpp) is the single required file [released here](https://github.com/dasmig/country-generator/releases). You also need [`random.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/random.hpp) in the same directory. Add
 
 ```cpp
 #include <dasmig/countrygen.hpp>
@@ -63,18 +63,18 @@ cntg::instance().load(dasmig::dataset::full);  // ~250 countries & territories
 // Generate a random country (population-weighted).
 auto country = cntg::instance().get_country();
 std::cout << country.name_common << ", " << country.cca2
-          << " (pop. " << country.population << ")" << std::endl;
+          << " (pop. " << country.population << ")" << '\n';
 
 // Generate a country from a specific region.
 auto eu = cntg::instance().get_country("Europe");
 
 // Access all available fields.
-std::cout << country.capital << std::endl;
-std::cout << country.languages << std::endl;
+std::cout << country.capital << '\n';
+std::cout << country.languages << '\n';
 std::cout << country.currency_name << " (" << country.currency_symbol << ")"
-          << std::endl;
-std::cout << country.driving_side << std::endl;
-std::cout << country.income_level << std::endl;
+          << '\n';
+std::cout << country.driving_side << '\n';
+std::cout << country.income_level << '\n';
 
 // Deterministic generation — same seed always produces the same country.
 auto seeded = cntg::instance().get_country(42);

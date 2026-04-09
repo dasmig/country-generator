@@ -85,6 +85,8 @@ dasmig::cntg::instance().load("/opt/data/countries.tsv");
 ```
 
 Calling `load()` multiple times is safe — each call adds to the existing data.
+`load(dataset)` returns `bool` (`true` if a matching file was found and loaded).
+`load(path)` returns `void` and silently does nothing if the path does not exist.
 
 ## Generating Countries
 
