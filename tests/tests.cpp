@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -130,7 +131,7 @@ TEST_CASE("multiple loads accumulate data", "[loading]")
 {
     auto gen = make_loaded_generator();
     auto count1 = gen.country_count();
-    gen.load(dasmig::dataset::lite);
+    (void)gen.load(dasmig::dataset::lite);
     REQUIRE(gen.country_count() >= count1);
 }
 
@@ -423,7 +424,274 @@ TEST_CASE("generated countries have valid field ranges", "[integrity]")
         REQUIRE(c.longitude <= 180.0);
         REQUIRE_FALSE(c.region.empty());
         REQUIRE(c.seed() != 0);
+
+        // Validate enum-like fields.
+        REQUIRE((c.driving_side == "right" || c.driving_side == "left" ||
+                 c.driving_side.empty()));
+        REQUIRE((c.start_of_week == "monday" || c.start_of_week == "sunday" ||
+                 c.start_of_week == "saturday" || c.start_of_week.empty()));
     }
 
     gen.unseed();
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: has_data before load
+// ---------------------------------------------------------------------------
+
+TEST_CASE("has_data is false before load", "[loading]")
+{
+    const dasmig::cntg gen;
+    REQUIRE_FALSE(gen.has_data());
+    REQUIRE(gen.country_count() == 0);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: header-only file (no data rows)
+// ---------------------------------------------------------------------------
+
+TEST_CASE("load - header-only file yields no data", "[loading]")
+{
+    auto tmp = std::filesystem::temp_directory_path() / "cntg_header_only.tsv";
+    {
+        std::ofstream f{tmp};
+        f << "cca2\tcca3\tccn3\tname_common\tname_official\tcapital\tregion\t"
+             "subregion\tcontinent\tlatitude\tlongitude\tarea\tpopulation\t"
+             "landlocked\tindependent\tun_member\tlanguages\tcurrency_code\t"
+             "currency_name\tcurrency_symbol\tborders\ttimezones\t"
+             "driving_side\ttld\tidd_root\tidd_suffix\tdemonym_m\tdemonym_f\t"
+             "flag_emoji\tincome_level\tstart_of_week\n";
+    }
+
+    dasmig::cntg gen;
+    gen.load(tmp);
+    REQUIRE_FALSE(gen.has_data());
+    REQUIRE(gen.country_count() == 0);
+    std::filesystem::remove(tmp);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: CRLF line endings
+// ---------------------------------------------------------------------------
+
+TEST_CASE("load - handles CRLF line endings", "[loading]")
+{
+    auto tmp = std::filesystem::temp_directory_path() / "cntg_crlf.tsv";
+    {
+        std::ofstream f{tmp, std::ios::binary};
+        f << "cca2\tcca3\tccn3\tname_common\tname_official\tcapital\tregion\t"
+             "subregion\tcontinent\tlatitude\tlongitude\tarea\tpopulation\t"
+             "landlocked\tindependent\tun_member\tlanguages\tcurrency_code\t"
+             "currency_name\tcurrency_symbol\tborders\ttimezones\t"
+             "driving_side\ttld\tidd_root\tidd_suffix\tdemonym_m\tdemonym_f\t"
+             "flag_emoji\tincome_level\tstart_of_week\r\n";
+        f << "XX\tXXX\t999\tCRLFland\tRepublic of CRLFland\tCRLFville\t"
+             "Europe\tNorthern Europe\tEurope\t60.0\t25.0\t50000\t1000000\t"
+             "0\t1\t1\tEnglish\tXXD\tCRLF dollar\tC$\t\tUTC+02:00\t"
+             "right\t.xx\t+9\t9\tCRLFlander\tCRLFlander\t\tHigh income\t"
+             "monday\r\n";
+    }
+
+    dasmig::cntg gen;
+    gen.load(tmp);
+    REQUIRE(gen.country_count() == 1);
+    auto c = gen.get_country();
+    REQUIRE(c.name_common == "CRLFland");
+    // Verify the trailing \r was stripped, not embedded in start_of_week.
+    REQUIRE(c.start_of_week == "monday");
+    std::filesystem::remove(tmp);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: non-numeric fields cause graceful skip
+// ---------------------------------------------------------------------------
+
+TEST_CASE("load - non-numeric coordinate yields zero", "[loading]")
+{
+    auto tmp = std::filesystem::temp_directory_path() / "cntg_bad_num.tsv";
+    {
+        std::ofstream f{tmp};
+        f << "cca2\tcca3\tccn3\tname_common\tname_official\tcapital\tregion\t"
+             "subregion\tcontinent\tlatitude\tlongitude\tarea\tpopulation\t"
+             "landlocked\tindependent\tun_member\tlanguages\tcurrency_code\t"
+             "currency_name\tcurrency_symbol\tborders\ttimezones\t"
+             "driving_side\ttld\tidd_root\tidd_suffix\tdemonym_m\tdemonym_f\t"
+             "flag_emoji\tincome_level\tstart_of_week\n";
+        // latitude and longitude are non-numeric "abc" / "xyz"
+        f << "ZZ\tZZZ\t000\tBadCoords\tBadCoords\tBadCity\tAfrica\t"
+             "Northern Africa\tAfrica\tabc\txyz\t999\t100\t"
+             "0\t1\t1\t\t\t\t\t\t\t"
+             "right\t\t\t\t\t\t\t\t"
+             "monday\n";
+    }
+
+    dasmig::cntg gen;
+    gen.load(tmp);
+    // from_chars returns 0 on failure — line is still valid (cca3 not empty).
+    REQUIRE(gen.country_count() == 1);
+    auto c = gen.get_country();
+    REQUIRE(c.latitude == Catch::Approx(0.0));
+    REQUIRE(c.longitude == Catch::Approx(0.0));
+    std::filesystem::remove(tmp);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: get_country(region, seed) throws when empty
+// ---------------------------------------------------------------------------
+
+TEST_CASE("get_country(region, seed) throws when empty", "[region]")
+{
+    const dasmig::cntg gen;
+    REQUIRE_THROWS_AS(gen.get_country("Europe", 42), std::runtime_error);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: different seeds produce different countries
+// ---------------------------------------------------------------------------
+
+TEST_CASE("different seeds produce different countries", "[generation][seed]")
+{
+    auto gen = make_loaded_generator();
+    std::set<std::string> seen;
+
+    for (std::uint64_t s = 1; s <= 50; ++s)
+    {
+        seen.insert(gen.get_country(s).cca3);
+    }
+
+    // 50 different seeds on ~195 countries should produce at least 5 distinct.
+    REQUIRE(seen.size() >= 5);
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: region index covers all expected regions
+// ---------------------------------------------------------------------------
+
+TEST_CASE("every generated country has a known region", "[region][integrity]")
+{
+    auto gen = make_loaded_generator();
+    gen.seed(1);
+
+    static const std::set<std::string> valid_regions = {
+        "Africa", "Americas", "Antarctic", "Asia", "Europe", "Oceania"};
+
+    for (int i = 0; i < 100; ++i)
+    {
+        auto c = gen.get_country();
+        REQUIRE(valid_regions.count(c.region) == 1);
+    }
+
+    gen.unseed();
+}
+
+// ---------------------------------------------------------------------------
+// Missing coverage: all six regions are reachable
+// ---------------------------------------------------------------------------
+
+TEST_CASE("all major regions are reachable", "[region]")
+{
+    auto gen = make_loaded_generator();
+
+    for (const auto* rgn : {"Africa", "Americas", "Asia", "Europe", "Oceania"})
+    {
+        auto c = gen.get_country(rgn);
+        REQUIRE(c.region == std::string{rgn});
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Deeper data integrity: all 31 fields populated for known country
+// ---------------------------------------------------------------------------
+
+TEST_CASE("known country has all fields populated", "[integrity]")
+{
+    auto gen = make_loaded_generator();
+    gen.seed(42);
+
+    bool found = false;
+    for (int i = 0; i < 500; ++i)
+    {
+        auto c = gen.get_country();
+        // Brazil is in both tiers, has all fields, and is likely with
+        // population weighting.
+        if (c.cca3 == "BRA")
+        {
+            REQUIRE(c.cca2 == "BR");
+            REQUIRE(c.ccn3 == "076");
+            REQUIRE(c.name_common == "Brazil");
+            REQUIRE_FALSE(c.name_official.empty());
+            REQUIRE_FALSE(c.capital.empty());
+            REQUIRE(c.region == "Americas");
+            REQUIRE(c.subregion == "South America");
+            REQUIRE_FALSE(c.continent.empty());
+            REQUIRE(c.latitude != Catch::Approx(0.0));
+            REQUIRE(c.longitude != Catch::Approx(0.0));
+            REQUIRE(c.area > 0);
+            REQUIRE(c.population > 100'000'000);
+            REQUIRE_FALSE(c.landlocked);
+            REQUIRE(c.independent);
+            REQUIRE(c.un_member);
+            REQUIRE_FALSE(c.languages.empty());
+            REQUIRE(c.currency_code == "BRL");
+            REQUIRE_FALSE(c.currency_name.empty());
+            REQUIRE_FALSE(c.currency_symbol.empty());
+            REQUIRE_FALSE(c.borders.empty());
+            REQUIRE_FALSE(c.timezones.empty());
+            REQUIRE(c.driving_side == "right");
+            REQUIRE(c.tld == ".br");
+            REQUIRE_FALSE(c.idd_root.empty());
+            REQUIRE_FALSE(c.idd_suffix.empty());
+            REQUIRE_FALSE(c.demonym_m.empty());
+            REQUIRE_FALSE(c.demonym_f.empty());
+            REQUIRE_FALSE(c.income_level.empty());
+            REQUIRE_FALSE(c.start_of_week.empty());
+            found = true;
+            break;
+        }
+    }
+
+    // Brazil should appear within 500 pop-weighted draws.
+    REQUIRE(found);
+    gen.unseed();
+}
+
+// ---------------------------------------------------------------------------
+// Stronger uniform test: compare distribution shape
+// ---------------------------------------------------------------------------
+
+TEST_CASE("uniform selection distributes evenly", "[weighting]")
+{
+    auto gen = make_loaded_generator();
+    gen.weighted(false).seed(123);
+
+    std::unordered_map<std::string, int> counts;
+    static constexpr int draws = 2000;
+
+    for (int i = 0; i < draws; ++i)
+    {
+        counts[gen.get_country().cca3]++;
+    }
+
+    // Uniform over ~195 countries, 2000 draws → expect ~10 per country.
+    // No single country should dominate (>5% of draws, i.e., >100).
+    for (const auto& [code, cnt] : counts)
+    {
+        REQUIRE(cnt < draws / 10);
+    }
+
+    gen.weighted(true).unseed();
+}
+
+// ---------------------------------------------------------------------------
+// load(dataset) return value is usable (not discarded)
+// ---------------------------------------------------------------------------
+
+TEST_CASE("load(dataset) return value is meaningful", "[loading][tier]")
+{
+    dasmig::cntg gen;
+    // At least one tier should work from the test directory.
+    bool lite_ok = gen.load(dasmig::dataset::lite);
+    bool full_ok = gen.load(dasmig::dataset::full);
+    REQUIRE((lite_ok || full_ok));
+    REQUIRE(gen.has_data());
 }

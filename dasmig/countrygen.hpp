@@ -4,6 +4,7 @@
 #include "random.hpp"
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -13,6 +14,7 @@
 #include <ranges>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -196,11 +198,11 @@ class cntg
     /// @brief Default constructor — creates an empty generator with no data.
     cntg() = default;
 
-    cntg(const cntg&) = delete;
-    cntg& operator=(const cntg&) = delete;
-    cntg(cntg&&) noexcept = default;
-    cntg& operator=(cntg&&) noexcept = default;
-    ~cntg() = default;
+    cntg(const cntg&) = delete;            ///< Not copyable.
+    cntg& operator=(const cntg&) = delete; ///< Not copyable.
+    cntg(cntg&&) noexcept = default;       ///< Move constructor.
+    cntg& operator=(cntg&&) noexcept = default; ///< Move assignment.
+    ~cntg() = default;                     ///< Default destructor.
 
     /// @brief Access the global singleton instance.
     ///
@@ -238,10 +240,9 @@ class cntg
                 "No country data loaded. Call load() first.");
         }
 
-        static constexpr unsigned seed_shift{32U};
         effolkronium::random_local call_engine;
         call_engine.seed(static_cast<std::mt19937::result_type>(
-            (call_seed ^ (call_seed >> seed_shift))));
+            (call_seed ^ (call_seed >> seed_shift_))));
 
         auto idx = _weighted
                        ? _distribution(call_engine.engine())
@@ -284,10 +285,9 @@ class cntg
                 "No countries found for region: " + rgn);
         }
 
-        static constexpr unsigned seed_shift{32U};
         effolkronium::random_local call_engine;
         call_engine.seed(static_cast<std::mt19937::result_type>(
-            (call_seed ^ (call_seed >> seed_shift))));
+            (call_seed ^ (call_seed >> seed_shift_))));
 
         const auto& idx = it->second;
         auto selected = _weighted
@@ -391,7 +391,7 @@ class cntg
                 continue;
             }
 
-            if (!line.empty() && line.back() == '\r')
+            if (line.back() == '\r')
             {
                 line.pop_back();
             }
@@ -409,7 +409,7 @@ class cntg
     /// @brief Load a specific dataset tier from a base resources directory.
     /// @param tier The dataset size to load.
     /// @return `true` if a matching directory was found and loaded.
-    bool load(dataset tier)
+    [[nodiscard]] bool load(dataset tier)
     {
         static constexpr std::array probe_paths = {
             "resources", "../resources", "country-generator/resources"};
@@ -451,6 +451,9 @@ class cntg
     };
 
     std::unordered_map<std::string, region_entry> _region_index;
+
+    // Bit shift for mixing per-call seeds.
+    static constexpr unsigned seed_shift_{32U};
 
     // Per-instance random engine for seed drawing.
     std::mt19937_64 _engine{std::random_device{}()};
@@ -556,50 +559,60 @@ class cntg
             return c; // cca3 stays empty, skipped by caller.
         }
 
-        try
-        {
-            c.cca2 = fields[0];
-            c.cca3 = fields[1];
-            c.ccn3 = fields[2];
-            c.name_common = fields[3];
-            c.name_official = fields[4];
-            c.capital = fields[5];
-            c.region = fields[6];
-            c.subregion = fields[7];
-            c.continent = fields[8];
-            c.latitude = fields[9].empty() ? 0.0 : std::stod(fields[9]);
-            c.longitude = fields[10].empty() ? 0.0 : std::stod(fields[10]);
-            c.area = fields[11].empty()
-                         ? 0
-                         : static_cast<std::uint64_t>(
-                               std::stoull(fields[11]));
-            c.population = fields[12].empty()
-                               ? 0
-                               : static_cast<std::uint64_t>(
-                                     std::stoull(fields[12]));
-            c.landlocked = (fields[13] == "1");
-            c.independent = (fields[14] == "1");
-            c.un_member = (fields[15] == "1");
-            c.languages = fields[16];
-            c.currency_code = fields[17];
-            c.currency_name = fields[18];
-            c.currency_symbol = fields[19];
-            c.borders = fields[20];
-            c.timezones = fields[21];
-            c.driving_side = fields[22];
-            c.tld = fields[23];
-            c.idd_root = fields[24];
-            c.idd_suffix = fields[25];
-            c.demonym_m = fields[26];
-            c.demonym_f = fields[27];
-            c.flag_emoji = fields[28];
-            c.income_level = fields[29];
-            c.start_of_week = fields[30];
-        }
-        catch (...)
-        {
-            c.cca3.clear(); // Mark as invalid.
-        }
+        // Locale-independent numeric parsing via std::from_chars.
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto parse_double = [](const std::string& s, double fallback = 0.0) {
+            if (s.empty())
+            {
+                return fallback;
+            }
+            double val{};
+            auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+            return ec == std::errc{} ? val : fallback;
+        };
+
+        auto parse_uint64 = [](const std::string& s) -> std::uint64_t {
+            if (s.empty())
+            {
+                return 0ULL;
+            }
+            std::uint64_t val{};
+            auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+            return ec == std::errc{} ? val : 0ULL;
+        };
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+        c.cca2 = fields[0];
+        c.cca3 = fields[1];
+        c.ccn3 = fields[2];
+        c.name_common = fields[3];
+        c.name_official = fields[4];
+        c.capital = fields[5];
+        c.region = fields[6];
+        c.subregion = fields[7];
+        c.continent = fields[8];
+        c.latitude = parse_double(fields[9]);
+        c.longitude = parse_double(fields[10]);
+        c.area = parse_uint64(fields[11]);
+        c.population = parse_uint64(fields[12]);
+        c.landlocked = (fields[13] == "1");
+        c.independent = (fields[14] == "1");
+        c.un_member = (fields[15] == "1");
+        c.languages = fields[16];
+        c.currency_code = fields[17];
+        c.currency_name = fields[18];
+        c.currency_symbol = fields[19];
+        c.borders = fields[20];
+        c.timezones = fields[21];
+        c.driving_side = fields[22];
+        c.tld = fields[23];
+        c.idd_root = fields[24];
+        c.idd_suffix = fields[25];
+        c.demonym_m = fields[26];
+        c.demonym_f = fields[27];
+        c.flag_emoji = fields[28];
+        c.income_level = fields[29];
+        c.start_of_week = fields[30];
 
         return c;
     }

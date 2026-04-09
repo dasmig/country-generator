@@ -43,7 +43,7 @@ int main()
     std::cout << "Continent:     " << c.continent << '\n';
     std::cout << "Coordinates:   " << c.latitude << ", "
               << c.longitude << '\n';
-    std::cout << "Area:          " << c.area << " kmÂ²" << '\n';
+    std::cout << "Area:          " << c.area << " km\u00B2" << '\n';
     std::cout << "Population:    " << c.population << '\n';
     std::cout << "Landlocked:    " << (c.landlocked ? "yes" : "no")
               << '\n';
