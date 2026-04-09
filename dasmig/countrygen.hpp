@@ -14,7 +14,6 @@
 #include <ranges>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -411,18 +410,16 @@ class cntg
     /// @return `true` if a matching directory was found and loaded.
     [[nodiscard]] bool load(dataset tier)
     {
-        static constexpr std::array probe_paths = {
-            "resources", "../resources", "country-generator/resources"};
-
         const char* subfolder =
             (tier == dataset::full) ? "full" : "lite";
 
-        auto found = std::ranges::find_if(probe_paths, [&](const char* base) {
-            const auto tsv =
-                std::filesystem::path{base} / subfolder / "countries.tsv";
-            return std::filesystem::is_regular_file(tsv);
-        });
-        if (found != probe_paths.end())
+        auto found = std::ranges::find_if(
+            probe_bases_, [&](const char* base) {
+                const auto tsv =
+                    std::filesystem::path{base} / subfolder / "countries.tsv";
+                return std::filesystem::is_regular_file(tsv);
+            });
+        if (found != probe_bases_.end())
         {
             load(std::filesystem::path{*found} / subfolder / "countries.tsv");
             return true;
@@ -455,6 +452,10 @@ class cntg
     // Bit shift for mixing per-call seeds.
     static constexpr unsigned seed_shift_{32U};
 
+    // Common base paths probed for resource directories.
+    static constexpr std::array probe_bases_{
+        "resources", "../resources", "country-generator/resources"};
+
     // Per-instance random engine for seed drawing.
     std::mt19937_64 _engine{std::random_device{}()};
 
@@ -464,14 +465,12 @@ class cntg
     // Singleton constructor: auto-probes common resource locations.
     explicit cntg(auto_probe_tag /*tag*/)
     {
-        static constexpr std::array probe_paths = {
-            "resources", "../resources", "country-generator/resources"};
-
-        auto found = std::ranges::find_if(probe_paths, [](const char* p) {
-            return std::filesystem::exists(p) &&
-                   std::filesystem::is_directory(p);
-        });
-        if (found != probe_paths.end())
+        auto found = std::ranges::find_if(
+            probe_bases_, [](const char* p) {
+                return std::filesystem::exists(p) &&
+                       std::filesystem::is_directory(p);
+            });
+        if (found != probe_bases_.end())
         {
             const std::filesystem::path base{*found};
             auto lite_tsv = base / "lite" / "countries.tsv";
@@ -582,15 +581,15 @@ class cntg
         };
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-        c.cca2 = fields[0];
-        c.cca3 = fields[1];
-        c.ccn3 = fields[2];
-        c.name_common = fields[3];
-        c.name_official = fields[4];
-        c.capital = fields[5];
-        c.region = fields[6];
-        c.subregion = fields[7];
-        c.continent = fields[8];
+        c.cca2 = std::move(fields[0]);
+        c.cca3 = std::move(fields[1]);
+        c.ccn3 = std::move(fields[2]);
+        c.name_common = std::move(fields[3]);
+        c.name_official = std::move(fields[4]);
+        c.capital = std::move(fields[5]);
+        c.region = std::move(fields[6]);
+        c.subregion = std::move(fields[7]);
+        c.continent = std::move(fields[8]);
         c.latitude = parse_double(fields[9]);
         c.longitude = parse_double(fields[10]);
         c.area = parse_uint64(fields[11]);
@@ -598,21 +597,21 @@ class cntg
         c.landlocked = (fields[13] == "1");
         c.independent = (fields[14] == "1");
         c.un_member = (fields[15] == "1");
-        c.languages = fields[16];
-        c.currency_code = fields[17];
-        c.currency_name = fields[18];
-        c.currency_symbol = fields[19];
-        c.borders = fields[20];
-        c.timezones = fields[21];
-        c.driving_side = fields[22];
-        c.tld = fields[23];
-        c.idd_root = fields[24];
-        c.idd_suffix = fields[25];
-        c.demonym_m = fields[26];
-        c.demonym_f = fields[27];
-        c.flag_emoji = fields[28];
-        c.income_level = fields[29];
-        c.start_of_week = fields[30];
+        c.languages = std::move(fields[16]);
+        c.currency_code = std::move(fields[17]);
+        c.currency_name = std::move(fields[18]);
+        c.currency_symbol = std::move(fields[19]);
+        c.borders = std::move(fields[20]);
+        c.timezones = std::move(fields[21]);
+        c.driving_side = std::move(fields[22]);
+        c.tld = std::move(fields[23]);
+        c.idd_root = std::move(fields[24]);
+        c.idd_suffix = std::move(fields[25]);
+        c.demonym_m = std::move(fields[26]);
+        c.demonym_f = std::move(fields[27]);
+        c.flag_emoji = std::move(fields[28]);
+        c.income_level = std::move(fields[29]);
+        c.start_of_week = std::move(fields[30]);
 
         return c;
     }
