@@ -15,7 +15,11 @@ Checks: >
   -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-magic-numbers,
-  -bugprone-exception-escape
+  -bugprone-exception-escape,
+  -hicpp-braces-around-statements,
+  -readability-braces-around-statements,
+  -readability-math-missing-parentheses,
+  -misc-include-cleaner
 WarningsAsErrors: ''
 HeaderFilterRegex: 'dasmig/.*\.hpp'
 ExtraArgs: ['-std=c++23']

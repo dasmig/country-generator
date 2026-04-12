@@ -119,3 +119,14 @@ python scripts/prepare_countries.py            # generate both tiers
 python scripts/prepare_countries.py --tier lite # lite only
 python scripts/prepare_countries.py --tier full # full only
 ```
+
+## Related Libraries
+
+| Library | Description |
+|---------|-------------|
+| [name-generator](https://github.com/dasmig/name-generator) | Culturally appropriate full names |
+| [nickname-generator](https://github.com/dasmig/nickname-generator) | Gamer-style nicknames |
+| [birth-generator](https://github.com/dasmig/birth-generator) | Demographically plausible birthdays |
+| [biodata-generator](https://github.com/dasmig/biodata-generator) | Procedural human physical characteristics |
+| [city-generator](https://github.com/dasmig/city-generator) | Weighted city selection by population |
+| [entity-generator](https://github.com/dasmig/entity-generator) | ECS-based entity generation |

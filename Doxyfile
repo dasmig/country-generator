@@ -4,7 +4,7 @@
 PROJECT_NAME           = "Country Generator"
 PROJECT_NUMBER         = 1.0.0
 PROJECT_BRIEF          = "Procedural country generation for C++23"
-PROJECT_LOGO           =
+PROJECT_LOGO           = doc/country-generator.png
 
 OUTPUT_DIRECTORY       = doc/api
 CREATE_SUBDIRS         = NO
@@ -58,3 +58,7 @@ TOC_INCLUDE_HEADINGS   = 3
 GENERATE_LATEX         = NO
 GENERATE_MAN           = NO
 GENERATE_XML           = NO
+
+# --- Graphs ----------------------------------------------------------------
+
+HAVE_DOT               = NO
