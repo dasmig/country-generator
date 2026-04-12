@@ -27,11 +27,14 @@ namespace dasmig
 {
 
 /// @brief Dataset size tier for resource loading.
+#ifndef DASMIG_DATASET_DEFINED
+#define DASMIG_DATASET_DEFINED
 enum class dataset : std::uint8_t
 {
     lite, ///< ~195 sovereign states only.
     full  ///< ~250 countries and territories.
 };
+#endif
 
 /// @brief Return type for country generation, holding all data fields.
 ///
