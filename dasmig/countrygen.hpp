@@ -303,6 +303,29 @@ class cntg
         return result;
     }
 
+    /// @brief Look up a country by its ISO 3166-1 alpha-2 code.
+    /// @param cca2 Two-letter country code (e.g. "US", "BR").
+    /// @return The matching country object.
+    /// @throws std::runtime_error If no data has been loaded.
+    /// @throws std::invalid_argument If no country matches the code.
+    [[nodiscard]] country find_country(const std::string& cca2) const
+    {
+        if (_countries.empty())
+        {
+            throw std::runtime_error(
+                "No country data loaded. Call load() first.");
+        }
+
+        auto it = _cca2_index.find(cca2);
+        if (it == _cca2_index.end())
+        {
+            throw std::invalid_argument(
+                "No country found for CCA2 code: " + cca2);
+        }
+
+        return _countries[it->second]; // NOLINT(cppcoreguidelines-pro-bounds-*)
+    }
+
     // -- Seeding ----------------------------------------------------------
 
     /// @name Seeding
@@ -452,6 +475,9 @@ class cntg
 
     std::unordered_map<std::string, region_entry> _region_index;
 
+    // Pre-built CCA2 → index map for O(1) code-based lookups.
+    std::unordered_map<std::string, std::size_t> _cca2_index;
+
     // Bit shift for mixing per-call seeds.
     static constexpr unsigned seed_shift_{32U};
 
@@ -514,11 +540,14 @@ class cntg
 
         // Region index.
         _region_index.clear();
+        _cca2_index.clear();
 
         for (auto&& [i, c] : _countries | std::views::enumerate)
         {
+            auto idx = static_cast<std::size_t>(i);
             auto& entry = _region_index[c.region];
-            entry.country_indices.push_back(static_cast<std::size_t>(i));
+            entry.country_indices.push_back(idx);
+            _cca2_index[c.cca2] = idx;
         }
 
         // Build per-region distributions.
