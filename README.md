@@ -31,6 +31,8 @@
 
 - **Multi-Instance Support**. Construct independent `cntg` instances with their own data and random engine — ideal for embedding inside other generators.
 
+- **CCA2 Lookup**. Look up a specific country by its ISO 3166-1 alpha-2 code with `find_country("US")`.
+
 ## Integration
 
 [`countrygen.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/countrygen.hpp) is the single required file [released here](https://github.com/dasmig/country-generator/releases). You also need [`random.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/random.hpp) in the same directory. Add

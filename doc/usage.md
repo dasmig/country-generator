@@ -12,6 +12,7 @@ This guide covers every feature of the country-generator library in detail. For 
 <li><a href="#generating-countries">Generating Countries</a></li>
 <li><a href="#country-fields">Country Fields</a></li>
 <li><a href="#region-filtering">Region Filtering</a></li>
+<li><a href="#cca2-lookup">CCA2 Lookup</a></li>
 <li><a href="#population-weighting">Population Weighting</a></li>
 <li><a href="#uniform-selection">Uniform Selection</a></li>
 <li><a href="#seeding-and-deterministic-generation">Seeding and Deterministic Generation</a></li>
@@ -166,6 +167,20 @@ Available regions: `Africa`, `Americas`, `Antarctic`, `Asia`, `Europe`, `Oceania
 Region-filtered selection is also population-weighted within the region.
 Throws `std::invalid_argument` if no countries match the region.
 
+## CCA2 Lookup
+
+Look up a specific country by its ISO 3166-1 alpha-2 code:
+
+```cpp
+auto us = gen.find_country("US");
+std::cout << us.name_common << " — " << us.capital << "\n";
+// "United States — Washington, D.C."
+```
+
+Throws `std::invalid_argument` if no country matches the code, or
+`std::runtime_error` if no data has been loaded. Codes are case-sensitive
+(uppercase only).
+
 ## Population Weighting
 
 By default, countries are selected with probability proportional to their population.
@@ -298,5 +313,6 @@ concurrent generation, give each thread its own `cntg` instance.
 
 | Exception | Condition |
 |-----------|-----------|
-| `std::runtime_error` | `get_country()` called with no data loaded |
+| `std::runtime_error` | `get_country()` or `find_country()` called with no data loaded |
 | `std::invalid_argument` | `get_country(region)` with unknown region |
+| `std::invalid_argument` | `find_country(cca2)` with unknown CCA2 code |

@@ -695,3 +695,42 @@ TEST_CASE("load(dataset) return value is meaningful", "[loading][tier]")
     REQUIRE((lite_ok || full_ok));
     REQUIRE(gen.has_data());
 }
+// ---------------------------------------------------------------------------
+// CCA2 lookup — find_country()
+// ---------------------------------------------------------------------------
+
+TEST_CASE("find_country - returns matching country by CCA2", "[lookup]")
+{
+    auto gen = make_loaded_generator();
+    auto us = gen.find_country("US");
+    REQUIRE(us.cca2 == "US");
+    REQUIRE_FALSE(us.name_common.empty());
+}
+
+TEST_CASE("find_country - returns correct fields", "[lookup]")
+{
+    auto gen = make_loaded_generator();
+    auto jp = gen.find_country("JP");
+    REQUIRE(jp.cca2 == "JP");
+    REQUIRE_FALSE(jp.capital.empty());
+    REQUIRE_FALSE(jp.region.empty());
+}
+
+TEST_CASE("find_country - throws for unknown CCA2", "[lookup]")
+{
+    auto gen = make_loaded_generator();
+    REQUIRE_THROWS_AS(gen.find_country("ZZ"), std::invalid_argument);
+}
+
+TEST_CASE("find_country - throws when no data loaded", "[lookup]")
+{
+    const dasmig::cntg gen;
+    REQUIRE_THROWS_AS(gen.find_country("US"), std::runtime_error);
+}
+
+TEST_CASE("find_country - case sensitive", "[lookup]")
+{
+    auto gen = make_loaded_generator();
+    // CCA2 codes are uppercase; lowercase should not match.
+    REQUIRE_THROWS_AS(gen.find_country("us"), std::invalid_argument);
+}
