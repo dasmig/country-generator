@@ -115,12 +115,15 @@ def generate(resources: Path, tier: str, name: str, include: str, chunk_bytes: i
         rel = f"{tier}/{path.relative_to(root).as_posix()}"
         parts = list(chunks(normalize(path.read_bytes()), chunk_bytes)) or [b""]
         lines.append(f"// {rel}")
+        # Each chunk gives its length, so the compiler does not compute it in
+        # a constant expression (clang 18 stops at about a million steps).
         lines.append(f"inline constexpr std::array<std::string_view, {len(parts)}> file_{index}{{")
         for part in parts:
             pieces = literal_pieces(part) or [""]
-            for i, piece in enumerate(pieces):
-                end = "," if i == len(pieces) - 1 else ""
-                lines.append(f'    "{piece}"{end}')
+            lines.append("    std::string_view{")
+            for piece in pieces:
+                lines.append(f'        "{piece}"')
+            lines.append(f"        , {len(part)}}},")
         lines.append("};")
         lines.append("")
         entries.append(f'    core::embedded_file{{"{escape(rel.encode("utf-8"))}", file_{index}}},')
