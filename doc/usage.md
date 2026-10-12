@@ -18,6 +18,10 @@ This guide covers every feature of the country-generator library in detail. For 
 <li><a href="#seeding-and-deterministic-generation">Seeding and Deterministic Generation</a></li>
 <li><a href="#multi-instance-support">Multi-Instance Support</a></li>
 <li><a href="#data-pipeline">Data Pipeline</a></li>
+<li><a href="#extending-data">Extending Data</a></li>
+<li><a href="#replay-and-json">Replay and JSON</a></li>
+<li><a href="#compiled-in-data">Compiled-in Data</a></li>
+<li><a href="#migrating-from-v1">Migrating from v1</a></li>
 <li><a href="#thread-safety">Thread Safety</a></li>
 <li><a href="#error-reference">Error Reference</a></li>
 </ul>
@@ -44,7 +48,7 @@ int main()
 
 ## Installation
 
-1. Copy `dasmig/countrygen.hpp` and `dasmig/random.hpp` into your include path.
+1. Copy `dasmig/countrygen.hpp`, `dasmig/core.hpp` and the `dasmig/core/` directory into your include path, keeping them side by side.
 2. Copy the `resources/` folder (containing `full/` and/or `lite/` subdirectories) so it is accessible at runtime.
 3. Compile with C++23 enabled: `-std=c++23`.
 
@@ -61,22 +65,21 @@ Resources are stored as `resources/lite/countries.tsv` and `resources/full/count
 
 ### Automatic loading (singleton)
 
-On first access the singleton constructor probes these base paths:
+On first access the singleton loads the `lite` tier (or `full` if `lite` is missing). It uses the compiled-in copy when built with `DASMIG_COUNTRY_EMBED` (see Compiled-in Data), and otherwise looks for `lite/countries.tsv` in these directories, relative to the working directory:
 
 | Priority | Base path |
 |----------|-----------|
 | 1 | `resources/` |
 | 2 | `../resources/` |
 | 3 | `country-generator/resources/` |
-
-It loads `lite/countries.tsv` if found, otherwise falls back to `full/countries.tsv`.
+| 4 | `../country-generator/resources/` |
 
 ### Explicit tier loading
 
 ```cpp
 dasmig::cntg gen;
 gen.load(dasmig::dataset::lite);  // ~195 sovereign states
-gen.load(dasmig::dataset::full);  // ~250 countries (can combine)
+gen.load(dasmig::dataset::full);  // ~250 countries and territories
 ```
 
 If your resources are elsewhere, call `load()` with a direct path:
@@ -85,9 +88,9 @@ If your resources are elsewhere, call `load()` with a direct path:
 dasmig::cntg::instance().load("/opt/data/countries.tsv");
 ```
 
-Calling `load()` multiple times is safe — each call adds to the existing data.
+Each `load()` replaces the data loaded before (use `extend()` to add on top; see Extending Data).
 `load(dataset)` returns `bool` (`true` if a matching file was found and loaded).
-`load(path)` returns `void` and silently does nothing if the path does not exist.
+`load(path)` returns `void` and does nothing if the path is not a file; a malformed file throws `dasmig::core::tsv_error` with its file, line and column.
 
 ## Generating Countries
 
@@ -281,18 +284,77 @@ auto c = my_gen.get_country();
 
 ## Data Pipeline
 
-The shipped datasets are generated from open data sources using the included Python script:
+The shipped datasets are generated from open data sources by `scripts/prepare_countries.py`. [Data and Method](data.md) describes the sources, every column and how selection works.
 
-```bash
-python scripts/prepare_countries.py            # generate both tiers
-python scripts/prepare_countries.py --tier full # full only (~250 countries)
-python scripts/prepare_countries.py --tier lite # lite only (~195 sovereign states)
+## Extending Data
+
+The shipped data is a base layer. Files with the same columns as `countries.tsv` can be loaded on top of it to add countries, change them or remove them, without editing the shipped file. Rows are keyed by `cca2`.
+
+```cpp
+auto& gen = dasmig::cntg::instance();
+
+// Override mode (the default): a row replaces the loaded country with the
+// same code; new codes are added.
+gen.extend("mods/fictional_nations.tsv");
+
+// From text, for example supplied by a WebAssembly host or a game scenario.
+gen.extend_from_string(text, "scenario: new republic");
+
+// Remove countries: a layer needs only the key and a disabled column.
+gen.extend_from_string("cca2\tdisabled\nVA\t1\n", "cleanup");
+
+// Add mode refuses to touch countries that are already loaded.
+gen.extend("mods/new_countries.tsv", dasmig::core::layer_mode::add);
 ```
 
-This produces `resources/full/countries.tsv` and `resources/lite/countries.tsv`.
+- A layer must have the columns `cca2`, `cca3`, `name_common`, `region`, `latitude`, `longitude`, `area`, `population`, `landlocked`, `independent` and `un_member`; the other columns are optional and default to empty. Numbers and flags (`0`/`1`) are checked, and latitude and longitude must be in range, before anything changes. A bad layer throws `dasmig::core::tsv_error` with the file, line and column, and the data stays as it was.
+- New regions become available to `get_country(region)` at once.
+- `layers()` lists what is loaded: source, mode, rows added, replaced and removed, and warnings such as unknown columns.
+- `load(...)` replaces the base and drops every layer.
 
-Data sources are licensed under ODbL, CC BY 4.0, and open source licenses.
-See `LICENSE_DATA.txt` for details.
+## Replay and JSON
+
+Every result records the seed and the data it came from:
+
+```cpp
+auto c = gen.get_country();
+c.seed();                    // the call seed
+c.signature().data;          // gen.data_hash() when it was generated
+
+// Same seed, same data, same weighting: the same country on every
+// compiler and platform.
+auto again = gen.get_country(c.seed());
+```
+
+`to_json()` gives the result as JSON, the form the WebAssembly layer and the game consume. Semicolon-separated fields (`capital`, `continent`, `languages`, `borders`, `timezones`) become arrays:
+
+```json
+{"cca2":"ET","cca3":"ETH","ccn3":"231","name_common":"Ethiopia",...,"languages":["Amharic"],
+ "borders":["DJI","ERI","KEN","SOM","SSD","SDN"],...,"signature":{"seed":"0000000000000001","data":"25ba572e6c3d6838"}}
+```
+
+Seeds are strings because JavaScript numbers cannot hold every 64-bit value. `to_json(writer)` writes into an existing `dasmig::core::json_writer`. `find_country()` results have seed 0.
+
+## Compiled-in Data
+
+Define `DASMIG_COUNTRY_EMBED` before including the header to compile the `lite` tier into the program (about 60 KB of source). `load(dataset::lite)` and `instance()` then use it and need no files, which is what a WebAssembly build wants. The compiled-in data has the same `data_hash()` as the file, so seeds replay the same either way.
+
+```cpp
+#define DASMIG_COUNTRY_EMBED
+#include <dasmig/countrygen.hpp>
+```
+
+`dasmig/countrygen_data.hpp` is generated from `resources/lite` by `make embed`; CI checks it is up to date.
+
+## Migrating from v1
+
+Version 2 moves the library onto [dasmig-core](https://github.com/dasmig/dasmig-core).
+
+- **Every seeded result changes.** Selection now uses the core's engine and weighted choice, so a seed gives the same country on every compiler, standard library and CPU, which the `std::` distributions could not promise. Seeds saved with v1 do not reproduce their v1 results. The selection probabilities are unchanged (checked against v1 over 20,000 draws per scenario).
+- **`load(path)` replaces the data.** In v1 each call added to what was loaded. Use `extend()` to add data on top.
+- **Malformed data is an error.** v1 skipped lines with too few fields and read non-numeric numbers as 0. v2 throws `dasmig::core::tsv_error` with the file, line and column and loads nothing. A path that does not exist is still ignored by `load(path)`.
+- **Files:** replace `random.hpp` with `core.hpp` and the `core/` directory (see Installation).
+- **New:** `extend()`, `extend_from_string()`, `layers()`, `data_hash()`, `country::signature()`, `country::to_json()`, `DASMIG_COUNTRY_EMBED`.
 
 ## Thread Safety
 
@@ -304,7 +366,7 @@ local static for safe initialization.
 | `instance()` | Yes (static local) |
 | `get_country()` on **different** instances | Yes |
 | `get_country()` on the **same** instance | **No** — requires external synchronization |
-| `load()` | **No** — must not be called concurrently with `get_country()` on the same instance |
+| `load()`, `extend()` | **No** — must not be called concurrently with `get_country()` on the same instance |
 
 Call `load()` once during initialization before spawning threads. For
 concurrent generation, give each thread its own `cntg` instance.
@@ -316,3 +378,4 @@ concurrent generation, give each thread its own `cntg` instance.
 | `std::runtime_error` | `get_country()` or `find_country()` called with no data loaded |
 | `std::invalid_argument` | `get_country(region)` with unknown region |
 | `std::invalid_argument` | `find_country(cca2)` with unknown CCA2 code |
+| `dasmig::core::tsv_error` | A malformed `countries.tsv` or layer (message gives file, line and column); the data is unchanged |

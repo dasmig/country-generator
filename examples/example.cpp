@@ -95,6 +95,20 @@ int main()
     }
     gen.weighted(true);
 
+    // JSON with the replay signature (seed and data hash).
+    std::cout << "\n=== JSON ===" << '\n';
+    std::cout << gen.find_country("JP").to_json() << '\n';
+
+    // Extend the data with a layer: a fictional country in its own region.
+    std::cout << "\n=== Extension layer ===" << '\n';
+    const auto& layer = gen.extend_from_string(
+        "cca2\tcca3\tname_common\tregion\tlatitude\tlongitude\tarea\tpopulation\t"
+        "landlocked\tindependent\tun_member\n"
+        "QQ\tQQQ\tAtlantis\tOcean\t31.0\t-24.0\t5000\t1000000\t0\t1\t0\n",
+        "atlantis");
+    std::cout << layer.source << ": " << layer.added << " added\n";
+    std::cout << "From the Ocean region: " << gen.get_country("Ocean") << '\n';
+
     // Library info.
     std::cout << "\n=== Info ===" << '\n';
     std::cout << "Countries loaded: " << gen.country_count() << '\n';

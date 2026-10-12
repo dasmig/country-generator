@@ -13,7 +13,7 @@
 [![Platform](https://img.shields.io/badge/platform-linux%20|%20windows%20|%20macos-lightgrey.svg)](https://github.com/dasmig/country-generator)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://dasmig.github.io/country-generator/)
 
-**[API Reference](https://dasmig.github.io/country-generator/)** · **[Usage Guide](doc/usage.md)** · **[Releases](https://github.com/dasmig/country-generator/releases)**
+**[API Reference](https://dasmig.github.io/country-generator/)** · **[Usage Guide](doc/usage.md)** · **[Data and Method](doc/data.md)** · **[Releases](https://github.com/dasmig/country-generator/releases)**
 
 ## Features
 
@@ -29,13 +29,21 @@
 
 - **Uniform Selection**. Switch to equal-probability selection with `weighted(false)` — every country has the same chance regardless of population.
 
+- **Identical Everywhere**. A seed gives the same country on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
+
+- **Extensible Data**. Load your own TSV layers on top of the shipped data to add, change or remove countries (`extend()`), checked before they are applied.
+
+- **JSON and Replay**. `to_json()` on every result, and a `signature()` recording the seed and the data it came from.
+
+- **Compiled-in Data**. Define `DASMIG_COUNTRY_EMBED` to build the `lite` tier into the program, for WebAssembly and other builds without files.
+
 - **Multi-Instance Support**. Construct independent `cntg` instances with their own data and random engine — ideal for embedding inside other generators.
 
 - **CCA2 Lookup**. Look up a specific country by its ISO 3166-1 alpha-2 code with `find_country("US")`.
 
 ## Integration
 
-[`countrygen.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/countrygen.hpp) is the single required file [released here](https://github.com/dasmig/country-generator/releases). You also need [`random.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/random.hpp) in the same directory. Add
+[`countrygen.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/countrygen.hpp) is the library [released here](https://github.com/dasmig/country-generator/releases). Keep [`core.hpp`](https://github.com/dasmig/country-generator/blob/master/dasmig/core.hpp) and the [`core/`](https://github.com/dasmig/country-generator/tree/master/dasmig/core) directory ([dasmig-core](https://github.com/dasmig/dasmig-core)) in the same directory. Add
 
 ```cpp
 #include <dasmig/countrygen.hpp>

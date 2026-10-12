@@ -1,45 +1,40 @@
 #ifndef DASMIG_COUNTRYGEN_HPP
 #define DASMIG_COUNTRYGEN_HPP
 
-#include "random.hpp"
+#include "core.hpp"
 #include <algorithm>
 #include <array>
-#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
-#include <fstream>
+#include <map>
 #include <ostream>
-#include <random>
-#include <ranges>
+#include <span>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
+#include <string_view>
+#include <system_error>
 #include <utility>
 #include <vector>
+
+#ifdef DASMIG_COUNTRY_EMBED
+#include "countrygen_data.hpp"
+#endif
 
 /// @file countrygen.hpp
 /// @brief Country generator library — procedural country generation for C++23.
 /// @author Diego Dasso Migotto (diegomigotto at hotmail dot com)
 /// @see See doc/usage.md for the narrative tutorial.
 
+DASMIG_CORE_REQUIRE(0, 3);
+
 namespace dasmig
 {
 
-/// @brief Dataset size tier for resource loading.
-#ifndef DASMIG_DATASET_DEFINED
-#define DASMIG_DATASET_DEFINED
-enum class dataset : std::uint8_t
-{
-    lite, ///< ~195 sovereign states only.
-    full  ///< ~250 countries and territories.
-};
-#endif
-
 /// @brief Return type for country generation, holding all data fields.
 ///
-/// Supports implicit conversion to std::string (returns the common name)
-/// and streaming via operator<<.
+/// Supports implicit conversion to std::string (returns the common name),
+/// streaming via operator<< and JSON output via to_json().
 class country
 {
   public:
@@ -153,11 +148,82 @@ class country
     // -- Methods ----------------------------------------------------------
 
     /// @brief Retrieve the random seed used to generate this country.
-    /// @return The per-call seed for replay.
+    /// @return The per-call seed for replay (0 for find_country()).
     /// @see cntg::get_country(std::uint64_t)
     [[nodiscard]] std::uint64_t seed() const
     {
-        return _seed;
+        return _signature.seed;
+    }
+
+    /// @brief The seed and the data this country was drawn from.
+    /// @return The replay signature; `data` is cntg::data_hash() at the
+    ///         time of generation.
+    [[nodiscard]] const core::seed_signature& signature() const
+    {
+        return _signature;
+    }
+
+    /// @brief Write this country as a JSON object.
+    ///
+    /// Semicolon-separated fields (capital, continent, languages, borders,
+    /// timezones) are written as arrays.
+    ///
+    /// @param w Writer positioned where a value is allowed.
+    void to_json(core::json_writer& w) const
+    {
+        auto list = [&w](std::string_view name, std::string_view text) {
+            w.key(name).begin_array();
+            while (!text.empty())
+            {
+                const auto pos = text.find(';');
+                w.value(text.substr(0, pos));
+                text = pos == std::string_view::npos ? std::string_view{} : text.substr(pos + 1);
+            }
+            w.end_array();
+        };
+        w.begin_object()
+            .field("cca2", cca2)
+            .field("cca3", cca3)
+            .field("ccn3", ccn3)
+            .field("name_common", name_common)
+            .field("name_official", name_official);
+        list("capital", capital);
+        w.field("region", region).field("subregion", subregion);
+        list("continent", continent);
+        w.field("latitude", latitude)
+            .field("longitude", longitude)
+            .field("area", area)
+            .field("population", population)
+            .field("landlocked", landlocked)
+            .field("independent", independent)
+            .field("un_member", un_member);
+        list("languages", languages);
+        w.field("currency_code", currency_code)
+            .field("currency_name", currency_name)
+            .field("currency_symbol", currency_symbol);
+        list("borders", borders);
+        list("timezones", timezones);
+        w.field("driving_side", driving_side)
+            .field("tld", tld)
+            .field("idd_root", idd_root)
+            .field("idd_suffix", idd_suffix)
+            .field("demonym_m", demonym_m)
+            .field("demonym_f", demonym_f)
+            .field("flag_emoji", flag_emoji)
+            .field("income_level", income_level)
+            .field("start_of_week", start_of_week)
+            .key("signature");
+        _signature.to_json(w);
+        w.end_object();
+    }
+
+    /// @brief This country as a JSON document.
+    /// @return Compact JSON.
+    [[nodiscard]] std::string to_json() const
+    {
+        core::json_writer w;
+        to_json(w);
+        return w.str();
     }
 
     /// @brief Implicit conversion to std::string.
@@ -168,6 +234,9 @@ class country
     }
 
     /// @brief Stream the common name to an output stream.
+    /// @param os Output stream.
+    /// @param c Country to stream.
+    /// @return The stream.
     friend std::ostream& operator<<(std::ostream& os, const country& c)
     {
         os << c.name_common;
@@ -175,7 +244,7 @@ class country
     }
 
   private:
-    std::uint64_t _seed{0};
+    core::seed_signature _signature;
 
     friend class cntg;
 };
@@ -187,13 +256,15 @@ class country
 /// default. Larger countries are proportionally more likely to be
 /// selected, mirroring real-world demographic distributions.
 ///
+/// Output is identical on every compiler and platform (dasmig-core).
+///
 /// Can be used as a singleton via instance() or constructed independently.
 ///
 /// @par Thread safety
 /// Each instance is independent. Concurrent calls to get_country() on
-/// the **same** instance require external synchronization. load() mutates
-/// internal state and must not be called concurrently with get_country()
-/// on the same instance.
+/// the **same** instance require external synchronization. load() and
+/// extend() mutate internal state and must not be called concurrently
+/// with get_country() on the same instance.
 class cntg
 {
   public:
@@ -208,7 +279,8 @@ class cntg
 
     /// @brief Access the global singleton instance.
     ///
-    /// The singleton auto-probes common resource paths on first access.
+    /// Loads the `lite` tier (or `full` if `lite` is missing) on first
+    /// access, from compiled-in data or an auto-probed `resources/`.
     /// @return Reference to the global cntg instance.
     static cntg& instance()
     {
@@ -226,8 +298,7 @@ class cntg
     /// @throws std::runtime_error If no data has been loaded.
     [[nodiscard]] country get_country()
     {
-        auto call_seed = static_cast<std::uint64_t>(_engine());
-        return get_country(call_seed);
+        return get_country(_engine());
     }
 
     /// @brief Generate a deterministic country using a specific seed.
@@ -236,22 +307,11 @@ class cntg
     /// @throws std::runtime_error If no data has been loaded.
     [[nodiscard]] country get_country(std::uint64_t call_seed) const
     {
-        if (_countries.empty())
-        {
-            throw std::runtime_error(
-                "No country data loaded. Call load() first.");
-        }
-
-        effolkronium::random_local call_engine;
-        call_engine.seed(static_cast<std::mt19937::result_type>(
-            (call_seed ^ (call_seed >> seed_shift_))));
-
-        auto idx = _weighted
-                       ? _distribution(call_engine.engine())
-                       : _uniform(call_engine.engine());
-        country result = _countries[idx]; // NOLINT(cppcoreguidelines-pro-bounds-*)
-        result._seed = call_seed;
-        return result;
+        require_data_();
+        auto r = core::rng{call_seed}.split("country");
+        const auto idx = _weighted ? _distribution(r)
+                                   : static_cast<std::size_t>(core::bounded(r, _countries.size()));
+        return result_(_countries[idx], call_seed);
     }
 
     /// @brief Generate a random country filtered by region.
@@ -261,8 +321,7 @@ class cntg
     /// @throws std::invalid_argument If no countries match the region.
     [[nodiscard]] country get_country(const std::string& rgn)
     {
-        auto call_seed = static_cast<std::uint64_t>(_engine());
-        return get_country(rgn, call_seed);
+        return get_country(rgn, _engine());
     }
 
     /// @brief Generate a deterministic country filtered by region.
@@ -274,56 +333,34 @@ class cntg
     [[nodiscard]] country get_country(const std::string& rgn,
                                       std::uint64_t call_seed) const
     {
-        if (_countries.empty())
-        {
-            throw std::runtime_error(
-                "No country data loaded. Call load() first.");
-        }
-
-        auto it = _region_index.find(rgn);
+        require_data_();
+        const auto it = _region_index.find(rgn);
         if (it == _region_index.end())
         {
-            throw std::invalid_argument(
-                "No countries found for region: " + rgn);
+            throw std::invalid_argument("No countries found for region: " + rgn);
         }
-
-        effolkronium::random_local call_engine;
-        call_engine.seed(static_cast<std::mt19937::result_type>(
-            (call_seed ^ (call_seed >> seed_shift_))));
-
-        const auto& idx = it->second;
-        auto selected = _weighted
-                            ? idx.distribution(call_engine.engine())
-                            : std::uniform_int_distribution<std::size_t>(
-                                  0, idx.country_indices.size() - 1)(
-                                  call_engine.engine());
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
-        country result = _countries[idx.country_indices[selected]];
-        result._seed = call_seed;
-        return result;
+        const auto& entry = it->second;
+        auto r = core::rng{call_seed}.split("country");
+        const auto selected = _weighted
+                                  ? entry.distribution(r)
+                                  : static_cast<std::size_t>(core::bounded(r, entry.indices.size()));
+        return result_(_countries[entry.indices[selected]], call_seed);
     }
 
     /// @brief Look up a country by its ISO 3166-1 alpha-2 code.
     /// @param cca2 Two-letter country code (e.g. "US", "BR").
-    /// @return The matching country object.
+    /// @return The matching country object (seed 0).
     /// @throws std::runtime_error If no data has been loaded.
     /// @throws std::invalid_argument If no country matches the code.
     [[nodiscard]] country find_country(const std::string& cca2) const
     {
-        if (_countries.empty())
-        {
-            throw std::runtime_error(
-                "No country data loaded. Call load() first.");
-        }
-
-        auto it = _cca2_index.find(cca2);
+        require_data_();
+        const auto it = _cca2_index.find(cca2);
         if (it == _cca2_index.end())
         {
-            throw std::invalid_argument(
-                "No country found for CCA2 code: " + cca2);
+            throw std::invalid_argument("No country found for CCA2 code: " + cca2);
         }
-
-        return _countries[it->second]; // NOLINT(cppcoreguidelines-pro-bounds-*)
+        return result_(_countries[it->second], 0);
     }
 
     // -- Seeding ----------------------------------------------------------
@@ -344,7 +381,7 @@ class cntg
     /// @return `*this` for chaining.
     cntg& unseed()
     {
-        _engine.seed(std::random_device{}());
+        _engine.unseed();
         return *this;
     }
 
@@ -369,283 +406,260 @@ class cntg
     // -- Data management --------------------------------------------------
 
     /// @brief Check whether any data has been loaded.
+    /// @return True when at least one country is loaded.
     [[nodiscard]] bool has_data() const
     {
         return !_countries.empty();
     }
 
     /// @brief Return the number of loaded countries.
+    /// @return The count.
     [[nodiscard]] std::size_t country_count() const
     {
         return _countries.size();
     }
 
-    /// @brief Load country data from a TSV file.
+    /// @brief Load country data from a TSV file, replacing all data and
+    ///        layers loaded before.
     ///
-    /// Expects a tab-delimited file with a header row and 31 columns
-    /// matching the schema produced by scripts/prepare_countries.py.
-    /// Safe to call multiple times.
+    /// Expects the `countries.tsv` columns (see doc/data.md). A path that
+    /// is not a regular file is ignored.
     ///
     /// @param tsv_path Path to the TSV file.
+    /// @throws core::tsv_error If the file is malformed; the data is then
+    ///         unchanged.
     void load(const std::filesystem::path& tsv_path)
     {
-        if (!std::filesystem::exists(tsv_path) ||
-            !std::filesystem::is_regular_file(tsv_path))
-        {
-            return;
-        }
-
-        std::ifstream file{tsv_path};
-        if (!file.is_open())
-        {
-            return;
-        }
-
-        std::string line;
-
-        // Skip header row.
-        if (!std::getline(file, line))
-        {
-            return;
-        }
-
-        while (std::getline(file, line))
-        {
-            if (line.empty())
-            {
-                continue;
-            }
-
-            if (line.back() == '\r')
-            {
-                line.pop_back();
-            }
-
-            auto c = parse_line(line);
-            if (!c.cca3.empty())
-            {
-                _countries.push_back(std::move(c));
-            }
-        }
-
-        rebuild_indices();
+        std::error_code ec;
+        if (!std::filesystem::is_regular_file(tsv_path, ec)) return;
+        (void)extend(core::tsv_document::load(tsv_path), core::layer_mode::replace);
     }
 
-    /// @brief Load a specific dataset tier from a base resources directory.
+    /// @brief Load a dataset tier, replacing all data and layers loaded
+    ///        before.
+    ///
+    /// Uses the compiled-in copy when the library is built with
+    /// `DASMIG_COUNTRY_EMBED`, otherwise searches `resources/`,
+    /// `../resources`, `country-generator/resources` and
+    /// `../country-generator/resources`.
+    ///
     /// @param tier The dataset size to load.
-    /// @return `true` if a matching directory was found and loaded.
+    /// @return `true` if the tier was found and loaded.
+    /// @throws core::tsv_error If the file is malformed.
     [[nodiscard]] bool load(dataset tier)
     {
-        const char* subfolder =
-            (tier == dataset::full) ? "full" : "lite";
-
-        auto found = std::ranges::find_if(
-            probe_bases_, [&](const char* base) {
-                const auto tsv =
-                    std::filesystem::path{base} / subfolder / "countries.tsv";
-                return std::filesystem::is_regular_file(tsv);
-            });
-        if (found != probe_bases_.end())
-        {
-            load(std::filesystem::path{*found} / subfolder / "countries.tsv");
-            return true;
-        }
-        return false;
+        const std::string path = std::string{core::tier_name(tier)} + "/" + std::string{data_file_};
+        auto doc = core::load_resource(path, embedded_files_(),
+                                       core::find_resources(library_name_, path));
+        if (!doc) return false;
+        (void)extend(std::move(*doc), core::layer_mode::replace);
+        return true;
     }
+
+    /// @brief Add a data layer from a TSV file with the `countries.tsv`
+    ///        columns.
+    ///
+    /// Rows are keyed by `cca2`. In the default override mode a row
+    /// replaces the loaded country with the same code and new codes are
+    /// added; a row with `disabled` set to 1 removes its country.
+    ///
+    /// @param file The layer file.
+    /// @param mode How the layer combines with the data loaded before.
+    /// @return What the layer did.
+    /// @throws core::tsv_error If the file cannot be read or a row is
+    ///         invalid; the data is then unchanged.
+    const core::layer_info& extend(const std::filesystem::path& file,
+                                   core::layer_mode mode = core::layer_mode::override)
+    {
+        return extend(core::tsv_document::load(file), mode);
+    }
+
+    /// @brief Add a data layer from TSV text.
+    /// @param text TSV with the `countries.tsv` columns.
+    /// @param source Name used in errors.
+    /// @param mode How the layer combines with the data loaded before.
+    /// @return What the layer did.
+    /// @throws core::tsv_error If a row is invalid; the data is unchanged.
+    const core::layer_info& extend_from_string(std::string_view text, std::string source,
+                                               core::layer_mode mode = core::layer_mode::override)
+    {
+        return extend(core::tsv_document::parse(text, std::move(source)), mode);
+    }
+
+    /// @brief Add a data layer.
+    /// @param doc TSV with the `countries.tsv` columns.
+    /// @param mode How the layer combines with the data loaded before.
+    /// @return What the layer did.
+    /// @throws core::tsv_error If a row is invalid; the data is unchanged.
+    const core::layer_info& extend(core::tsv_document doc,
+                                   core::layer_mode mode = core::layer_mode::override)
+    {
+        const auto& info = _table.extend(std::move(doc), mode, [](const core::tsv_row& row) {
+            (void)parse_(row);
+        });
+        rebuild_();
+        return info;
+    }
+
+    /// @brief The data layers in effect, in order.
+    /// @return The layer records.
+    [[nodiscard]] const std::vector<core::layer_info>& layers() const
+    {
+        return _table.layers();
+    }
+
+    /// @brief Hash of the loaded data, recorded in each result's
+    ///        signature().
+    /// @return The hash; 0 when nothing is loaded.
+    [[nodiscard]] std::uint64_t data_hash() const { return _table.data_hash(); }
 
   private:
-    // All loaded countries.
-    std::vector<country> _countries;
+    static constexpr std::string_view library_name_ = "country-generator";
+    static constexpr std::string_view data_file_ = "countries.tsv";
 
-    // Population-weighted distribution over _countries indices.
-    mutable std::discrete_distribution<std::size_t> _distribution;
-
-    // Uniform distribution over _countries indices.
-    mutable std::uniform_int_distribution<std::size_t> _uniform;
-
-    // Whether to use population-weighted (true) or uniform (false) selection.
-    bool _weighted{true};
-
-    // Pre-built per-region index for O(1) region-filtered lookups.
-    struct region_entry
+    static core::table_schema schema_()
     {
-        std::vector<std::size_t> country_indices;
-        mutable std::discrete_distribution<std::size_t> distribution;
-    };
-
-    std::unordered_map<std::string, region_entry> _region_index;
-
-    // Pre-built CCA2 → index map for O(1) code-based lookups.
-    std::unordered_map<std::string, std::size_t> _cca2_index;
-
-    // Bit shift for mixing per-call seeds.
-    static constexpr unsigned seed_shift_{32U};
-
-    // Common base paths probed for resource directories.
-    static constexpr std::array probe_bases_{
-        "resources", "../resources", "country-generator/resources"};
-
-    // Per-instance random engine for seed drawing.
-    std::mt19937_64 _engine{std::random_device{}()};
-
-    // Tag type for the auto-probing singleton constructor.
-    struct auto_probe_tag {};
-
-    // Singleton constructor: auto-probes common resource locations.
-    explicit cntg(auto_probe_tag /*tag*/)
-    {
-        auto found = std::ranges::find_if(
-            probe_bases_, [](const char* p) {
-                return std::filesystem::exists(p) &&
-                       std::filesystem::is_directory(p);
-            });
-        if (found != probe_bases_.end())
-        {
-            const std::filesystem::path base{*found};
-            auto lite_tsv = base / "lite" / "countries.tsv";
-            auto full_tsv = base / "full" / "countries.tsv";
-            if (std::filesystem::is_regular_file(lite_tsv))
-            {
-                load(lite_tsv);
-            }
-            else if (std::filesystem::is_regular_file(full_tsv))
-            {
-                load(full_tsv);
-            }
-        }
+        return {.key = {"cca2"},
+                .required = {"cca3", "name_common", "region", "latitude", "longitude",
+                             "area", "population", "landlocked", "independent", "un_member"},
+                .optional = {"ccn3", "name_official", "capital", "subregion", "continent",
+                             "languages", "currency_code", "currency_name", "currency_symbol",
+                             "borders", "timezones", "driving_side", "tld", "idd_root",
+                             "idd_suffix", "demonym_m", "demonym_f", "flag_emoji",
+                             "income_level", "start_of_week"}};
     }
 
-    // Rebuild the global distribution and region index.
-    void rebuild_indices()
-    {
-        // Global distribution.
-        std::vector<double> weights;
-        weights.reserve(_countries.size());
-
-        std::ranges::transform(
-            _countries, std::back_inserter(weights), [](const country& c) {
-                return static_cast<double>(
-                    std::max<std::uint64_t>(c.population, 1));
-            });
-
-        _distribution = std::discrete_distribution<std::size_t>(
-            weights.begin(), weights.end());
-
-        // Uniform distribution.
-        if (!_countries.empty())
-        {
-            _uniform = std::uniform_int_distribution<std::size_t>(
-                0, _countries.size() - 1);
-        }
-
-        // Region index.
-        _region_index.clear();
-        _cca2_index.clear();
-
-        for (auto&& [i, c] : _countries | std::views::enumerate)
-        {
-            auto idx = static_cast<std::size_t>(i);
-            auto& entry = _region_index[c.region];
-            entry.country_indices.push_back(idx);
-            _cca2_index[c.cca2] = idx;
-        }
-
-        // Build per-region distributions.
-        for (auto& [rgn, entry] : _region_index)
-        {
-            std::vector<double> rw;
-            rw.reserve(entry.country_indices.size());
-
-            for (auto idx : entry.country_indices)
-            {
-                rw.push_back(static_cast<double>(
-                    std::max<std::uint64_t>(
-                        _countries[idx].population, 1))); // NOLINT(cppcoreguidelines-pro-bounds-*)
-            }
-
-            entry.distribution = std::discrete_distribution<std::size_t>(
-                rw.begin(), rw.end());
-        }
-    }
-
-    // Parse a single tab-delimited line into a country object.
-    // Expected 31 fields matching the TSV header.
-    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
-    static country parse_line(const std::string& line)
+    // Parse and check a row; throws core::tsv_error located at the row.
+    static country parse_(const core::tsv_row& row)
     {
         country c;
-
-        static constexpr std::size_t num_fields{31};
-        std::vector<std::string> fields;
-        fields.reserve(num_fields);
-
-        for (auto part : line | std::views::split('\t'))
+        c.cca2 = row.get<std::string>("cca2");
+        c.cca3 = row.get<std::string>("cca3");
+        c.ccn3 = row.get_or<std::string>("ccn3", "");
+        c.name_common = row.get<std::string>("name_common");
+        c.name_official = row.get_or<std::string>("name_official", "");
+        c.capital = row.get_or<std::string>("capital", "");
+        c.region = row.get<std::string>("region");
+        c.subregion = row.get_or<std::string>("subregion", "");
+        c.continent = row.get_or<std::string>("continent", "");
+        c.latitude = row.get<double>("latitude");
+        c.longitude = row.get<double>("longitude");
+        if (c.latitude < -90.0 || c.latitude > 90.0)
         {
-            fields.emplace_back(std::ranges::begin(part),
-                                std::ranges::end(part));
+            throw row.error("latitude", "must be between -90 and 90");
         }
-
-        if (fields.size() < num_fields)
+        if (c.longitude < -180.0 || c.longitude > 180.0)
         {
-            return c; // cca3 stays empty, skipped by caller.
+            throw row.error("longitude", "must be between -180 and 180");
         }
-
-        // Locale-independent numeric parsing via std::from_chars.
-        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto parse_double = [](const std::string& s, double fallback = 0.0) {
-            if (s.empty())
-            {
-                return fallback;
-            }
-            double val{};
-            auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-            return ec == std::errc{} ? val : fallback;
-        };
-
-        auto parse_uint64 = [](const std::string& s) -> std::uint64_t {
-            if (s.empty())
-            {
-                return 0ULL;
-            }
-            std::uint64_t val{};
-            auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
-            return ec == std::errc{} ? val : 0ULL;
-        };
-        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-        c.cca2 = std::move(fields[0]);
-        c.cca3 = std::move(fields[1]);
-        c.ccn3 = std::move(fields[2]);
-        c.name_common = std::move(fields[3]);
-        c.name_official = std::move(fields[4]);
-        c.capital = std::move(fields[5]);
-        c.region = std::move(fields[6]);
-        c.subregion = std::move(fields[7]);
-        c.continent = std::move(fields[8]);
-        c.latitude = parse_double(fields[9]);
-        c.longitude = parse_double(fields[10]);
-        c.area = parse_uint64(fields[11]);
-        c.population = parse_uint64(fields[12]);
-        c.landlocked = (fields[13] == "1");
-        c.independent = (fields[14] == "1");
-        c.un_member = (fields[15] == "1");
-        c.languages = std::move(fields[16]);
-        c.currency_code = std::move(fields[17]);
-        c.currency_name = std::move(fields[18]);
-        c.currency_symbol = std::move(fields[19]);
-        c.borders = std::move(fields[20]);
-        c.timezones = std::move(fields[21]);
-        c.driving_side = std::move(fields[22]);
-        c.tld = std::move(fields[23]);
-        c.idd_root = std::move(fields[24]);
-        c.idd_suffix = std::move(fields[25]);
-        c.demonym_m = std::move(fields[26]);
-        c.demonym_f = std::move(fields[27]);
-        c.flag_emoji = std::move(fields[28]);
-        c.income_level = std::move(fields[29]);
-        c.start_of_week = std::move(fields[30]);
-
+        // The source marks an unknown area as -1 (Svalbard and Jan Mayen);
+        // it reads as 0, as in v1.
+        c.area = static_cast<std::uint64_t>(std::max<std::int64_t>(row.get<std::int64_t>("area"), 0));
+        c.population = row.get<std::uint64_t>("population");
+        c.landlocked = row.get<bool>("landlocked");
+        c.independent = row.get<bool>("independent");
+        c.un_member = row.get<bool>("un_member");
+        c.languages = row.get_or<std::string>("languages", "");
+        c.currency_code = row.get_or<std::string>("currency_code", "");
+        c.currency_name = row.get_or<std::string>("currency_name", "");
+        c.currency_symbol = row.get_or<std::string>("currency_symbol", "");
+        c.borders = row.get_or<std::string>("borders", "");
+        c.timezones = row.get_or<std::string>("timezones", "");
+        c.driving_side = row.get_or<std::string>("driving_side", "");
+        c.tld = row.get_or<std::string>("tld", "");
+        c.idd_root = row.get_or<std::string>("idd_root", "");
+        c.idd_suffix = row.get_or<std::string>("idd_suffix", "");
+        c.demonym_m = row.get_or<std::string>("demonym_m", "");
+        c.demonym_f = row.get_or<std::string>("demonym_f", "");
+        c.flag_emoji = row.get_or<std::string>("flag_emoji", "");
+        c.income_level = row.get_or<std::string>("income_level", "");
+        c.start_of_week = row.get_or<std::string>("start_of_week", "");
         return c;
+    }
+
+    // Population weight; every country keeps a chance even with population 0.
+    static double weight_(const country& c)
+    {
+        return static_cast<double>(std::max<std::uint64_t>(c.population, 1));
+    }
+
+    struct region_entry
+    {
+        std::vector<std::size_t> indices;
+        core::discrete distribution{1.0};
+    };
+
+    core::layered_table _table{schema_()};
+    std::vector<country> _countries; // in table row order
+    core::discrete _distribution{1.0}; // replaced in rebuild_() when data is loaded
+    std::map<std::string, region_entry, std::less<>> _region_index;
+    std::map<std::string, std::size_t, std::less<>> _cca2_index;
+    bool _weighted{true};
+    core::rng _engine{core::rng::from_entropy()};
+
+    struct auto_probe_tag {};
+
+    explicit cntg(auto_probe_tag /*tag*/)
+    {
+        if (!load(dataset::lite)) (void)load(dataset::full);
+    }
+
+    static std::span<const core::embedded_file> embedded_files_()
+    {
+#ifdef DASMIG_COUNTRY_EMBED
+        return embedded::countrygen::files;
+#else
+        return {};
+#endif
+    }
+
+    void require_data_() const
+    {
+        if (_countries.empty())
+        {
+            throw std::runtime_error("No country data loaded. Call load() first.");
+        }
+    }
+
+    [[nodiscard]] country result_(const country& c, std::uint64_t call_seed) const
+    {
+        country result = c;
+        result._signature = {.seed = call_seed, .data = data_hash()};
+        return result;
+    }
+
+    void rebuild_()
+    {
+        std::vector<country> countries;
+        countries.reserve(_table.size());
+        for (const auto& row : _table.rows()) countries.push_back(parse_(row));
+
+        core::discrete distribution{1.0};
+        std::map<std::string, region_entry, std::less<>> regions;
+        std::map<std::string, std::size_t, std::less<>> cca2_index;
+        if (!countries.empty())
+        {
+            std::vector<double> weights;
+            weights.reserve(countries.size());
+            std::map<std::string, std::vector<double>, std::less<>> region_weights;
+            for (std::size_t i = 0; i < countries.size(); ++i)
+            {
+                const auto& c = countries[i];
+                weights.push_back(weight_(c));
+                regions[c.region].indices.push_back(i);
+                region_weights[c.region].push_back(weight_(c));
+                cca2_index.emplace(c.cca2, i);
+            }
+            distribution = core::discrete{weights};
+            for (auto& [name, entry] : regions)
+            {
+                entry.distribution = core::discrete{region_weights[name]};
+            }
+        }
+        _countries = std::move(countries);
+        _distribution = std::move(distribution);
+        _region_index = std::move(regions);
+        _cca2_index = std::move(cca2_index);
     }
 };
 
