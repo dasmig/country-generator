@@ -110,6 +110,21 @@ auto c = my_gen.get_country();
 
 For the complete feature guide — fields, filtering, weighting, and more — see the **[Usage Guide](doc/usage.md)**.
 
+## Build and Test
+
+The library is header-only. To build the example and run the tests, use GNU Make with a POSIX shell and a C++23-capable compiler and standard library. The Makefile defaults to `clang++`; CI uses LLVM 18 with libstdc++ 14.
+
+Run these commands from the repository root:
+
+```bash
+make all        # build the example in build/example
+./build/example # run the example
+make test       # build and run the tests
+make test-embed # build and run the tests with the lite tier compiled in
+```
+
+For an LLVM coverage report, run `make coverage` with `llvm-profdata` and `llvm-cov` on your `PATH`. The HTML report is written to `coverage/index.html`.
+
 ## Data
 
 The country data is aggregated from multiple open-data sources:
