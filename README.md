@@ -27,7 +27,7 @@
 
 - **Deterministic Seeding**. Per-call `get_country(seed)` for reproducible results, generator-level `seed()` / `unseed()` for deterministic sequences, and `country::seed()` for replaying a previous generation.
 
-- **Uniform Selection**. Switch to equal-probability selection with `weighted(false)` — every country has the same chance regardless of population.
+- **Per-Call Selection**. Use `country_request` with `get_country(request, seed)` to choose a region and population-weighted or uniform selection without changing generator settings. Population-weighted selection remains the default; `weighted(false)` is still supported for the simple overloads.
 
 - **Identical Everywhere**. A seed gives the same country on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
 
@@ -92,12 +92,17 @@ auto seeded = cntg::instance().get_country(42);
 // Replay a previous country using its seed.
 auto replay = cntg::instance().get_country(seeded.seed());
 
+// Per-call options: uniform selection within Europe, without changing settings.
+dasmig::country_request request{.region = "Europe", .weighted = false};
+auto requested = cntg::instance().get_country(request, 42);
+auto request_replay = cntg::instance().get_country(request, requested.seed());
+
 // Seed the engine for a deterministic sequence.
 cntg::instance().seed(100);
 // ... generate countries ...
 cntg::instance().unseed(); // restore non-deterministic state
 
-// Switch to uniform random selection (equal probability).
+// Compatibility API: change the default for the simple overloads.
 cntg::instance().weighted(false);
 auto uniform = cntg::instance().get_country();
 cntg::instance().weighted(true);
@@ -107,6 +112,11 @@ cntg my_gen;
 my_gen.load("path/to/countries.tsv");
 auto c = my_gen.get_country();
 ```
+
+`country_request{}` selects from all loaded countries with population weighting,
+even after `weighted(false)`. Request-based calls use an explicit seed and do
+not advance the generator's engine or affect subsequent calls. Replay requires
+the same request, seed and data; the result and JSON format are unchanged.
 
 For the complete feature guide — fields, filtering, weighting, and more — see the **[Usage Guide](doc/usage.md)**.
 

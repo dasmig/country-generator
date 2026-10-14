@@ -10,6 +10,7 @@ This guide covers every feature of the country-generator library in detail. For 
 <li><a href="#installation">Installation</a></li>
 <li><a href="#loading-resources">Loading Resources</a></li>
 <li><a href="#generating-countries">Generating Countries</a></li>
+<li><a href="#per-call-requests">Per-Call Requests</a></li>
 <li><a href="#country-fields">Country Fields</a></li>
 <li><a href="#region-filtering">Region Filtering</a></li>
 <li><a href="#cca2-lookup">CCA2 Lookup</a></li>
@@ -108,6 +109,40 @@ auto c = dasmig::cntg::instance().get_country("Asia");
 // c.region == "Asia"
 ```
 
+## Per-Call Requests
+
+Use `get_country(const dasmig::country_request&, std::uint64_t seed)` to
+specify selection options for one deterministic call:
+
+```cpp
+dasmig::country_request request{.region = "Europe", .weighted = false};
+auto c = gen.get_country(request, 42); // uniform within Europe
+auto replay = gen.get_country(request, c.seed());
+
+auto any = gen.get_country(dasmig::country_request{}, 42); // population-weighted
+auto uniform = gen.get_country(dasmig::country_request{.weighted = false}, 42);
+```
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `region` | `std::optional<std::string>` | Unset | All loaded countries; set to a case-sensitive UN geoscheme region to filter |
+| `weighted` | `bool` | `true` | Population weighting; `false` gives every matching country the same probability |
+
+An explicitly empty or unknown region throws `std::invalid_argument`, just
+like the region-taking simple overloads. No loaded data throws
+`std::runtime_error` before region validation.
+
+Request-based calls ignore the generator's `weighted()` setting, do not
+change it, and do not advance the internal engine used by `seed()` sequences.
+The existing `get_country()`, `get_country(seed)`, `get_country(region)` and
+`get_country(region, seed)` overloads remain compatibility wrappers using
+the generator's weighting setting. Their results, errors and sequence
+behavior are unchanged.
+
+The returned `country` and its JSON format are unchanged. To replay a
+request-based result, retain the request as well as the seed and use the same
+data. The result signature records the seed and data hash, not the request.
+
 ## Country Fields
 
 Every generated country includes all 31 data fields:
@@ -168,7 +203,10 @@ auto af = gen.get_country("Africa");
 Available regions: `Africa`, `Americas`, `Antarctic`, `Asia`, `Europe`, `Oceania`.
 
 Region-filtered selection is also population-weighted within the region.
-Throws `std::invalid_argument` if no countries match the region.
+Use `country_request{.region = "Europe", .weighted = false}` with an explicit
+seed for uniform selection within a region without changing settings.
+Throws `std::invalid_argument` if no countries match the region; region names
+are case-sensitive.
 
 ## CCA2 Lookup
 
@@ -196,6 +234,15 @@ Switch to equal-probability selection where every loaded country has the
 same chance of being picked, regardless of population:
 
 ```cpp
+auto c = gen.get_country(dasmig::country_request{.weighted = false}, 42);
+auto e = gen.get_country(
+    dasmig::country_request{.region = "Europe", .weighted = false}, 42);
+```
+
+For compatibility, `weighted(false)` changes the mode for subsequent simple
+overload calls only, not explicit requests:
+
+```cpp
 auto& gen = dasmig::cntg::instance();
 
 gen.weighted(false);             // uniform random
@@ -214,7 +261,7 @@ gen.weighted(false).seed(42);  // uniform + deterministic
 Query the current mode with:
 
 ```cpp
-bool is_weighted = gen.weighted(); // true by default
+bool is_weighted = gen.weighted(); // simple overload mode; true by default
 ```
 
 ## Seeding and Deterministic Generation
@@ -270,7 +317,9 @@ auto c = gen.get_country("Americas", 42);
 > **Note:** To replay a region-filtered country, pass both the region
 > and the seed: `gen.get_country("Americas", c.seed())`. Using just `c.seed()`
 > without the region filter will select from the full dataset and likely
-> produce a different country.
+> produce a different country. The weighting mode must also match. For
+> request-based generation, use `gen.get_country(request, c.seed())` with
+> the original request instead.
 
 ## Multi-Instance Support
 
@@ -376,6 +425,6 @@ concurrent generation, give each thread its own `cntg` instance.
 | Exception | Condition |
 |-----------|-----------|
 | `std::runtime_error` | `get_country()` or `find_country()` called with no data loaded |
-| `std::invalid_argument` | `get_country(region)` with unknown region |
+| `std::invalid_argument` | Region-taking overloads or `get_country(request, seed)` with an empty or unknown region |
 | `std::invalid_argument` | `find_country(cca2)` with unknown CCA2 code |
 | `dasmig::core::tsv_error` | A malformed `countries.tsv` or layer (message gives file, line and column); the data is unchanged |
