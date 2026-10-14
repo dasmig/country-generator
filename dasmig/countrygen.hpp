@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <span>
 #include <stdexcept>
@@ -249,6 +250,17 @@ class country
     friend class cntg;
 };
 
+/// @brief Per-call country selection options, independent of cntg::weighted().
+struct country_request
+{
+    /// @brief UN geoscheme region; unset selects from all loaded countries.
+    /// An empty or unknown region throws std::invalid_argument.
+    std::optional<std::string> region{std::nullopt};
+
+    /// @brief Population-weighted selection (default); false selects uniformly.
+    bool weighted{true};
+};
+
 /// @brief Country generator that produces random countries from
 ///        aggregated open-data sources.
 ///
@@ -307,11 +319,7 @@ class cntg
     /// @throws std::runtime_error If no data has been loaded.
     [[nodiscard]] country get_country(std::uint64_t call_seed) const
     {
-        require_data_();
-        auto r = core::rng{call_seed}.split("country");
-        const auto idx = _weighted ? _distribution(r)
-                                   : static_cast<std::size_t>(core::bounded(r, _countries.size()));
-        return result_(_countries[idx], call_seed);
+        return get_country(country_request{.weighted = _weighted}, call_seed);
     }
 
     /// @brief Generate a random country filtered by region.
@@ -333,15 +341,39 @@ class cntg
     [[nodiscard]] country get_country(const std::string& rgn,
                                       std::uint64_t call_seed) const
     {
+        return get_country(country_request{.region = rgn, .weighted = _weighted}, call_seed);
+    }
+
+    /// @brief Generate a deterministic country with per-call selection options.
+    ///
+    /// Ignores weighted() and does not change generator settings or advance
+    /// the internal random engine. Replay with the same request, seed and data.
+    /// @param request Region filter and selection mode for this call.
+    /// @param call_seed Seed for reproducible results.
+    /// @return A country object with all fields.
+    /// @throws std::runtime_error If no data has been loaded.
+    /// @throws std::invalid_argument If no countries match the requested region.
+    [[nodiscard]] country get_country(const country_request& request,
+                                      std::uint64_t call_seed) const
+    {
         require_data_();
-        const auto it = _region_index.find(rgn);
+        if (!request.region)
+        {
+            auto r = core::rng{call_seed}.split("country");
+            const auto idx = request.weighted
+                                 ? _distribution(r)
+                                 : static_cast<std::size_t>(core::bounded(r, _countries.size()));
+            return result_(_countries[idx], call_seed);
+        }
+
+        const auto it = _region_index.find(*request.region);
         if (it == _region_index.end())
         {
-            throw std::invalid_argument("No countries found for region: " + rgn);
+            throw std::invalid_argument("No countries found for region: " + *request.region);
         }
         const auto& entry = it->second;
         auto r = core::rng{call_seed}.split("country");
-        const auto selected = _weighted
+        const auto selected = request.weighted
                                   ? entry.distribution(r)
                                   : static_cast<std::size_t>(core::bounded(r, entry.indices.size()));
         return result_(_countries[entry.indices[selected]], call_seed);
@@ -387,7 +419,8 @@ class cntg
 
     /// @}
 
-    /// @brief Set whether generation is population-weighted or uniform.
+    /// @brief Set population-weighted or uniform selection for simple overloads.
+    /// Explicit country_request calls are unaffected.
     /// @param enable `true` for weighted (default), `false` for uniform.
     /// @return `*this` for chaining.
     cntg& weighted(bool enable)
@@ -396,7 +429,7 @@ class cntg
         return *this;
     }
 
-    /// @brief Query whether generation is population-weighted.
+    /// @brief Query the selection mode used by the simple overloads.
     /// @return `true` if weighted (default), `false` if uniform.
     [[nodiscard]] bool weighted() const
     {

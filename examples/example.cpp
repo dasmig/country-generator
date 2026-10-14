@@ -77,6 +77,13 @@ int main()
     std::cout << "replay  -> " << replay.name_common << ", "
               << replay.cca2 << '\n';
 
+    // Per-call options leave the generator's weighting and engine unchanged.
+    const dasmig::country_request request{.region = "Europe", .weighted = false};
+    const auto requested = gen.get_country(request, 42);
+    const auto request_replay = gen.get_country(request, requested.seed());
+    std::cout << "uniform Europe -> " << requested.name_common
+              << ", replay -> " << request_replay.name_common << '\n';
+
     // Seed the engine for a deterministic sequence.
     gen.seed(100);
     std::cout << "\n=== Seeded sequence ===" << '\n';
