@@ -150,7 +150,7 @@ class country
 
     /// @brief Retrieve the random seed used to generate this country.
     /// @return The per-call seed for replay (0 for find_country()).
-    /// @see cntg::get_country(std::uint64_t)
+    /// @see cntg::get_country(const country_request&, std::uint64_t) const
     [[nodiscard]] std::uint64_t seed() const
     {
         return _signature.seed;
@@ -250,7 +250,7 @@ class country
     friend class cntg;
 };
 
-/// @brief Per-call country selection options, independent of cntg::weighted().
+/// @brief Per-call country selection options.
 struct country_request
 {
     /// @brief UN geoscheme region; unset selects from all loaded countries.
@@ -273,10 +273,10 @@ struct country_request
 /// Can be used as a singleton via instance() or constructed independently.
 ///
 /// @par Thread safety
-/// Each instance is independent. Concurrent calls to get_country() on
-/// the **same** instance require external synchronization. load() and
-/// extend() mutate internal state and must not be called concurrently
-/// with get_country() on the same instance.
+/// Each instance is independent. Concurrent calls to get_country(request)
+/// on the **same** instance require external synchronization. Calls with
+/// an explicit seed only read data and may run concurrently. load() and
+/// extend() must not run concurrently with either generation overload.
 class cntg
 {
   public:
@@ -302,52 +302,23 @@ class cntg
 
     // -- Generation -------------------------------------------------------
 
-    /// @brief Generate a random country.
+    /// @brief Generate a random country with per-call selection options.
     ///
-    /// By default, selection is population-weighted. Call weighted(false)
-    /// to switch to uniform random selection.
+    /// Draws a call seed from the internal random engine. Replay with the
+    /// same request, the returned country's seed and the same data.
+    /// @param request Region filter and selection mode for this call.
     /// @return A country object with all fields.
     /// @throws std::runtime_error If no data has been loaded.
-    [[nodiscard]] country get_country()
+    /// @throws std::invalid_argument If no countries match the requested region.
+    [[nodiscard]] country get_country(const country_request& request)
     {
-        return get_country(_engine());
-    }
-
-    /// @brief Generate a deterministic country using a specific seed.
-    /// @param call_seed Seed for reproducible results.
-    /// @return A country object with all fields.
-    /// @throws std::runtime_error If no data has been loaded.
-    [[nodiscard]] country get_country(std::uint64_t call_seed) const
-    {
-        return get_country(country_request{.weighted = _weighted}, call_seed);
-    }
-
-    /// @brief Generate a random country filtered by region.
-    /// @param rgn UN geoscheme region (e.g. "Europe", "Asia").
-    /// @return A country object from the specified region.
-    /// @throws std::runtime_error If no data has been loaded.
-    /// @throws std::invalid_argument If no countries match the region.
-    [[nodiscard]] country get_country(const std::string& rgn)
-    {
-        return get_country(rgn, _engine());
-    }
-
-    /// @brief Generate a deterministic country filtered by region.
-    /// @param rgn UN geoscheme region.
-    /// @param call_seed Seed for reproducible results.
-    /// @return A country object from the specified region.
-    /// @throws std::runtime_error If no data has been loaded.
-    /// @throws std::invalid_argument If no countries match the region.
-    [[nodiscard]] country get_country(const std::string& rgn,
-                                      std::uint64_t call_seed) const
-    {
-        return get_country(country_request{.region = rgn, .weighted = _weighted}, call_seed);
+        return get_country(request, _engine());
     }
 
     /// @brief Generate a deterministic country with per-call selection options.
     ///
-    /// Ignores weighted() and does not change generator settings or advance
-    /// the internal random engine. Replay with the same request, seed and data.
+    /// Does not advance the internal random engine. Replay with the same
+    /// request, seed and data.
     /// @param request Region filter and selection mode for this call.
     /// @param call_seed Seed for reproducible results.
     /// @return A country object with all fields.
@@ -393,47 +364,6 @@ class cntg
             throw std::invalid_argument("No country found for CCA2 code: " + cca2);
         }
         return result_(_countries[it->second], 0);
-    }
-
-    // -- Seeding ----------------------------------------------------------
-
-    /// @name Seeding
-    /// @{
-
-    /// @brief Seed the internal random engine for deterministic sequences.
-    /// @param seed_value The seed value.
-    /// @return `*this` for chaining.
-    cntg& seed(std::uint64_t seed_value)
-    {
-        _engine.seed(seed_value);
-        return *this;
-    }
-
-    /// @brief Reseed the engine with a non-deterministic source.
-    /// @return `*this` for chaining.
-    cntg& unseed()
-    {
-        _engine.unseed();
-        return *this;
-    }
-
-    /// @}
-
-    /// @brief Set population-weighted or uniform selection for simple overloads.
-    /// Explicit country_request calls are unaffected.
-    /// @param enable `true` for weighted (default), `false` for uniform.
-    /// @return `*this` for chaining.
-    cntg& weighted(bool enable)
-    {
-        _weighted = enable;
-        return *this;
-    }
-
-    /// @brief Query the selection mode used by the simple overloads.
-    /// @return `true` if weighted (default), `false` if uniform.
-    [[nodiscard]] bool weighted() const
-    {
-        return _weighted;
     }
 
     // -- Data management --------------------------------------------------
@@ -627,7 +557,6 @@ class cntg
     core::discrete _distribution{1.0}; // replaced in rebuild_() when data is loaded
     std::map<std::string, region_entry, std::less<>> _region_index;
     std::map<std::string, std::size_t, std::less<>> _cca2_index;
-    bool _weighted{true};
     core::rng _engine{core::rng::from_entropy()};
 
     struct auto_probe_tag {};

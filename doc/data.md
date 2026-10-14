@@ -38,7 +38,7 @@ Lists (`capital`, `continent`, `languages`, `borders`, `timezones`) are separate
 | `cca2`, `cca3`, `ccn3` | ISO 3166-1 alpha-2, alpha-3 and numeric codes | `cca2` is the key of extension layers |
 | `name_common`, `name_official` | English names | |
 | `capital` | Capital city or cities | |
-| `region`, `subregion`, `continent` | UN geoscheme region and subregion; continent(s) | `region` drives `get_country(region)` |
+| `region`, `subregion`, `continent` | UN geoscheme region and subregion; continent(s) | `region` drives the `country_request::region` filter |
 | `latitude`, `longitude` | Representative point, decimal degrees | |
 | `area` | Land area in km² | `-1` in the source means unknown (Svalbard and Jan Mayen) and reads as 0 |
 | `population` | Total population | Selection weight; a population of 0 (5 territories in `full`) counts as 1, so every country can be drawn |
@@ -47,7 +47,7 @@ Lists (`capital`, `continent`, `languages`, `borders`, `timezones`) are separate
 
 ## Generation Model
 
-- **Weighted (default):** a country's chance is its population divided by the total population loaded (or of its region, for `get_country(region)`).
+- **Weighted (default):** a country's chance is its population divided by the total population loaded (or of the region specified by `country_request::region`).
 - **Uniform:** every loaded country (or every country in the region) is equally likely.
 
 Both draw from the `"country"` stream split from the call seed, with dasmig-core's weighted choice and uniform integer, so the result is the same on every platform.
