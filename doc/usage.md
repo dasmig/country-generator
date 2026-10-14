@@ -22,6 +22,7 @@ This guide covers every feature of the country-generator library in detail. For 
 <li><a href="#extending-data">Extending Data</a></li>
 <li><a href="#replay-and-json">Replay and JSON</a></li>
 <li><a href="#compiled-in-data">Compiled-in Data</a></li>
+<li><a href="#migrating-to-request-first-generation">Migrating to Request-First Generation</a></li>
 <li><a href="#migrating-from-v1">Migrating from v1</a></li>
 <li><a href="#thread-safety">Thread Safety</a></li>
 <li><a href="#error-reference">Error Reference</a></li>
@@ -38,11 +39,11 @@ int main()
     auto& gen = dasmig::cntg::instance();
 
     // Random country (population-weighted).
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     std::cout << c.name_common << ", " << c.cca2 << "\n";
 
     // Country from a specific region.
-    auto eu = gen.get_country("Europe");
+    auto eu = gen.get_country({.region = "Europe"});
     std::cout << eu.name_common << " (pop. " << eu.population << ")\n";
 }
 ```
@@ -98,25 +99,27 @@ Each `load()` replaces the data loaded before (use `extend()` to add on top; see
 ### Random (population-weighted)
 
 ```cpp
-auto c = dasmig::cntg::instance().get_country();
+auto c = dasmig::cntg::instance().get_country({});
 std::string text = c;  // implicit conversion — returns the common name
 ```
 
 ### Region-filtered
 
 ```cpp
-auto c = dasmig::cntg::instance().get_country("Asia");
+auto c = dasmig::cntg::instance().get_country({.region = "Asia"});
 // c.region == "Asia"
 ```
 
 ## Per-Call Requests
 
-Use `get_country(const dasmig::country_request&, std::uint64_t seed)` to
-specify selection options for one deterministic call:
+Every generation call takes a `dasmig::country_request` first. Use
+`get_country(request)` for a random call, or `get_country(request, seed)` for
+a deterministic call:
 
 ```cpp
 dasmig::country_request request{.region = "Europe", .weighted = false};
-auto c = gen.get_country(request, 42); // uniform within Europe
+auto random = gen.get_country(request); // uniform within Europe
+auto c = gen.get_country(request, 42);   // deterministic uniform within Europe
 auto replay = gen.get_country(request, c.seed());
 
 auto any = gen.get_country(dasmig::country_request{}, 42); // population-weighted
@@ -128,16 +131,13 @@ auto uniform = gen.get_country(dasmig::country_request{.weighted = false}, 42);
 | `region` | `std::optional<std::string>` | Unset | All loaded countries; set to a case-sensitive UN geoscheme region to filter |
 | `weighted` | `bool` | `true` | Population weighting; `false` gives every matching country the same probability |
 
-An explicitly empty or unknown region throws `std::invalid_argument`, just
-like the region-taking simple overloads. No loaded data throws
-`std::runtime_error` before region validation.
+An explicitly empty or unknown region throws `std::invalid_argument`.
+No loaded data throws `std::runtime_error` before region validation.
 
-Request-based calls ignore the generator's `weighted()` setting, do not
-change it, and do not advance the internal engine used by `seed()` sequences.
-The existing `get_country()`, `get_country(seed)`, `get_country(region)` and
-`get_country(region, seed)` overloads remain compatibility wrappers using
-the generator's weighting setting. Their results, errors and sequence
-behavior are unchanged.
+All selection choices come from the request, with no mutable generator
+defaults. Random calls draw a call seed from the internal engine; explicit
+seed calls do not advance it and can be made on a const generator. The only
+generation overloads are `get_country(request)` and `get_country(request, seed)`.
 
 The returned `country` and its JSON format are unchanged. To replay a
 request-based result, retain the request as well as the seed and use the same
@@ -182,7 +182,7 @@ Every generated country includes all 31 data fields:
 | `start_of_week` | `string` | `"monday"`, `"sunday"`, or `"saturday"` |
 
 ```cpp
-auto c = gen.get_country();
+auto c = gen.get_country({});
 std::cout << c.name_common << " (" << c.cca2 << ")\n";
 std::cout << "Capital: " << c.capital << "\n";
 std::cout << "Population: " << c.population << "\n";
@@ -193,18 +193,18 @@ std::cout << "Driving side: " << c.driving_side << "\n";
 
 ## Region Filtering
 
-Pass a UN geoscheme region to restrict generation:
+Set a UN geoscheme region on the request to restrict generation:
 
 ```cpp
-auto eu = gen.get_country("Europe");
-auto af = gen.get_country("Africa");
+auto eu = gen.get_country({.region = "Europe"});
+auto af = gen.get_country({.region = "Africa"});
 ```
 
 Available regions: `Africa`, `Americas`, `Antarctic`, `Asia`, `Europe`, `Oceania`.
 
 Region-filtered selection is also population-weighted within the region.
-Use `country_request{.region = "Europe", .weighted = false}` with an explicit
-seed for uniform selection within a region without changing settings.
+Use `country_request{.region = "Europe", .weighted = false}` for uniform
+selection within a region.
 Throws `std::invalid_argument` if no countries match the region; region names
 are case-sensitive.
 
@@ -234,92 +234,68 @@ Switch to equal-probability selection where every loaded country has the
 same chance of being picked, regardless of population:
 
 ```cpp
-auto c = gen.get_country(dasmig::country_request{.weighted = false}, 42);
+auto c = gen.get_country(dasmig::country_request{.weighted = false});
 auto e = gen.get_country(
     dasmig::country_request{.region = "Europe", .weighted = false}, 42);
 ```
 
-For compatibility, `weighted(false)` changes the mode for subsequent simple
-overload calls only, not explicit requests:
-
-```cpp
-auto& gen = dasmig::cntg::instance();
-
-gen.weighted(false);             // uniform random
-auto c = gen.get_country();      // any country equally likely
-auto e = gen.get_country("Europe"); // uniform within Europe
-
-gen.weighted(true);              // restore population-weighted (default)
-```
-
-The `weighted()` setter returns `*this` for chaining:
-
-```cpp
-gen.weighted(false).seed(42);  // uniform + deterministic
-```
-
-Query the current mode with:
-
-```cpp
-bool is_weighted = gen.weighted(); // simple overload mode; true by default
-```
+Selection mode applies only to the current request. A subsequent
+`gen.get_country({})` call is population-weighted, regardless of earlier calls.
 
 ## Seeding and Deterministic Generation
 
 ### Per-call seeding
 
-Pass an explicit seed to `get_country()` to produce the same country every time:
+Pass a request followed by an explicit seed to produce the same country every time:
 
 ```cpp
-auto c = dasmig::cntg::instance().get_country(42);
-// Always produces the same country for the same data + seed.
+auto c = dasmig::cntg::instance().get_country({}, 42);
+// Always produces the same country for the same request + data + seed.
 ```
 
 ### Seed replay
 
 Every country records its seed. Retrieve it with `country::seed()` and pass
-it back to reproduce the exact same result:
+it back with the original request to reproduce the exact same result:
 
 ```cpp
-auto c = dasmig::cntg::instance().get_country();
+dasmig::country_request request{.region = "Europe", .weighted = false};
+auto c = dasmig::cntg::instance().get_country(request);
 auto saved_seed = c.seed();
 
 // Later, replay:
-auto replay = dasmig::cntg::instance().get_country(saved_seed);
+auto replay = dasmig::cntg::instance().get_country(request, saved_seed);
 // replay.cca3 == c.cca3
 ```
 
-### Sequence seeding
+### Deterministic sequences
 
-Seed the generator's engine for a reproducible sequence:
+Supply an explicit seed for each call. For a repeatable sequence, keep the
+same seed sequence, requests and data:
 
 ```cpp
 auto& gen = dasmig::cntg::instance();
 
-gen.seed(100);
-auto a = gen.get_country();
-auto b = gen.get_country();
-
-gen.seed(100);                   // reset
-auto a2 = gen.get_country();     // identical to a
-auto b2 = gen.get_country();     // identical to b
-
-gen.unseed(); // restore non-deterministic behavior
+auto a = gen.get_country({}, 100);
+auto b = gen.get_country({}, 101);
+auto a2 = gen.get_country({}, 100); // identical to a
+auto b2 = gen.get_country({}, 101); // identical to b
 ```
+
+The generator has no public `seed()` or `unseed()` controls.
 
 ### Region filter with seed
 
 ```cpp
-auto c = gen.get_country("Americas", 42);
+dasmig::country_request request{.region = "Americas"};
+auto c = gen.get_country(request, 42);
 // Deterministic within American countries.
 ```
 
-> **Note:** To replay a region-filtered country, pass both the region
-> and the seed: `gen.get_country("Americas", c.seed())`. Using just `c.seed()`
-> without the region filter will select from the full dataset and likely
-> produce a different country. The weighting mode must also match. For
-> request-based generation, use `gen.get_country(request, c.seed())` with
-> the original request instead.
+> **Note:** Replay with `gen.get_country(request, c.seed())` using the original
+> request. Omitting the region or changing the weighting mode may produce a
+> different country. The result signature records the seed and data, not
+> these request options.
 
 ## Multi-Instance Support
 
@@ -328,7 +304,7 @@ Construct independent generators with their own data and engine:
 ```cpp
 dasmig::cntg my_gen;
 my_gen.load("path/to/countries.tsv");
-auto c = my_gen.get_country();
+auto c = my_gen.get_country({});
 ```
 
 ## Data Pipeline
@@ -357,7 +333,7 @@ gen.extend("mods/new_countries.tsv", dasmig::core::layer_mode::add);
 ```
 
 - A layer must have the columns `cca2`, `cca3`, `name_common`, `region`, `latitude`, `longitude`, `area`, `population`, `landlocked`, `independent` and `un_member`; the other columns are optional and default to empty. Numbers and flags (`0`/`1`) are checked, and latitude and longitude must be in range, before anything changes. A bad layer throws `dasmig::core::tsv_error` with the file, line and column, and the data stays as it was.
-- New regions become available to `get_country(region)` at once.
+- New regions become available to `get_country({.region = region})` at once.
 - `layers()` lists what is loaded: source, mode, rows added, replaced and removed, and warnings such as unknown columns.
 - `load(...)` replaces the base and drops every layer.
 
@@ -366,13 +342,14 @@ gen.extend("mods/new_countries.tsv", dasmig::core::layer_mode::add);
 Every result records the seed and the data it came from:
 
 ```cpp
-auto c = gen.get_country();
+dasmig::country_request request{};
+auto c = gen.get_country(request);
 c.seed();                    // the call seed
 c.signature().data;          // gen.data_hash() when it was generated
 
-// Same seed, same data, same weighting: the same country on every
+// Same request, same seed, same data: the same country on every
 // compiler and platform.
-auto again = gen.get_country(c.seed());
+auto again = gen.get_country(request, c.seed());
 ```
 
 `to_json()` gives the result as JSON, the form the WebAssembly layer and the game consume. Semicolon-separated fields (`capital`, `continent`, `languages`, `borders`, `timezones`) become arrays:
@@ -395,6 +372,27 @@ Define `DASMIG_COUNTRY_EMBED` before including the header to compile the `lite` 
 
 `dasmig/countrygen_data.hpp` is generated from `resources/lite` by `make embed`; CI checks it is up to date.
 
+## Migrating to Request-First Generation
+
+Generation now uses exactly `get_country(request)` and
+`get_country(request, seed)`, where `request` is a `country_request`.
+The former no-argument, seed-only and region-taking overloads and generator-level
+`weighted()`, `seed()` and `unseed()` controls have been removed.
+
+| Former call | Request-first replacement |
+|-------------|---------------------------|
+| `get_country()` | `get_country({})` |
+| `get_country(seed)` | `get_country({}, seed)` |
+| `get_country("Europe")` | `get_country({.region = "Europe"})` |
+| `get_country("Europe", seed)` | `get_country({.region = "Europe"}, seed)` |
+| `weighted(false)` followed by generation | Set `.weighted = false` on each applicable request |
+| `seed()` / `unseed()` on a generator | Pass explicit per-call seeds for repeatable output; omit the seed for normal random generation |
+
+The request defaults remain all loaded countries with population weighting.
+Matching requests, seeds and data preserve the established deterministic
+results, including zero-population minimum weights, region validation, JSON
+and signatures. Data loading, extensions and `find_country()` are unchanged.
+
 ## Migrating from v1
 
 Version 2 moves the library onto [dasmig-core](https://github.com/dasmig/dasmig-core).
@@ -413,9 +411,10 @@ local static for safe initialization.
 | Operation | Thread-safe? |
 |-----------|-------------|
 | `instance()` | Yes (static local) |
-| `get_country()` on **different** instances | Yes |
-| `get_country()` on the **same** instance | **No** — requires external synchronization |
-| `load()`, `extend()` | **No** — must not be called concurrently with `get_country()` on the same instance |
+| `get_country(request)` on **different** instances | Yes |
+| `get_country(request)` on the **same** instance | **No** — requires external synchronization |
+| `get_country(request, seed)` | Yes for concurrent reads, provided no data mutation occurs |
+| `load()`, `extend()` | **No** — must not be called concurrently with generation on the same instance |
 
 Call `load()` once during initialization before spawning threads. For
 concurrent generation, give each thread its own `cntg` instance.
@@ -424,7 +423,7 @@ concurrent generation, give each thread its own `cntg` instance.
 
 | Exception | Condition |
 |-----------|-----------|
-| `std::runtime_error` | `get_country()` or `find_country()` called with no data loaded |
-| `std::invalid_argument` | Region-taking overloads or `get_country(request, seed)` with an empty or unknown region |
+| `std::runtime_error` | Either `get_country` overload or `find_country()` called with no data loaded |
+| `std::invalid_argument` | Either `get_country` overload with an empty or unknown request region |
 | `std::invalid_argument` | `find_country(cca2)` with unknown CCA2 code |
 | `dasmig::core::tsv_error` | A malformed `countries.tsv` or layer (message gives file, line and column); the data is unchanged |

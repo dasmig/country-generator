@@ -15,7 +15,7 @@ int main()
     std::cout << "=== Random countries ===" << '\n';
     for (int i = 0; i < 10; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({});
         std::cout << c.name_common << " (" << c.cca2
                   << ", pop. " << c.population << ")" << '\n';
     }
@@ -24,7 +24,7 @@ int main()
     std::cout << "\n=== European countries ===" << '\n';
     for (int i = 0; i < 5; ++i)
     {
-        auto c = gen.get_country("Europe");
+        auto c = gen.get_country({.region = "Europe"});
         std::cout << c.name_common << ", " << c.subregion
                   << " (pop. " << c.population
                   << ", tz: " << c.timezones << ")" << '\n';
@@ -32,7 +32,7 @@ int main()
 
     // Access all available fields.
     std::cout << "\n=== Full country details ===" << '\n';
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     std::cout << "Name:          " << c.name_common << '\n';
     std::cout << "Official:      " << c.name_official << '\n';
     std::cout << "ISO:           " << c.cca2 << " / " << c.cca3
@@ -69,38 +69,34 @@ int main()
 
     // Deterministic generation.
     std::cout << "\n=== Seeded (deterministic) ===" << '\n';
-    auto seeded = gen.get_country(42);
+    auto seeded = gen.get_country({}, 42);
     std::cout << "seed 42 -> " << seeded.name_common << ", "
               << seeded.cca2 << '\n';
 
-    auto replay = gen.get_country(seeded.seed());
+    auto replay = gen.get_country({}, seeded.seed());
     std::cout << "replay  -> " << replay.name_common << ", "
               << replay.cca2 << '\n';
 
-    // Per-call options leave the generator's weighting and engine unchanged.
+    // Selection options are explicit on every request.
     const dasmig::country_request request{.region = "Europe", .weighted = false};
     const auto requested = gen.get_country(request, 42);
     const auto request_replay = gen.get_country(request, requested.seed());
     std::cout << "uniform Europe -> " << requested.name_common
               << ", replay -> " << request_replay.name_common << '\n';
 
-    // Seed the engine for a deterministic sequence.
-    gen.seed(100);
-    std::cout << "\n=== Seeded sequence ===" << '\n';
-    for (int i = 0; i < 3; ++i)
+    // Deterministic sequences use explicit per-call seeds.
+    std::cout << "\n=== Explicit seed sequence ===" << '\n';
+    for (std::uint64_t seed = 100; seed < 103; ++seed)
     {
-        std::cout << gen.get_country() << '\n';
+        std::cout << gen.get_country({}, seed) << '\n';
     }
-    gen.unseed();
 
     // Uniform random selection.
-    gen.weighted(false);
     std::cout << "\n=== Uniform (unweighted) ===" << '\n';
     for (int i = 0; i < 5; ++i)
     {
-        std::cout << gen.get_country() << '\n';
+        std::cout << gen.get_country({.weighted = false}) << '\n';
     }
-    gen.weighted(true);
 
     // JSON with the replay signature (seed and data hash).
     std::cout << "\n=== JSON ===" << '\n';
@@ -114,7 +110,7 @@ int main()
         "QQ\tQQQ\tAtlantis\tOcean\t31.0\t-24.0\t5000\t1000000\t0\t1\t0\n",
         "atlantis");
     std::cout << layer.source << ": " << layer.added << " added\n";
-    std::cout << "From the Ocean region: " << gen.get_country("Ocean") << '\n';
+    std::cout << "From the Ocean region: " << gen.get_country({.region = "Ocean"}) << '\n';
 
     // Library info.
     std::cout << "\n=== Info ===" << '\n';

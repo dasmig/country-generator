@@ -21,13 +21,13 @@
 
 - **Rich Country Data**. Every generated country includes 31 fields: names, ISO codes, capital, region, coordinates, area, population, languages, currency, borders, timezones, driving side, demonyms, income level, and more.
 
-- **Region Filtering**. Generate countries from a specific UN geoscheme region with `get_country("Europe")`.
+- **Region Filtering**. Generate countries from a specific UN geoscheme region with `get_country({.region = "Europe"})`.
 
 - **Open Data Sources**. Ships with two dataset tiers — *full* (~250 countries and territories) and *lite* (~195 sovereign states) — aggregated from mledoze/countries (ODbL), REST Countries, and World Bank.
 
-- **Deterministic Seeding**. Per-call `get_country(seed)` for reproducible results, generator-level `seed()` / `unseed()` for deterministic sequences, and `country::seed()` for replaying a previous generation.
+- **Deterministic Seeding**. Per-call `get_country(request, seed)` for reproducible results, and `country::seed()` for replaying a previous generation with the same request.
 
-- **Per-Call Selection**. Use `country_request` with `get_country(request, seed)` to choose a region and population-weighted or uniform selection without changing generator settings. Population-weighted selection remains the default; `weighted(false)` is still supported for the simple overloads.
+- **Per-Call Selection**. Use `country_request` with `get_country(request)` or `get_country(request, seed)` to choose a region and population-weighted or uniform selection. Population weighting remains the request default; no mutable generator selection settings are needed.
 
 - **Identical Everywhere**. A seed gives the same country on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
 
@@ -71,12 +71,12 @@ cntg::instance().load(dasmig::dataset::lite);  // ~195 sovereign states
 cntg::instance().load(dasmig::dataset::full);  // ~250 countries & territories
 
 // Generate a random country (population-weighted).
-auto country = cntg::instance().get_country();
+auto country = cntg::instance().get_country({});
 std::cout << country.name_common << ", " << country.cca2
           << " (pop. " << country.population << ")" << '\n';
 
 // Generate a country from a specific region.
-auto eu = cntg::instance().get_country("Europe");
+auto eu = cntg::instance().get_country({.region = "Europe"});
 
 // Access all available fields.
 std::cout << country.capital << '\n';
@@ -87,36 +87,35 @@ std::cout << country.driving_side << '\n';
 std::cout << country.income_level << '\n';
 
 // Deterministic generation — same seed always produces the same country.
-auto seeded = cntg::instance().get_country(42);
+auto seeded = cntg::instance().get_country({}, 42);
 
 // Replay a previous country using its seed.
-auto replay = cntg::instance().get_country(seeded.seed());
+auto replay = cntg::instance().get_country({}, seeded.seed());
 
-// Per-call options: uniform selection within Europe, without changing settings.
+// Per-call options: uniform selection within Europe.
 dasmig::country_request request{.region = "Europe", .weighted = false};
+auto random_europe = cntg::instance().get_country(request);
 auto requested = cntg::instance().get_country(request, 42);
 auto request_replay = cntg::instance().get_country(request, requested.seed());
 
-// Seed the engine for a deterministic sequence.
-cntg::instance().seed(100);
-// ... generate countries ...
-cntg::instance().unseed(); // restore non-deterministic state
-
-// Compatibility API: change the default for the simple overloads.
-cntg::instance().weighted(false);
-auto uniform = cntg::instance().get_country();
-cntg::instance().weighted(true);
+// Uniform random selection without changing later calls.
+auto uniform = cntg::instance().get_country({.weighted = false});
 
 // Independent instance — separate data and random engine.
 cntg my_gen;
 my_gen.load("path/to/countries.tsv");
-auto c = my_gen.get_country();
+auto c = my_gen.get_country({});
 ```
 
-`country_request{}` selects from all loaded countries with population weighting,
-even after `weighted(false)`. Request-based calls use an explicit seed and do
-not advance the generator's engine or affect subsequent calls. Replay requires
-the same request, seed and data; the result and JSON format are unchanged.
+`country_request{}` selects from all loaded countries with population weighting.
+`get_country(request)` draws a seed from the generator's internal engine;
+`get_country(request, seed)` does not advance that engine. Replay requires the
+same request, seed and data; the result and JSON format are unchanged.
+
+The request-first API replaces the old no-argument, seed-only and region-taking
+overloads, and removes generator-level `weighted()`, `seed()` and `unseed()`
+controls. Pass `{}` for default options, put filtering and weighting on the
+request, and supply per-call seeds for deterministic sequences.
 
 For the complete feature guide — fields, filtering, weighting, and more — see the **[Usage Guide](doc/usage.md)**.
 

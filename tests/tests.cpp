@@ -2,6 +2,7 @@
 #include "../dasmig/countrygen.hpp"
 
 #include <algorithm>
+#include <concepts>
 #include <filesystem>
 #include <limits>
 #include <optional>
@@ -9,6 +10,38 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+template <typename Generator, typename... Args>
+concept country_call = requires(Generator& gen, Args... args) {
+    { gen.get_country(args...) } -> std::same_as<dasmig::country>;
+};
+
+template <typename Generator>
+concept seed_control = requires(Generator& gen) { gen.seed(42); };
+
+template <typename Generator>
+concept unseed_control = requires(Generator& gen) { gen.unseed(); };
+
+template <typename Generator>
+concept weighting_setter = requires(Generator& gen) { gen.weighted(false); };
+
+template <typename Generator>
+concept weighting_getter = requires(const Generator& gen) { gen.weighted(); };
+
+static_assert(country_call<dasmig::cntg, dasmig::country_request>);
+static_assert(country_call<const dasmig::cntg, dasmig::country_request, std::uint64_t>);
+static_assert(!country_call<const dasmig::cntg, dasmig::country_request>);
+static_assert(!country_call<dasmig::cntg>);
+static_assert(!country_call<dasmig::cntg, std::uint64_t>);
+static_assert(!country_call<dasmig::cntg, std::string>);
+static_assert(!country_call<dasmig::cntg, std::string, std::uint64_t>);
+static_assert(!country_call<dasmig::cntg, const char*>);
+static_assert(!country_call<dasmig::cntg, const char*, std::uint64_t>);
+static_assert(!country_call<dasmig::cntg, std::uint64_t, dasmig::country_request>);
+static_assert(!seed_control<dasmig::cntg>);
+static_assert(!unseed_control<dasmig::cntg>);
+static_assert(!weighting_setter<dasmig::cntg>);
+static_assert(!weighting_getter<dasmig::cntg>);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -192,7 +225,7 @@ TEST_CASE("load(dataset) returns false for missing tier", "[loading][tier]")
 TEST_CASE("get_country returns a valid country", "[generation]")
 {
     auto gen = make_loaded_generator();
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     REQUIRE_FALSE(c.name_common.empty());
     REQUIRE_FALSE(c.cca2.empty());
     REQUIRE_FALSE(c.cca3.empty());
@@ -202,8 +235,8 @@ TEST_CASE("get_country returns a valid country", "[generation]")
 TEST_CASE("get_country with seed is deterministic", "[generation][seed]")
 {
     auto gen = make_loaded_generator();
-    auto c1 = gen.get_country(42);
-    auto c2 = gen.get_country(42);
+    auto c1 = gen.get_country({}, 42);
+    auto c2 = gen.get_country({}, 42);
     REQUIRE(c1.cca3 == c2.cca3);
     REQUIRE(c1.name_common == c2.name_common);
 }
@@ -211,27 +244,27 @@ TEST_CASE("get_country with seed is deterministic", "[generation][seed]")
 TEST_CASE("get_country seed replay", "[generation][seed]")
 {
     auto gen = make_loaded_generator();
-    auto c1 = gen.get_country();
-    auto c2 = gen.get_country(c1.seed());
+    auto c1 = gen.get_country({});
+    auto c2 = gen.get_country({}, c1.seed());
     REQUIRE(c1.cca3 == c2.cca3);
 }
 
 TEST_CASE("get_country throws when empty", "[generation]")
 {
     dasmig::cntg gen;
-    REQUIRE_THROWS_AS(gen.get_country(), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_country({}), std::runtime_error);
 }
 
-TEST_CASE("get_country(seed) throws when empty", "[generation]")
+TEST_CASE("get_country(request, seed) throws when empty", "[generation]")
 {
     const dasmig::cntg gen;
-    REQUIRE_THROWS_AS(gen.get_country(42), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_country({}, 42), std::runtime_error);
 }
 
 TEST_CASE("implicit string conversion returns common name", "[generation]")
 {
     auto gen = make_loaded_generator();
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     std::string name = c;
     REQUIRE(name == c.name_common);
 }
@@ -239,7 +272,7 @@ TEST_CASE("implicit string conversion returns common name", "[generation]")
 TEST_CASE("ostream operator outputs common name", "[generation]")
 {
     auto gen = make_loaded_generator();
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     std::ostringstream oss;
     oss << c;
     REQUIRE(oss.str() == c.name_common);
@@ -249,46 +282,43 @@ TEST_CASE("ostream operator outputs common name", "[generation]")
 // Region filtering
 // ---------------------------------------------------------------------------
 
-TEST_CASE("get_country(region) filters correctly", "[region]")
+TEST_CASE("get_country(request) filters correctly", "[region]")
 {
     auto gen = make_loaded_generator();
-    gen.seed(42);
 
     for (int i = 0; i < 20; ++i)
     {
-        auto c = gen.get_country("Europe");
+        auto c = gen.get_country({.region = "Europe"});
         REQUIRE(c.region == "Europe");
     }
-
-    gen.unseed();
 }
 
-TEST_CASE("get_country(region, seed) is deterministic", "[region][seed]")
+TEST_CASE("get_country(request, seed) filters deterministically", "[region][seed]")
 {
     auto gen = make_loaded_generator();
-    auto c1 = gen.get_country("Asia", 7777);
-    auto c2 = gen.get_country("Asia", 7777);
+    auto c1 = gen.get_country({.region = "Asia"}, 7777);
+    auto c2 = gen.get_country({.region = "Asia"}, 7777);
     REQUIRE(c1.cca3 == c2.cca3);
     REQUIRE(c1.region == "Asia");
 }
 
-TEST_CASE("get_country(region) throws for unknown region", "[region]")
+TEST_CASE("get_country(request) throws for unknown region", "[region]")
 {
     auto gen = make_loaded_generator();
-    REQUIRE_THROWS_AS(gen.get_country("Atlantis"), std::invalid_argument);
+    REQUIRE_THROWS_AS(gen.get_country({.region = "Atlantis"}), std::invalid_argument);
 }
 
-TEST_CASE("get_country(region) throws when empty", "[region]")
+TEST_CASE("get_country(request) with region throws when empty", "[region]")
 {
     dasmig::cntg gen;
-    REQUIRE_THROWS_AS(gen.get_country("Europe"), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_country({.region = "Europe"}), std::runtime_error);
 }
 
 // ---------------------------------------------------------------------------
 // Per-call requests
 // ---------------------------------------------------------------------------
 
-TEST_CASE("country_request defaults match population-weighted simple overloads",
+TEST_CASE("country_request defaults to all countries with population weighting",
           "[request][generation]")
 {
     auto gen = make_loaded_generator();
@@ -296,31 +326,25 @@ TEST_CASE("country_request defaults match population-weighted simple overloads",
     REQUIRE_FALSE(request.region.has_value());
     REQUIRE(request.weighted);
 
-    for (std::uint64_t seed = 0; seed < 64; ++seed)
-    {
-        REQUIRE(gen.get_country(request, seed).to_json() == gen.get_country(seed).to_json());
-    }
+    REQUIRE(gen.get_country(request, 42).to_json() ==
+            gen.get_country(dasmig::country_request{.weighted = true}, 42).to_json());
 }
 
-TEST_CASE("country_request preserves region and selection mode results",
+TEST_CASE("country_request selects every major region in either mode",
           "[request][region][weighting]")
 {
     auto gen = make_loaded_generator();
     const auto& const_gen = gen;
     for (const bool weighted : {true, false})
     {
-        gen.weighted(weighted);
-        const dasmig::country_request all{.weighted = weighted};
         for (std::uint64_t seed = 0; seed < 64; ++seed)
         {
-            REQUIRE(const_gen.get_country(all, seed).to_json() ==
-                    const_gen.get_country(seed).to_json());
             for (const char* region : {"Africa", "Americas", "Asia", "Europe", "Oceania"})
             {
                 const dasmig::country_request request{.region = region, .weighted = weighted};
                 const auto c = const_gen.get_country(request, seed);
                 REQUIRE(c.region == region);
-                REQUIRE(c.to_json() == const_gen.get_country(region, seed).to_json());
+                REQUIRE(c.to_json() == const_gen.get_country(request, seed).to_json());
             }
         }
     }
@@ -341,8 +365,8 @@ TEST_CASE("country_request replays with the same options seed and data",
                 const auto c = gen.get_country(request, seed);
                 REQUIRE(c.seed() == seed);
                 REQUIRE(c.signature().data == gen.data_hash());
-                gen.weighted(!weighted);
-                (void)gen.get_country("Europe", 123);
+                (void)gen.get_country({.region = "Europe", .weighted = !weighted}, 123);
+                (void)gen.get_country({.weighted = !weighted});
                 REQUIRE(gen.get_country(request, c.seed()).to_json() == c.to_json());
             }
         }
@@ -359,6 +383,9 @@ TEST_CASE("country_request preserves validation and errors", "[request][errors]"
         REQUIRE_THROWS_AS(empty.get_country(request, 42), std::runtime_error);
         REQUIRE_THROWS_WITH(empty.get_country(request, 42),
                             "No country data loaded. Call load() first.");
+        REQUIRE_THROWS_AS(empty.get_country(request), std::runtime_error);
+        REQUIRE_THROWS_WITH(empty.get_country(request),
+                            "No country data loaded. Call load() first.");
     }
 
     auto gen = make_loaded_generator();
@@ -370,12 +397,13 @@ TEST_CASE("country_request preserves validation and errors", "[request][errors]"
             REQUIRE_THROWS_AS(gen.get_country(request, 42), std::invalid_argument);
             const auto error = std::string{"No countries found for region: "} + region;
             REQUIRE_THROWS_WITH(gen.get_country(request, 42), error);
-            REQUIRE_THROWS_WITH(gen.get_country(region, 42), error);
+            REQUIRE_THROWS_AS(gen.get_country(request), std::invalid_argument);
+            REQUIRE_THROWS_WITH(gen.get_country(request), error);
         }
     }
 }
 
-TEST_CASE("country_request does not leak settings or advance the generator engine",
+TEST_CASE("country_request options do not leak between calls or instances",
           "[request][seed][weighting]")
 {
     auto gen = make_loaded_generator();
@@ -385,21 +413,18 @@ TEST_CASE("country_request does not leak settings or advance the generator engin
     const auto layers = gen.layers().size();
     for (const bool weighted : {true, false})
     {
-        gen.weighted(weighted).seed(100);
-        control.weighted(weighted).seed(100);
-        const dasmig::country_request request{.region = "Europe", .weighted = !weighted};
+        const dasmig::country_request request{.region = "Asia", .weighted = weighted};
         for (std::uint64_t seed = 0; seed < 20; ++seed)
         {
-            (void)gen.get_country(request, seed);
+            const auto expected = control.get_country(request, seed).to_json();
+            (void)gen.get_country({.region = "Europe", .weighted = !weighted});
             (void)gen.get_country(dasmig::country_request{.weighted = !weighted}, seed);
             REQUIRE_THROWS_AS(
                 gen.get_country(dasmig::country_request{.region = "Atlantis",
                                                        .weighted = !weighted}, seed),
                 std::invalid_argument);
-            REQUIRE(gen.weighted() == weighted);
-            REQUIRE(gen.get_country().to_json() == control.get_country().to_json());
-            REQUIRE(gen.get_country("Asia").to_json() == control.get_country("Asia").to_json());
-            REQUIRE(gen.get_country(seed).to_json() == control.get_country(seed).to_json());
+            REQUIRE(gen.get_country(request, seed).to_json() == expected);
+            REQUIRE(gen.get_country({}, seed).to_json() == control.get_country({}, seed).to_json());
         }
     }
     REQUIRE(gen.data_hash() == hash);
@@ -408,40 +433,29 @@ TEST_CASE("country_request does not leak settings or advance the generator engin
 }
 
 // ---------------------------------------------------------------------------
-// Seeding
+// Unseeded request replay
 // ---------------------------------------------------------------------------
 
-TEST_CASE("seed/unseed produces deterministic then random", "[seed]")
+TEST_CASE("unseeded requests replay with the same options seed and data", "[request][seed]")
 {
     auto gen = make_loaded_generator();
-
-    gen.seed(100);
-    auto a = gen.get_country();
-    auto b = gen.get_country();
-
-    gen.seed(100);
-    auto a2 = gen.get_country();
-    auto b2 = gen.get_country();
-
-    REQUIRE(a.cca3 == a2.cca3);
-    REQUIRE(b.cca3 == b2.cca3);
-
-    gen.unseed();
-}
-
-TEST_CASE("seed is chainable", "[seed]")
-{
-    auto gen = make_loaded_generator();
-    auto& ref = gen.seed(42);
-    REQUIRE(&ref == &gen);
-    gen.unseed();
-}
-
-TEST_CASE("unseed is chainable", "[seed]")
-{
-    auto gen = make_loaded_generator();
-    auto& ref = gen.unseed();
-    REQUIRE(&ref == &gen);
+    std::set<std::uint64_t> seeds;
+    for (const bool weighted : {true, false})
+    {
+        for (const auto& request : {dasmig::country_request{.weighted = weighted},
+                                   dasmig::country_request{.region = "Asia", .weighted = weighted}})
+        {
+            for (int i = 0; i < 20; ++i)
+            {
+                const auto c = gen.get_country(request);
+                if (request.region) REQUIRE(c.region == *request.region);
+                REQUIRE(c.signature().data == gen.data_hash());
+                REQUIRE(gen.get_country(request, c.seed()).to_json() == c.to_json());
+                seeds.insert(c.seed());
+            }
+        }
+    }
+    REQUIRE(seeds.size() == 80);
 }
 
 // ---------------------------------------------------------------------------
@@ -459,17 +473,10 @@ TEST_CASE("singleton returns same instance", "[singleton]")
 // Weighted / uniform
 // ---------------------------------------------------------------------------
 
-TEST_CASE("weighted defaults to true", "[weighting]")
+TEST_CASE("country_request weighted false enables uniform selection", "[weighting]")
 {
     auto gen = make_loaded_generator();
-    REQUIRE(gen.weighted() == true);
-}
-
-TEST_CASE("weighted(false) enables uniform selection", "[weighting]")
-{
-    auto gen = make_loaded_generator();
-    gen.weighted(false).seed(99);
-    REQUIRE(gen.weighted() == false);
+    auto seeds = dasmig::core::rng{99};
 
     // With uniform selection, small countries should appear more often.
     int below_10m = 0;
@@ -477,7 +484,7 @@ TEST_CASE("weighted(false) enables uniform selection", "[weighting]")
 
     for (int i = 0; i < draws; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({.weighted = false}, seeds());
         if (c.population < 10'000'000)
         {
             ++below_10m;
@@ -486,30 +493,17 @@ TEST_CASE("weighted(false) enables uniform selection", "[weighting]")
 
     // Most countries have pop < 10M. Uniform should produce many of them.
     REQUIRE(below_10m > draws / 3);
-
-    gen.weighted(true).unseed();
 }
 
-TEST_CASE("weighted(false) with region filter", "[weighting][region]")
+TEST_CASE("country_request weighted false with region filter", "[weighting][region]")
 {
     auto gen = make_loaded_generator();
-    gen.weighted(false).seed(42);
 
     for (int i = 0; i < 20; ++i)
     {
-        auto c = gen.get_country("Americas");
+        auto c = gen.get_country({.region = "Americas", .weighted = false});
         REQUIRE(c.region == "Americas");
     }
-
-    gen.weighted(true).unseed();
-}
-
-TEST_CASE("weighted toggle is chainable", "[weighting]")
-{
-    auto gen = make_loaded_generator();
-    auto& ref = gen.weighted(false);
-    REQUIRE(&ref == &gen);
-    gen.weighted(true);
 }
 
 // ---------------------------------------------------------------------------
@@ -519,14 +513,14 @@ TEST_CASE("weighted toggle is chainable", "[weighting]")
 TEST_CASE("population weighting favors large countries", "[weighting]")
 {
     auto gen = make_loaded_generator();
-    gen.seed(12345);
+    auto seeds = dasmig::core::rng{12345};
 
     int large_count = 0;
     static constexpr int draws = 200;
 
     for (int i = 0; i < draws; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({}, seeds());
         if (c.population > 50'000'000)
         {
             ++large_count;
@@ -535,7 +529,6 @@ TEST_CASE("population weighting favors large countries", "[weighting]")
 
     // With population weighting, most draws should be large countries.
     REQUIRE(large_count > draws / 2);
-    gen.unseed();
 }
 
 // ---------------------------------------------------------------------------
@@ -545,11 +538,11 @@ TEST_CASE("population weighting favors large countries", "[weighting]")
 TEST_CASE("generated countries have valid field ranges", "[integrity]")
 {
     auto gen = make_loaded_generator();
-    gen.seed(42);
+    auto seeds = dasmig::core::rng{42};
 
     for (int i = 0; i < 50; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({}, seeds());
         REQUIRE_FALSE(c.name_common.empty());
         REQUIRE_FALSE(c.cca2.empty());
         REQUIRE(c.cca2.size() == 2);
@@ -568,8 +561,6 @@ TEST_CASE("generated countries have valid field ranges", "[integrity]")
         REQUIRE((c.start_of_week == "monday" || c.start_of_week == "sunday" ||
                  c.start_of_week == "saturday" || c.start_of_week.empty()));
     }
-
-    gen.unseed();
 }
 
 // ---------------------------------------------------------------------------
@@ -632,7 +623,7 @@ TEST_CASE("load - handles CRLF line endings", "[loading]")
     dasmig::cntg gen;
     gen.load(tmp);
     REQUIRE(gen.country_count() == 1);
-    auto c = gen.get_country();
+    auto c = gen.get_country({});
     REQUIRE(c.name_common == "CRLFland");
     // Verify the trailing \r was stripped, not embedded in start_of_week.
     REQUIRE(c.start_of_week == "monday");
@@ -678,13 +669,13 @@ TEST_CASE("load - non-numeric coordinate is an error", "[loading]")
 }
 
 // ---------------------------------------------------------------------------
-// Missing coverage: get_country(region, seed) throws when empty
+// Missing coverage: get_country(request, seed) with region throws when empty
 // ---------------------------------------------------------------------------
 
-TEST_CASE("get_country(region, seed) throws when empty", "[region]")
+TEST_CASE("get_country(request, seed) with region throws when empty", "[region]")
 {
     const dasmig::cntg gen;
-    REQUIRE_THROWS_AS(gen.get_country("Europe", 42), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_country({.region = "Europe"}, 42), std::runtime_error);
 }
 
 // ---------------------------------------------------------------------------
@@ -698,7 +689,7 @@ TEST_CASE("different seeds produce different countries", "[generation][seed]")
 
     for (std::uint64_t s = 1; s <= 50; ++s)
     {
-        seen.insert(gen.get_country(s).cca3);
+        seen.insert(gen.get_country({}, s).cca3);
     }
 
     // 50 different seeds on ~195 countries should produce at least 5 distinct.
@@ -712,18 +703,16 @@ TEST_CASE("different seeds produce different countries", "[generation][seed]")
 TEST_CASE("every generated country has a known region", "[region][integrity]")
 {
     auto gen = make_loaded_generator();
-    gen.seed(1);
+    auto seeds = dasmig::core::rng{1};
 
     static const std::set<std::string> valid_regions = {
         "Africa", "Americas", "Antarctic", "Asia", "Europe", "Oceania"};
 
     for (int i = 0; i < 100; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({}, seeds());
         REQUIRE(valid_regions.count(c.region) == 1);
     }
-
-    gen.unseed();
 }
 
 // ---------------------------------------------------------------------------
@@ -736,7 +725,7 @@ TEST_CASE("all major regions are reachable", "[region]")
 
     for (const auto* rgn : {"Africa", "Americas", "Asia", "Europe", "Oceania"})
     {
-        auto c = gen.get_country(rgn);
+        auto c = gen.get_country({.region = rgn});
         REQUIRE(c.region == std::string{rgn});
     }
 }
@@ -748,12 +737,12 @@ TEST_CASE("all major regions are reachable", "[region]")
 TEST_CASE("known country has all fields populated", "[integrity]")
 {
     auto gen = make_loaded_generator();
-    gen.seed(42);
+    auto seeds = dasmig::core::rng{42};
 
     bool found = false;
     for (int i = 0; i < 500; ++i)
     {
-        auto c = gen.get_country();
+        auto c = gen.get_country({}, seeds());
         // Brazil is in both tiers, has all fields, and is likely with
         // population weighting.
         if (c.cca3 == "BRA")
@@ -794,7 +783,6 @@ TEST_CASE("known country has all fields populated", "[integrity]")
 
     // Brazil should appear within 500 pop-weighted draws.
     REQUIRE(found);
-    gen.unseed();
 }
 
 // ---------------------------------------------------------------------------
@@ -804,14 +792,14 @@ TEST_CASE("known country has all fields populated", "[integrity]")
 TEST_CASE("uniform selection distributes evenly", "[weighting]")
 {
     auto gen = make_loaded_generator();
-    gen.weighted(false).seed(123);
+    auto seeds = dasmig::core::rng{123};
 
     std::unordered_map<std::string, int> counts;
     static constexpr int draws = 2000;
 
     for (int i = 0; i < draws; ++i)
     {
-        counts[gen.get_country().cca3]++;
+        counts[gen.get_country({.weighted = false}, seeds()).cca3]++;
     }
 
     // Uniform over ~195 countries, 2000 draws → expect ~10 per country.
@@ -820,8 +808,6 @@ TEST_CASE("uniform selection distributes evenly", "[weighting]")
     {
         REQUIRE(cnt < draws / 10);
     }
-
-    gen.weighted(true).unseed();
 }
 
 // ---------------------------------------------------------------------------
@@ -908,7 +894,7 @@ TEST_CASE("known answers for fixed seeds", "[kat]")
     auto gen = load_lite_file();
     REQUIRE(gen.data_hash() == 0x25ba572e6c3d6838ULL);
 
-    REQUIRE(gen.get_country(std::uint64_t{1}).to_json() ==
+    REQUIRE(gen.get_country({}, std::uint64_t{1}).to_json() ==
             R"({"cca2":"ET","cca3":"ETH","ccn3":"231","name_common":"Ethiopia",)"
             R"("name_official":"Federal Democratic Republic of Ethiopia","capital":["Addis Ababa"],)"
             R"("region":"Africa","subregion":"Eastern Africa","continent":["Africa"],"latitude":8,)"
@@ -918,21 +904,15 @@ TEST_CASE("known answers for fixed seeds", "[kat]")
             R"("driving_side":"right","tld":".et","idd_root":"+2","idd_suffix":"51","demonym_m":"Ethiopian",)"
             R"("demonym_f":"Ethiopian","flag_emoji":")" "\xF0\x9F\x87\xAA\xF0\x9F\x87\xB9" R"(","income_level":"Not classified",)"
             R"("start_of_week":"monday","signature":{"seed":"0000000000000001","data":"25ba572e6c3d6838"}})");
-    REQUIRE(gen.get_country("Europe", std::uint64_t{3}).cca2 == "PL");
-    REQUIRE(gen.get_country(dasmig::country_request{}, 1).cca2 == "ET");
     REQUIRE(gen.get_country(dasmig::country_request{.region = "Europe"}, 3).cca2 == "PL");
     REQUIRE(gen.get_country(dasmig::country_request{.weighted = false}, 2).cca2 == "NO");
     REQUIRE(gen.get_country(dasmig::country_request{.region = "Asia", .weighted = false}, 4).cca2 ==
             "PK");
-    gen.weighted(false);
-    REQUIRE(gen.get_country(std::uint64_t{2}).cca2 == "NO");
-    REQUIRE(gen.get_country("Asia", std::uint64_t{4}).cca2 == "PK");
-    gen.weighted(true);
 
     std::uint64_t h = 0xcbf29ce484222325ULL;
     for (std::uint64_t s = 0; s < 10000; ++s)
     {
-        for (const char c : gen.get_country(s).to_json())
+        for (const char c : gen.get_country({}, s).to_json())
         {
             h ^= static_cast<unsigned char>(c);
             h *= 0x100000001b3ULL;
@@ -955,7 +935,7 @@ TEST_CASE("to_json writes lists as arrays and the signature", "[json]")
     REQUIRE(br.signature().seed == 0);
     REQUIRE(br.signature().data == gen.data_hash());
 
-    const auto c = gen.get_country(std::uint64_t{77});
+    const auto c = gen.get_country({}, std::uint64_t{77});
     REQUIRE(c.seed() == 77);
     REQUIRE(c.signature().data == gen.data_hash());
     REQUIRE(c.to_json().find(R"("signature":{"seed":"000000000000004d")") != std::string::npos);
@@ -1042,13 +1022,13 @@ TEST_CASE("extend adds, overrides and removes countries", "[extend]")
     REQUIRE(info.replaced == 1);
     REQUIRE(gen.country_count() == count + 1);
     REQUIRE(gen.find_country("BR").name_common == "Pindorama");
-    REQUIRE(gen.get_country("Ocean").cca2 == "QQ");
+    REQUIRE(gen.get_country({.region = "Ocean"}).cca2 == "QQ");
     REQUIRE(gen.data_hash() != base_hash);
 
     // A layer that only removes needs just the key.
     gen.extend_from_string("cca2\tdisabled\nQQ\t1\n", "sink.tsv");
     REQUIRE(gen.country_count() == count);
-    REQUIRE_THROWS_AS(gen.get_country("Ocean"), std::invalid_argument);
+    REQUIRE_THROWS_AS(gen.get_country({.region = "Ocean"}), std::invalid_argument);
     REQUIRE(gen.layers().size() == 3);
 
     REQUIRE(gen.load(dasmig::dataset::lite));
@@ -1092,6 +1072,6 @@ TEST_CASE("compiled-in data needs no files and matches them", "[embed]")
     REQUIRE(loaded);
     REQUIRE(gen.layers().front().source == "embedded:lite/countries.tsv");
     REQUIRE(gen.data_hash() == 0x25ba572e6c3d6838ULL); // same as the file
-    REQUIRE(gen.get_country(std::uint64_t{1}).cca2 == "ET");
+    REQUIRE(gen.get_country({}, std::uint64_t{1}).cca2 == "ET");
 }
 #endif
