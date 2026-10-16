@@ -140,11 +140,11 @@ The country data is aggregated from multiple open-data sources:
 
 | Source | License | Contribution |
 |--------|---------|--------------|
-| [mledoze/countries](https://github.com/mledoze/countries) | ODbL v1.0 | Names, ISO codes, borders, demonyms, languages, currencies |
-| [REST Countries](https://restcountries.com/) | Open Source | Population, timezones, driving side, continents |
+| [mledoze/countries](https://github.com/mledoze/countries) | ODbL v1.0 | ISO codes, names, area, flag, and fallbacks for REST Countries' gaps |
+| [REST Countries](https://restcountries.com/) | MPL 2.0 | Coordinates, regions, capitals, languages, currencies, borders, demonyms, population, timezones, driving side, continents |
 | [World Bank](https://data.worldbank.org/) | CC BY 4.0 | Income level classification |
 
-See `LICENSE_DATA.txt` for details.
+Because the data is adapted from an ODbL database, the ODbL applies to it. Output generated with the library needs a notice that it uses mledoze/countries data under the ODbL. If you publish the data itself, or a database adapted from it, you must also offer that database under the ODbL (share-alike). `LICENSE_DATA.txt` gives the details. The column-by-column sources are in [`doc/data.md`](doc/data.md).
 
 To regenerate datasets:
 
