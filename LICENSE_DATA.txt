@@ -1,15 +1,31 @@
-The country data in the resources/ directory is derived from:
+The country data in the resources/ directory, and its compiled-in copy in
+dasmig/countrygen_data.hpp, is a database built from:
 
 1. mledoze/countries (https://github.com/mledoze/countries)
    Licensed under the Open Database License (ODbL) v1.0.
    https://opendatacommons.org/licenses/odbl/1.0/
 
-2. REST Countries (https://restcountries.com/)
-   Open source project (https://gitlab.com/restcountries/restcountries).
+2. REST Countries (https://gitlab.com/restcountries/restcountries)
+   Licensed under the Mozilla Public License 2.0.
+   https://www.mozilla.org/MPL/2.0/
 
 3. World Bank Open Data (https://data.worldbank.org/)
    Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
    https://creativecommons.org/licenses/by/4.0/
 
-You are free to share and adapt the data for any purpose, including
-commercial use, provided you give appropriate credit to the original sources.
+Because the database is adapted from an ODbL source, the ODbL's terms apply
+to it. In short, and not as legal advice (the licence texts govern):
+
+- Output generated from the data, such as countries returned by the library,
+  is a "Produced Work" (ODbL section 4.3). Anything you publish that is made
+  from it must carry a notice saying it uses data from mledoze/countries
+  under the ODbL. There is no share-alike requirement for Produced Works.
+
+- If you publicly use or distribute the database itself, or a database
+  adapted from it (for example these files with your changes, or an
+  extension layer built from them), you must credit the sources above,
+  keep this notice, and offer that database under the ODbL v1.0
+  (share-alike, section 4.4). You may not restrict it with technical
+  measures unless you also offer it without them (section 4.7).
+
+- The World Bank income classification also requires credit (CC BY 4.0).
