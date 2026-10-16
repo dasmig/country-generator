@@ -129,6 +129,7 @@ Run these commands from the repository root:
 make all        # build the example in build/example
 ./build/example # run the example
 make test       # build and run the tests
+make bench      # benchmarks, results in build/bench.tsv
 make test-embed # build and run the tests with the lite tier compiled in
 ```
 
