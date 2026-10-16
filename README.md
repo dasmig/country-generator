@@ -164,3 +164,13 @@ python scripts/prepare_countries.py --tier full # full only
 | [biodata-generator](https://github.com/dasmig/biodata-generator) | Procedural human physical characteristics |
 | [city-generator](https://github.com/dasmig/city-generator) | Weighted city selection by population |
 | [entity-generator](https://github.com/dasmig/entity-generator) | ECS-based entity generation |
+
+## License
+
+This library is released under the [MIT License](https://opensource.org/licenses/MIT).
+
+```
+MIT License
+
+Copyright (c) 2020-2026 Diego Dasso Migotto
+```
