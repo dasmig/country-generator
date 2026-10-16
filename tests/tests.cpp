@@ -1075,3 +1075,68 @@ TEST_CASE("compiled-in data needs no files and matches them", "[embed]")
     REQUIRE(gen.get_country({}, std::uint64_t{1}).cca2 == "ET");
 }
 #endif
+
+// ---------------------------------------------------------------------------
+// Batch generation
+// ---------------------------------------------------------------------------
+
+TEST_CASE("country batch: items equal the single calls for any thread count", "[batch]")
+{
+    auto gen = load_lite_file();
+    const auto request = dasmig::country_request{};
+    const auto batch = gen.get_country_batch(request, {.count = 200, .threads = 1}, 77);
+    REQUIRE(batch.size() == 200);
+    for (std::uint64_t i = 0; i < batch.size(); ++i)
+    {
+        REQUIRE(batch[i].to_json() == gen.get_country(request, dasmig::core::item_seed(77, i)).to_json());
+    }
+
+    // A range is computed directly, on any number of threads.
+    const auto tail = gen.get_country_batch(request, {.count = 100, .first = 100, .threads = 4}, 77);
+    REQUIRE(tail.size() == 100);
+    for (std::size_t i = 0; i < tail.size(); ++i)
+    {
+        REQUIRE(tail[i].to_json() == batch[100 + i].to_json());
+    }
+    for (const std::size_t threads : {2U, 7U, 0U})
+    {
+        const auto other = gen.get_country_batch(request, {.count = 200, .threads = threads}, 77);
+        REQUIRE(other.size() == batch.size());
+        for (std::size_t i = 0; i < other.size(); ++i)
+        {
+            REQUIRE(other[i].to_json() == batch[i].to_json());
+        }
+    }
+
+    // Without a seed the batch still has the requested size.
+    REQUIRE(gen.get_country_batch(request, {.count = 5}).size() == 5);
+}
+
+TEST_CASE("country batch: streaming gives the same items in order", "[batch]")
+{
+    auto gen = load_lite_file();
+    const auto request = dasmig::country_request{};
+    const auto batch = gen.get_country_batch(request, {.count = 300, .first = 10, .threads = 3}, 5);
+    std::uint64_t next = 10;
+    std::size_t seen = 0;
+    gen.for_each_country(request, {.count = 300, .first = 10, .threads = 3}, 5,
+                        [&](std::uint64_t index, const dasmig::country& item)
+                        {
+                            REQUIRE(index == next);
+                            REQUIRE(item.to_json() == batch[seen].to_json());
+                            ++next;
+                            ++seen;
+                        });
+    REQUIRE(seen == batch.size());
+}
+
+TEST_CASE("country batch: known answer of 10,000 items", "[batch][kat]")
+{
+    auto gen = load_lite_file();
+    const auto request = dasmig::country_request{};
+    std::uint64_t hash = 0xcbf29ce484222325ULL;
+    gen.for_each_country(request, {.count = 10000, .threads = 4}, 1,
+                        [&](std::uint64_t, const dasmig::country& item)
+                        { hash = dasmig::core::hash_combine(hash, dasmig::core::fnv1a64(item.to_json())); });
+    REQUIRE(hash == 0xd1bbb061e64851a8ULL);
+}
