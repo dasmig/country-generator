@@ -19,6 +19,8 @@
 
 - **Population-Weighted Generation**. Countries are selected with probability proportional to their population, mirroring real-world demographics.
 
+- **Batch Generation**. Generate thousands of results from one seed, on several threads with the same output for any thread count, optionally unique by a key, and stream them as JSON Lines or CSV (see the usage guide).
+
 - **Rich Country Data**. Every generated country includes 31 fields: names, ISO codes, capital, region, coordinates, area, population, languages, currency, borders, timezones, driving side, demonyms, income level, and more.
 
 - **Region Filtering**. Generate countries from a specific UN geoscheme region with `get_country({.region = "Europe"})`.

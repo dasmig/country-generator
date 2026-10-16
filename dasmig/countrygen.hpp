@@ -30,7 +30,7 @@
 /// @author Diego Dasso Migotto (diegomigotto at hotmail dot com)
 /// @see See doc/usage.md for the narrative tutorial.
 
-DASMIG_CORE_REQUIRE(1, 0);
+DASMIG_CORE_REQUIRE(1, 1);
 
 namespace dasmig
 {
@@ -352,6 +352,82 @@ class cntg
                                   : static_cast<std::size_t>(core::bounded(r, entry.indices.size()));
         return result_(_countries[entry.indices[selected]], call_seed);
     }
+
+    // -- Batch generation -------------------------------------------------
+
+    /// @brief Generate a batch of country results from a seed drawn like
+    ///        get_country() draws its own.
+    ///
+    /// Item `i` is `get_country(request, core::item_seed(batch_seed, options.first + i))`
+    /// for the drawn batch seed; see the seeded overload.
+    ///
+    /// @param request What every item is generated from.
+    /// @param options Count, first index, threads and uniqueness.
+    /// @return The results, in index order.
+    [[nodiscard]] std::vector<country> get_country_batch(const country_request& request,
+                                                  const core::batch_options& options)
+    {
+        return get_country_batch(request, options, _engine());
+    }
+
+    /// @brief Generate a batch of country results, deterministically.
+    ///
+    /// Item `i` is exactly `get_country(request, core::item_seed(batch_seed,
+    /// options.first + i))`, so an item replays on its own, a range can be
+    /// generated directly, two batches that follow each other equal one, and
+    /// the output does not depend on `options.threads`.
+    ///
+    /// @param request What every item is generated from.
+    /// @param options Count, first index, threads and uniqueness (see
+    ///        core::unique_rule; the rule must be made for `country`).
+    /// @param batch_seed Seed of the whole batch.
+    /// @return The results, in index order.
+    /// @throws std::invalid_argument If the request or options are invalid.
+    /// @throws std::runtime_error If no data has been loaded, or a unique
+    ///         batch runs out of attempts.
+    [[nodiscard]] std::vector<country> get_country_batch(const country_request& request,
+                                                  const core::batch_options& options,
+                                                  std::uint64_t batch_seed) const
+    {
+        return core::run_batch(options, batch_seed, [&](std::uint64_t item_seed)
+                               { return get_country(request, item_seed); });
+    }
+
+    /// @brief Stream a batch of country results to a sink without holding the
+    ///        whole batch.
+    ///
+    /// Generates the same items as get_country_batch() and calls
+    /// `sink(index, item)` in index order on the calling thread; `index`
+    /// includes `options.first`.
+    ///
+    /// @tparam Sink Callable taking `(std::uint64_t, country&)`; for example
+    ///         core::jsonl_writer or core::csv_writer.
+    /// @param request What every item is generated from.
+    /// @param options Count, first index, threads and uniqueness.
+    /// @param batch_seed Seed of the whole batch.
+    /// @param sink Receives the items.
+    template <typename Sink>
+    void for_each_country(const country_request& request, const core::batch_options& options,
+                        std::uint64_t batch_seed, Sink&& sink) const
+    {
+        core::for_each_batch(options, batch_seed,
+                             [&](std::uint64_t item_seed) { return get_country(request, item_seed); },
+                             std::forward<Sink>(sink));
+    }
+
+    /// @brief Stream a batch of country results with a batch seed drawn like
+    ///        get_country() draws its own.
+    /// @tparam Sink Callable taking `(std::uint64_t, country&)`.
+    /// @param request What every item is generated from.
+    /// @param options Count, first index, threads and uniqueness.
+    /// @param sink Receives the items.
+    template <typename Sink>
+    void for_each_country(const country_request& request, const core::batch_options& options,
+                        Sink&& sink)
+    {
+        for_each_country(request, options, _engine(), std::forward<Sink>(sink));
+    }
+
 
     /// @brief Look up a country by its ISO 3166-1 alpha-2 code.
     /// @param cca2 Two-letter country code (e.g. "US", "BR").
