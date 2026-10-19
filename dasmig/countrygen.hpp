@@ -35,6 +35,13 @@ DASMIG_CORE_REQUIRE(1, 1);
 namespace dasmig
 {
 
+/// @brief One language of a country and the share of its population that speaks it.
+struct language_share
+{
+    std::string name;   ///< English name of the language (for example "Portuguese").
+    double percent{0.0}; ///< Percent of the population that speaks it, 0 to 100.
+};
+
 /// @brief Return type for country generation, holding all data fields.
 ///
 /// Supports implicit conversion to std::string (returns the common name),
@@ -101,6 +108,14 @@ class country
     /// @brief Semicolon-separated language names (e.g. "Portuguese").
     std::string languages;
 
+    /// @brief Semicolon-separated `Name:percent` pairs, largest first, for the
+    ///        languages at least 1% of the population speaks (for example
+    ///        "Portuguese:91;English:8"); empty when the data has none.
+    ///
+    /// Each percent is the share of people who speak that language, so they
+    /// overlap and can sum above 100. Use language_distribution() to read them.
+    std::string language_shares;
+
     /// @brief Primary ISO 4217 currency code (e.g. "BRL").
     std::string currency_code;
 
@@ -150,6 +165,47 @@ class country
     std::string start_of_week;
 
     // -- Methods ----------------------------------------------------------
+
+    /// @brief The language names of `languages` as a list.
+    /// @return The official languages in the data's order; empty when none.
+    [[nodiscard]] std::vector<std::string> language_list() const
+    {
+        std::vector<std::string> out;
+        std::string_view text{languages};
+        while (!text.empty())
+        {
+            const auto pos = text.find(';');
+            out.emplace_back(text.substr(0, pos));
+            text = pos == std::string_view::npos ? std::string_view{} : text.substr(pos + 1);
+        }
+        return out;
+    }
+
+    /// @brief The languages and the share of the population that speaks each.
+    /// @return `language_shares` parsed, largest first; empty when the data has none.
+    [[nodiscard]] std::vector<language_share> language_distribution() const
+    {
+        return parse_shares_(language_shares).value_or(std::vector<language_share>{});
+    }
+
+    /// @brief The language most of the population speaks.
+    /// @return The largest share's name, else the first of `languages`, else empty.
+    [[nodiscard]] std::string primary_language() const
+    {
+        const auto shares = language_distribution();
+        if (!shares.empty()) return shares.front().name;
+        auto list = language_list();
+        return list.empty() ? std::string{} : std::move(list.front());
+    }
+
+    /// @brief The English demonym for a person of this country.
+    /// @param bio_sex The person's sex.
+    /// @return `demonym_m` or `demonym_f`, falling back to the other when empty.
+    [[nodiscard]] const std::string& demonym(sex bio_sex) const
+    {
+        const auto& wanted = bio_sex == sex::male ? demonym_m : demonym_f;
+        return wanted.empty() ? (bio_sex == sex::male ? demonym_f : demonym_m) : wanted;
+    }
 
     /// @brief Retrieve the random seed used to generate this country.
     /// @return The per-call seed for replay (0 for find_country()).
@@ -202,6 +258,11 @@ class country
             .field("independent", independent)
             .field("un_member", un_member);
         list("languages", languages);
+        w.key("language_shares").begin_array();
+        (void)for_each_share_(language_shares, [&w](std::string_view name, double percent) {
+            w.begin_object().field("name", name).field("percent", percent).end_object();
+        });
+        w.end_array();
         w.field("currency_code", currency_code)
             .field("currency_name", currency_name)
             .field("currency_symbol", currency_symbol);
@@ -249,6 +310,38 @@ class country
 
   private:
     core::seed_signature _signature;
+
+    // Calls visit(name, percent) for each "Name:percent" pair of a shares text and returns true;
+    // returns false at the first malformed pair (no colon, empty name, or a percent not in (0, 100]).
+    template <typename Visit>
+    [[nodiscard]] static bool for_each_share_(std::string_view text, Visit&& visit)
+    {
+        while (!text.empty())
+        {
+            const auto end = text.find(';');
+            const auto pair = text.substr(0, end);
+            const auto colon = pair.rfind(':');
+            if (colon == std::string_view::npos || colon == 0) return false;
+            const auto percent = core::detail::parse_number<double>(pair.substr(colon + 1));
+            if (!percent || !(*percent > 0.0) || *percent > 100.0) return false;
+            visit(pair.substr(0, colon), *percent);
+            text = end == std::string_view::npos ? std::string_view{} : text.substr(end + 1);
+        }
+        return true;
+    }
+
+    // "Name:percent;..." -> shares; nullopt when a pair is malformed.
+    [[nodiscard]] static std::optional<std::vector<language_share>> parse_shares_(std::string_view text)
+    {
+        std::vector<language_share> out;
+        if (!for_each_share_(text, [&out](std::string_view name, double percent) {
+                out.push_back({.name = std::string{name}, .percent = percent});
+            }))
+        {
+            return std::nullopt;
+        }
+        return out;
+    }
 
     friend class cntg;
 };
@@ -445,6 +538,34 @@ class cntg
         return result_(_countries[it->second], 0);
     }
 
+    /// @brief Draw a language a person of a country speaks, in proportion to
+    ///        the share of the population that speaks it.
+    ///
+    /// Falls back to the first of the country's `languages` when the data has
+    /// no shares for it. A pure function of the data, the country and the seed.
+    /// @param cca2 ISO 3166-1 alpha-2 code.
+    /// @param call_seed The call seed.
+    /// @return The language's English name.
+    /// @throws std::runtime_error If no data has been loaded.
+    /// @throws std::invalid_argument If no country matches the code, or the
+    ///         country has no language data.
+    [[nodiscard]] std::string get_language(const std::string& cca2, std::uint64_t call_seed) const
+    {
+        const auto c = find_country(cca2);
+        const auto shares = c.language_distribution();
+        if (shares.empty())
+        {
+            auto list = c.language_list();
+            if (list.empty()) throw std::invalid_argument("No language data for CCA2 code: " + cca2);
+            return std::move(list.front());
+        }
+        std::vector<double> weights;
+        weights.reserve(shares.size());
+        for (const auto& share : shares) weights.push_back(share.percent);
+        auto r = core::rng{call_seed}.split("language");
+        return shares[core::discrete{weights}(r)].name;
+    }
+
     // -- Data management --------------------------------------------------
 
     /// @brief Check whether any data has been loaded.
@@ -565,8 +686,8 @@ class cntg
                 .required = {"cca3", "name_common", "region", "latitude", "longitude",
                              "area", "population", "landlocked", "independent", "un_member"},
                 .optional = {"ccn3", "name_official", "capital", "subregion", "continent",
-                             "languages", "currency_code", "currency_name", "currency_symbol",
-                             "borders", "timezones", "driving_side", "tld", "idd_root",
+                             "languages", "language_shares", "currency_code", "currency_name",
+                             "currency_symbol", "borders", "timezones", "driving_side", "tld", "idd_root",
                              "idd_suffix", "demonym_m", "demonym_f", "flag_emoji",
                              "income_level", "start_of_week"}};
     }
@@ -602,6 +723,11 @@ class cntg
         c.independent = row.get<bool>("independent");
         c.un_member = row.get<bool>("un_member");
         c.languages = row.get_or<std::string>("languages", "");
+        c.language_shares = row.get_or<std::string>("language_shares", "");
+        if (!country::for_each_share_(c.language_shares, [](std::string_view, double) {}))
+        {
+            throw row.error("language_shares", "must be Name:percent pairs separated by ';', each percent above 0 and at most 100");
+        }
         c.currency_code = row.get_or<std::string>("currency_code", "");
         c.currency_name = row.get_or<std::string>("currency_name", "");
         c.currency_symbol = row.get_or<std::string>("currency_symbol", "");

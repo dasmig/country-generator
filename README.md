@@ -19,7 +19,7 @@ Countries drawn by population, with names, codes, capital, region, languages, cu
 
 - **Population-Weighted Generation**. Countries are selected with probability proportional to their population, mirroring real-world demographics.
 
-- **Rich Country Data**. Every generated country includes 31 fields: names, ISO codes, capital, region, coordinates, area, population, languages, currency, borders, timezones, driving side, demonyms, income level, and more.
+- **Rich Country Data**. Every generated country includes 32 fields: names, ISO codes, capital, region, coordinates, area, population, languages (with the share of the population that speaks each), currency, borders, timezones, driving side, demonyms, income level, and more.
 
 - **Region Filtering**. Generate countries from a specific UN geoscheme region with `get_country({.region = "Europe"})`.
 
@@ -125,6 +125,8 @@ The country data is aggregated from multiple open-data sources:
 | [mledoze/countries](https://github.com/mledoze/countries) | ODbL v1.0 | ISO codes, names, area, flag, and fallbacks for REST Countries' gaps |
 | [REST Countries](https://restcountries.com/) | MPL 2.0 | Coordinates, regions, capitals, languages, currencies, borders, demonyms, population, timezones, driving side, continents |
 | [World Bank](https://data.worldbank.org/) | CC BY 4.0 | Income level classification |
+| [Unicode CLDR](https://cldr.unicode.org/) | Unicode License v3 | Share of the population that speaks each language |
+| [SIL ISO 639-3](https://iso639-3.sil.org/) | Free to use | Names of languages CLDR does not name |
 
 Because the data is adapted from an ODbL database, the ODbL applies to it. Output generated with the library needs a notice that it uses mledoze/countries data under the ODbL. If you publish the data itself, or a database adapted from it, you must also offer that database under the ODbL (share-alike). `LICENSE_DATA.txt` gives the details. The column-by-column sources are in [`doc/data.md`](doc/data.md).
 
