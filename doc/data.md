@@ -19,6 +19,7 @@ Where the data in `resources/*/countries.tsv` comes from and how it is built. Fo
 | Coordinates, region and subregion, capital, languages, currency, borders, demonyms, dialling codes, TLD, landlocked, independent, UN member | [REST Countries](https://restcountries.com/) v3.1, falling back to mledoze where REST Countries has no value |
 | Population, timezones, continents, driving side, start of week | REST Countries only |
 | `income_level` | [World Bank](https://data.worldbank.org/) income classification |
+| `language_shares` | [Unicode CLDR](https://cldr.unicode.org/) `territoryInfo` (Unicode License v3), added by `scripts/prepare_language_shares.py`; names CLDR lacks come from the [SIL ISO 639-3](https://iso639-3.sil.org/) code table |
 
 `scripts/prepare_countries.py` downloads all three, merges them by ISO alpha-3 code and writes both tiers:
 
@@ -43,6 +44,7 @@ Lists (`capital`, `continent`, `languages`, `borders`, `timezones`) are separate
 | `area` | Land area in km² | `-1` in the source means unknown (Svalbard and Jan Mayen) and reads as 0 |
 | `population` | Total population | Selection weight; a population of 0 (5 territories in `full`) counts as 1, so every country can be drawn |
 | `landlocked`, `independent`, `un_member` | Flags | |
+| `language_shares` | `Name:percent` pairs, largest first | Optional. The share of the population that speaks each language (CLDR's estimates, at least 1%); shares overlap and can sum above 100. Each percent is above 0 and at most 100 |
 | `languages`, `currency_*`, `borders`, `timezones`, `driving_side`, `tld`, `idd_*`, `demonym_*`, `flag_emoji`, `income_level`, `start_of_week` | As named | May be empty; `income_level` is "Not classified" for some countries (Ethiopia, for example) |
 
 ## Generation Model

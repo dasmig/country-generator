@@ -892,18 +892,22 @@ dasmig::cntg load_lite_file()
 TEST_CASE("known answers for fixed seeds", "[kat]")
 {
     auto gen = load_lite_file();
-    REQUIRE(gen.data_hash() == 0x25ba572e6c3d6838ULL);
+    REQUIRE(gen.data_hash() == 0xba0f78d3ad63fb46ULL);
 
     REQUIRE(gen.get_country({}, std::uint64_t{1}).to_json() ==
             R"({"cca2":"ET","cca3":"ETH","ccn3":"231","name_common":"Ethiopia",)"
             R"("name_official":"Federal Democratic Republic of Ethiopia","capital":["Addis Ababa"],)"
             R"("region":"Africa","subregion":"Eastern Africa","continent":["Africa"],"latitude":8,)"
             R"("longitude":38,"area":1104300,"population":111652998,"landlocked":true,"independent":true,)"
-            R"("un_member":true,"languages":["Amharic"],"currency_code":"ETB","currency_name":"Ethiopian birr",)"
+            R"("un_member":true,"languages":["Amharic"],)"
+            R"("language_shares":[{"name":"English","percent":43},{"name":"Amharic","percent":33},)"
+            R"({"name":"Oromo","percent":32},{"name":"Somali","percent":6},{"name":"Tigrinya","percent":6},)"
+            R"({"name":"Sidamo","percent":3.5},{"name":"Wolaytta","percent":1.8},{"name":"Afar","percent":1.4}],)"
+            R"("currency_code":"ETB","currency_name":"Ethiopian birr",)"
             R"("currency_symbol":"Br","borders":["DJI","ERI","KEN","SOM","SSD","SDN"],"timezones":["UTC+03:00"],)"
             R"("driving_side":"right","tld":".et","idd_root":"+2","idd_suffix":"51","demonym_m":"Ethiopian",)"
             R"("demonym_f":"Ethiopian","flag_emoji":")" "\xF0\x9F\x87\xAA\xF0\x9F\x87\xB9" R"(","income_level":"Not classified",)"
-            R"("start_of_week":"monday","signature":{"seed":"0000000000000001","data":"25ba572e6c3d6838"}})");
+            R"("start_of_week":"monday","signature":{"seed":"0000000000000001","data":"ba0f78d3ad63fb46"}})");
     REQUIRE(gen.get_country(dasmig::country_request{.region = "Europe"}, 3).cca2 == "PL");
     REQUIRE(gen.get_country(dasmig::country_request{.weighted = false}, 2).cca2 == "NO");
     REQUIRE(gen.get_country(dasmig::country_request{.region = "Asia", .weighted = false}, 4).cca2 ==
@@ -918,7 +922,101 @@ TEST_CASE("known answers for fixed seeds", "[kat]")
             h *= 0x100000001b3ULL;
         }
     }
-    REQUIRE(h == 0xa4f750055c1423d4ULL);
+    REQUIRE(h == 0x6f80b11ecf4085e5ULL);
+}
+
+// ---------------------------------------------------------------------------
+// Languages and demonyms
+// ---------------------------------------------------------------------------
+
+TEST_CASE("languages are listed, shared out and drawn", "[languages]")
+{
+    auto gen = make_loaded_generator();
+
+    const auto br = gen.find_country("BR");
+    REQUIRE(br.language_list() == std::vector<std::string>{"Portuguese"});
+    REQUIRE(br.primary_language() == "Portuguese");
+    const auto shares = br.language_distribution();
+    REQUIRE(shares.size() >= 2);
+    REQUIRE(shares.front().name == "Portuguese");
+    REQUIRE(shares.front().percent > 80.0);
+    REQUIRE(std::is_sorted(shares.begin(), shares.end(),
+                           [](const auto& a, const auto& b) { return a.percent > b.percent; }));
+
+    // A country with several official languages lists them all.
+    REQUIRE(gen.find_country("CH").language_list().size() >= 3);
+
+    // Every country in the data: shares parse, are in range and sorted, and the primary language is one of them.
+    std::size_t with_shares = 0;
+    for (const auto& c : gen.get_country_batch({}, dasmig::core::batch_options{.count = 2000}, std::uint64_t{7}))
+    {
+        const auto list = c.language_distribution();
+        if (list.empty()) continue;
+        ++with_shares;
+        REQUIRE(c.primary_language() == list.front().name);
+        for (const auto& share : list)
+        {
+            REQUIRE(!share.name.empty());
+            REQUIRE(share.percent > 0.0);
+            REQUIRE(share.percent <= 100.0);
+        }
+    }
+    REQUIRE(with_shares > 1900);
+
+    // Drawn in proportion to the shares, and a pure function of the seed.
+    std::map<std::string, int> counts;
+    for (std::uint64_t seed = 0; seed < 4000; ++seed) ++counts[gen.get_language("CH", seed)];
+    REQUIRE(counts.size() >= 3);
+    REQUIRE(counts["German"] > counts["Italian"]);
+    REQUIRE(gen.get_language("CH", 42) == gen.get_language("CH", 42));
+    REQUIRE_THROWS_AS(gen.get_language("XX", 1), std::invalid_argument);
+}
+
+TEST_CASE("a country without shares falls back to its languages", "[languages][extend]")
+{
+    auto gen = make_loaded_generator();
+    const std::string header =
+        "cca2\tcca3\tname_common\tregion\tlatitude\tlongitude\tarea\tpopulation\tlandlocked\tindependent"
+        "\tun_member\tlanguages\tlanguage_shares\tdemonym_m\tdemonym_f\n";
+    gen.extend_from_string(header + "ZZ\tZZZ\tZedland\tEurope\t0\t0\t1\t1000\t0\t1\t0\tZedish;Zorp\t\t\tZedlander\n",
+                           "test:fallback", dasmig::core::layer_mode::override);
+    const auto zz = gen.find_country("ZZ");
+    REQUIRE(zz.language_distribution().empty());
+    REQUIRE(zz.primary_language() == "Zedish");
+    REQUIRE(gen.get_language("ZZ", 5) == "Zedish");
+    REQUIRE(zz.demonym(dasmig::sex::male) == "Zedlander"); // no male form: the female one
+    REQUIRE(zz.demonym(dasmig::sex::female) == "Zedlander");
+
+    gen.extend_from_string(header + "ZY\tZYY\tZyland\tEurope\t0\t0\t1\t1000\t0\t1\t0\t\t\t\t\n",
+                           "test:none", dasmig::core::layer_mode::override);
+    REQUIRE(gen.find_country("ZY").primary_language().empty());
+    REQUIRE_THROWS_AS(gen.get_language("ZY", 1), std::invalid_argument);
+}
+
+TEST_CASE("malformed language shares are rejected with their location", "[languages][errors]")
+{
+    auto gen = make_loaded_generator();
+    const std::string header =
+        "cca2\tcca3\tname_common\tregion\tlatitude\tlongitude\tarea\tpopulation\tlandlocked\tindependent"
+        "\tun_member\tlanguage_shares\n";
+    for (const char* bad : {"Zedish", "Zedish:0", "Zedish:101", "Zedish:x", ":50", "Zedish:50;Zorp"})
+    {
+        const auto row = std::string{"ZZ\tZZZ\tZedland\tEurope\t0\t0\t1\t1000\t0\t1\t0\t"} + bad + "\n";
+        REQUIRE_THROWS_AS(gen.extend_from_string(header + row, "test:bad", dasmig::core::layer_mode::override),
+                          dasmig::core::tsv_error);
+    }
+    REQUIRE_NOTHROW(gen.extend_from_string(header + "ZZ\tZZZ\tZedland\tEurope\t0\t0\t1\t1000\t0\t1\t0\tZedish:60;Zorp:5.5\n",
+                                           "test:good", dasmig::core::layer_mode::override));
+    REQUIRE(gen.find_country("ZZ").language_distribution().size() == 2);
+}
+
+TEST_CASE("demonyms follow the sex, falling back to the other form", "[languages]")
+{
+    auto gen = make_loaded_generator();
+    const auto fr = gen.find_country("FR");
+    REQUIRE(fr.demonym(dasmig::sex::male) == fr.demonym_m);
+    REQUIRE(fr.demonym(dasmig::sex::female) == fr.demonym_f);
+    REQUIRE(!fr.demonym(dasmig::sex::male).empty());
 }
 
 // ---------------------------------------------------------------------------
@@ -1071,7 +1169,7 @@ TEST_CASE("compiled-in data needs no files and matches them", "[embed]")
 
     REQUIRE(loaded);
     REQUIRE(gen.layers().front().source == "embedded:lite/countries.tsv");
-    REQUIRE(gen.data_hash() == 0x25ba572e6c3d6838ULL); // same as the file
+    REQUIRE(gen.data_hash() == 0xba0f78d3ad63fb46ULL); // same as the file
     REQUIRE(gen.get_country({}, std::uint64_t{1}).cca2 == "ET");
 }
 #endif
@@ -1138,5 +1236,5 @@ TEST_CASE("country batch: known answer of 10,000 items", "[batch][kat]")
     gen.for_each_country(request, {.count = 10000, .threads = 4}, 1,
                         [&](std::uint64_t, const dasmig::country& item)
                         { hash = dasmig::core::hash_combine(hash, dasmig::core::fnv1a64(item.to_json())); });
-    REQUIRE(hash == 0xd1bbb061e64851a8ULL);
+    REQUIRE(hash == 0xa94ee4e0e96111f4ULL);
 }

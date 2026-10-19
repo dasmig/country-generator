@@ -13,6 +13,16 @@ dasmig/countrygen_data.hpp, is a database built from:
    Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
    https://creativecommons.org/licenses/by/4.0/
 
+4. Unicode CLDR (https://cldr.unicode.org/), supplemental territoryInfo.
+   Copyright (c) Unicode, Inc. Licensed under the Unicode License v3.
+   https://www.unicode.org/license.txt
+   Used for the language_shares column: the share of each territory's
+   population that speaks each language, and the English language names.
+
+5. SIL ISO 639-3 code tables (https://iso639-3.sil.org/), free to use, for
+   the names of languages that CLDR does not name.
+   https://iso639-3.sil.org/code_tables/download_tables#terms
+
 Because the database is adapted from an ODbL source, the ODbL's terms apply
 to it. In short, and not as legal advice (the licence texts govern):
 
@@ -29,3 +39,7 @@ to it. In short, and not as legal advice (the licence texts govern):
   measures unless you also offer it without them (section 4.7).
 
 - The World Bank income classification also requires credit (CC BY 4.0).
+
+- The CLDR language data is under the Unicode License v3, which asks that
+  the copyright and permission notice (https://www.unicode.org/license.txt)
+  stay with copies of the data.

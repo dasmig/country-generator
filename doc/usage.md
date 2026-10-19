@@ -145,7 +145,7 @@ data. The result signature records the seed and data hash, not the request.
 
 ## Country Fields
 
-Every generated country includes all 31 data fields:
+Every generated country includes all 32 data fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -166,6 +166,7 @@ Every generated country includes all 31 data fields:
 | `independent` | `bool` | Sovereign state flag |
 | `un_member` | `bool` | UN membership |
 | `languages` | `string` | `;`-separated language names |
+| `language_shares` | `string` | `;`-separated `Name:percent` pairs, largest first (see [Languages](#languages-and-demonyms)) |
 | `currency_code` | `string` | Primary ISO 4217 code |
 | `currency_name` | `string` | Primary currency name |
 | `currency_symbol` | `string` | Primary currency symbol |
@@ -190,6 +191,25 @@ std::cout << "Currency: " << c.currency_name << " ("
           << c.currency_symbol << ")\n";
 std::cout << "Driving side: " << c.driving_side << "\n";
 ```
+
+## Languages and demonyms
+
+`languages` lists a country's official languages. `language_shares` adds how many people speak each, from Unicode CLDR: the languages at least 1% of the population speaks, as `Name:percent` pairs. The shares overlap (a country where many people speak two languages sums above 100), because each is the share of people who speak that language.
+
+```cpp
+auto ch = gen.find_country("CH");
+ch.language_list();          // {"French", "Italian", "Romansh", "Swiss German"}
+ch.language_distribution();  // {{"German", 76}, {"Swiss German", 66}, {"English", 45}, ...}
+ch.primary_language();       // "German" (the largest share, not an official-list entry)
+ch.demonym(dasmig::sex::female);   // "Swiss"
+
+// A language a person of the country speaks, in proportion to the shares.
+std::string language = gen.get_language("CH", seed);
+```
+
+`get_language(cca2, seed)` is a pure function of the data, the country and the seed. A country with no shares falls back to the first of its `languages`; one with no language data at all throws `std::invalid_argument`. `primary_language()` does the same fallback. `demonym(sex)` returns `demonym_m` or `demonym_f`, and the other one when the wanted form is empty.
+
+Layers can set `language_shares` like any column; a malformed value (a pair without a percent, or a percent that is not above 0 and at most 100) is rejected with its row and column. `to_json()` writes the shares as an array of `{"name", "percent"}`.
 
 ## Region Filtering
 
@@ -356,7 +376,7 @@ auto again = gen.get_country(request, c.seed());
 
 ```json
 {"cca2":"ET","cca3":"ETH","ccn3":"231","name_common":"Ethiopia",...,"languages":["Amharic"],
- "borders":["DJI","ERI","KEN","SOM","SSD","SDN"],...,"signature":{"seed":"0000000000000001","data":"25ba572e6c3d6838"}}
+ "language_shares":[{"name":"English","percent":43},...],"borders":["DJI","ERI","KEN","SOM","SSD","SDN"],...,"signature":{"seed":"0000000000000001","data":"ba0f78d3ad63fb46"}}
 ```
 
 Seeds are strings because JavaScript numbers cannot hold every 64-bit value. `to_json(writer)` writes into an existing `dasmig::core::json_writer`. `find_country()` results have seed 0.
@@ -452,4 +472,5 @@ gen.for_each_country(request, {.count = 1'000'000, .threads = 0}, 42, lines);
 | `std::runtime_error` | Either `get_country` overload or `find_country()` called with no data loaded |
 | `std::invalid_argument` | Either `get_country` overload with an empty or unknown request region |
 | `std::invalid_argument` | `find_country(cca2)` with unknown CCA2 code |
+| `std::invalid_argument` | `get_language(cca2, seed)` with an unknown code, or a country with no language data |
 | `dasmig::core::tsv_error` | A malformed `countries.tsv` or layer (message gives file, line and column); the data is unchanged |
