@@ -259,10 +259,9 @@ class country
             .field("un_member", un_member);
         list("languages", languages);
         w.key("language_shares").begin_array();
-        for (const auto& share : language_distribution())
-        {
-            w.begin_object().field("name", share.name).field("percent", share.percent).end_object();
-        }
+        (void)for_each_share_(language_shares, [&w](std::string_view name, double percent) {
+            w.begin_object().field("name", name).field("percent", percent).end_object();
+        });
         w.end_array();
         w.field("currency_code", currency_code)
             .field("currency_name", currency_name)
@@ -312,20 +311,34 @@ class country
   private:
     core::seed_signature _signature;
 
-    // "Name:percent;..." -> shares; nullopt when a pair is malformed or a percent is not in (0, 100].
-    [[nodiscard]] static std::optional<std::vector<language_share>> parse_shares_(std::string_view text)
+    // Calls visit(name, percent) for each "Name:percent" pair of a shares text and returns true;
+    // returns false at the first malformed pair (no colon, empty name, or a percent not in (0, 100]).
+    template <typename Visit>
+    [[nodiscard]] static bool for_each_share_(std::string_view text, Visit&& visit)
     {
-        std::vector<language_share> out;
         while (!text.empty())
         {
             const auto end = text.find(';');
             const auto pair = text.substr(0, end);
             const auto colon = pair.rfind(':');
-            if (colon == std::string_view::npos || colon == 0) return std::nullopt;
+            if (colon == std::string_view::npos || colon == 0) return false;
             const auto percent = core::detail::parse_number<double>(pair.substr(colon + 1));
-            if (!percent || !(*percent > 0.0) || *percent > 100.0) return std::nullopt;
-            out.push_back({.name = std::string{pair.substr(0, colon)}, .percent = *percent});
+            if (!percent || !(*percent > 0.0) || *percent > 100.0) return false;
+            visit(pair.substr(0, colon), *percent);
             text = end == std::string_view::npos ? std::string_view{} : text.substr(end + 1);
+        }
+        return true;
+    }
+
+    // "Name:percent;..." -> shares; nullopt when a pair is malformed.
+    [[nodiscard]] static std::optional<std::vector<language_share>> parse_shares_(std::string_view text)
+    {
+        std::vector<language_share> out;
+        if (!for_each_share_(text, [&out](std::string_view name, double percent) {
+                out.push_back({.name = std::string{name}, .percent = percent});
+            }))
+        {
+            return std::nullopt;
         }
         return out;
     }
@@ -711,7 +724,7 @@ class cntg
         c.un_member = row.get<bool>("un_member");
         c.languages = row.get_or<std::string>("languages", "");
         c.language_shares = row.get_or<std::string>("language_shares", "");
-        if (!country::parse_shares_(c.language_shares))
+        if (!country::for_each_share_(c.language_shares, [](std::string_view, double) {}))
         {
             throw row.error("language_shares", "must be Name:percent pairs separated by ';', each percent above 0 and at most 100");
         }
