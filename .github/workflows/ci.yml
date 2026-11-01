@@ -37,6 +37,9 @@ jobs:
       - name: Build and run tests with compiled-in data
         run: make test-embed
 
+      - name: Build and run tests with only the countries compiled in
+        run: make test-embed-countries
+
       - name: Generate JUnit report
         if: always()
         run: ./build/test_runner --reporter junit --out build/test_report.xml

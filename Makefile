@@ -17,7 +17,7 @@ BENCH_FLAGS := -O2 -DNDEBUG
 COV_FLAGS := -fprofile-instr-generate -fcoverage-mapping
 COV_DIR   := coverage
 
-.PHONY: all clean lint test bench bench-gate test-embed coverage docs embed
+.PHONY: all clean lint test bench bench-gate test-embed test-embed-countries dump coverage docs embed
 
 all: $(EXAMPLE_BIN)
 
@@ -35,6 +35,16 @@ test: $(TEST_BIN)
 test-embed: $(TEST_SRC) $(HEADERS) dasmig/countrygen_data.hpp dasmig/countrygen_locale_data.hpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -DDASMIG_COUNTRY_EMBED -DDASMIG_COUNTRY_EMBED_LOCALE -o $(BUILD)/test_embed $(TEST_SRC)
 	./$(BUILD)/test_embed
+
+# The same tests with only countries.tsv compiled in (DASMIG_COUNTRY_EMBED):
+# the locale tables then come from disk, or not at all (design 10).
+test-embed-countries: $(TEST_SRC) $(HEADERS) dasmig/countrygen_data.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -DDASMIG_COUNTRY_EMBED -o $(BUILD)/test_embed_countries $(TEST_SRC)
+	./$(BUILD)/test_embed_countries
+
+# The program that prints the library's answers for scripts/validate_*.py.
+dump: tests/dump.cpp $(HEADERS) | $(BUILD)
+	$(CXX) $(CXXFLAGS) -O2 -o $(BUILD)/dump tests/dump.cpp
 
 # Regenerate the compiled-in copy of the lite tier: countries.tsv behind
 # DASMIG_COUNTRY_EMBED, the locale tables behind DASMIG_COUNTRY_EMBED_LOCALE.
