@@ -60,7 +60,7 @@ Both draw from the `"country"` stream split from the call seed, with dasmig-core
 
 - Population is a single snapshot from REST Countries; it is not tied to a year.
 - `latitude` and `longitude` are a representative point, not a centroid or the capital's location.
-- Only the first currency is kept for countries with several.
+- Only the first currency is kept for countries with several. That is not always the country's main currency: Palestine has EGP. The locale tables correct it (ILS).
 
 ## Locale Tables
 
@@ -99,7 +99,7 @@ A country's locales are the languages CLDR's `territoryInfo` gives it that at le
 | `date_short` … `date_full`, `time_short`, `time_medium` | CLDR's Gregorian patterns (LDML). The long and full time patterns are left out, since they carry a zone name |
 | `months`, `months_abbr`, `weekdays`, `weekdays_abbr`, `am`, `pm`, `eras` | Names in the format context, `;`-separated; months from January, weekdays from Sunday; abbreviated eras |
 | `decimal`, `group`, `minus`, `number_pattern`, `currency_pattern`, `currency_spacing` | The Latin number system's symbols, standard patterns and the text inserted next to a letter currency symbol |
-| `currency_code`, `currency_symbol` | The country's currency and this locale's symbol for it |
+| `currency_code`, `currency_symbol` | The country's currency and this locale's symbol for it. This is `countries.tsv`'s `currency_code` when it is on ISO 4217 list one, else CLDR's current tender. Palestine is the exception: `countries.tsv` has EGP, the first of the currencies mledoze lists, and the locale has ILS, the currency the country uses and reports its statistics in |
 | `first_day`, `weekend_start`, `weekend_end`, `measurement` | CLDR's week data and measurement system for the country |
 
 The build resolves CLDR's inheritance chain (`en-NG` → `en-001` → `en`), so every row is complete. It rewrites the flexible day period `B` to `a` (AM and PM) where CLDR uses it, and fails on any pattern field the formatter does not support. A CLDR locale with no confirmed Gregorian data of its own, which cldr-json fills with the root locale's placeholders (months `M01` to `M12`), is left out; 28 locales in `lite` were, among them `dv-MV`, `la-VA` and `ny-MW`, and every country kept a locale.

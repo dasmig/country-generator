@@ -20,7 +20,8 @@ language's formats exist, and `fallback` for a country where no language
 qualifies (section 4.3 of the design).
 
 The locale's currency is the country's currency_code when it is on ISO list
-one; otherwise CLDR's current tender for the territory, or an override below
+one (except for the fixes below, where it is not the country's currency);
+otherwise CLDR's current tender for the territory, or an override below
 where CLDR is behind ISO. currencies.tsv holds list one, and the withdrawn
 codes of list three that countries.tsv still uses.
 
@@ -55,6 +56,12 @@ MIN_SHARE, UNOFFICIAL_SHARE = 1.0, 5.0
 
 # Where CLDR 47's current tender is behind ISO 4217 list one.
 CURRENCY_OVERRIDES = {"BG": "EUR"}    # euro from 2026-01-01; CLDR 47 still has BGN
+
+# Where countries.tsv's currency_code (mledoze's first listed currency) is on
+# ISO list one but is not the country's currency. Palestine lists EGP first; it
+# uses the shekel (CLDR's current tender: ILS, then JOD), and its statistics
+# (PCBS, ILOSTAT) are in ILS.
+COUNTRY_CURRENCY_FIXES = {"PS": "ILS"}
 
 WEEKDAYS = ("sun", "mon", "tue", "wed", "thu", "fri", "sat")
 DATE_FIELDS = re.compile(r"^(G{1,3}|y{1,2}|yyyy|M{1,4}|L{1,4}|d{1,2}|E{1,4}|c{1,4}|a|h{1,2}|H{1,2}|m{1,2}|s{1,2})$")
@@ -273,6 +280,10 @@ def current_tender(region_data, cc):
 
 def country_currency(cc, country, region_data, iso_current, report):
     code = country["currency_code"]
+    if cc in COUNTRY_CURRENCY_FIXES:
+        chosen = COUNTRY_CURRENCY_FIXES[cc]
+        report.append(f"{cc}: currency_code {code} is not the country's currency; the locale uses {chosen}")
+        return chosen
     if code in iso_current:
         return code
     if cc in CURRENCY_OVERRIDES:
