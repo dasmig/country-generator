@@ -237,6 +237,7 @@ class Country:
         self.observed = []                 # (date, kind, base English name, observed English name)
         self.observed_label = {}           # kind -> native "%s (observed)"
         self.seen_observed = set()
+        self.claimed = {}                  # (date, English name) -> the first kind that lists it
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for cat in (c for c in CATEGORIES if c in cls.supported_categories):
@@ -257,7 +258,10 @@ class Country:
             if len(names_en) != len(names_native):
                 names_native = names_en
             for n_en, n_native in zip(names_en, names_native):
-                s = self.series[(kind, strip(n_en, est_en))]
+                base = strip(n_en, est_en)
+                if self.claimed.setdefault((day, base), kind) != kind:
+                    continue                    # a stronger kind lists it (US government repeats federal days)
+                s = self.series[(kind, base)]
                 if day in s["names"]:
                     continue                    # listed by two categories of one kind
                 s["dates"].append(day)
@@ -270,6 +274,8 @@ class Country:
                     real[(day, n)] -= 1
                     continue
                 entry = (day, kind, strip(n, obs_labels), n)
+                if self.claimed.setdefault(("observed", day, entry[2]), kind) != kind:
+                    continue
                 if entry not in self.seen_observed:
                     self.seen_observed.add(entry)
                     self.observed.append(entry)

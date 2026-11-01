@@ -1147,14 +1147,11 @@ CA	dominion_day	Dominion Day	Dominion Day	public	07-01	1	none	1970	1982
 CA	good_friday	Good Friday	Good Friday	public	easter-2	1	none	1970	2050
 CA	labor_day	Labour Day	Labor Day	public	09:1:mon	1	none	1970	2050
 CA	new_year_s_day	New Year's Day	New Year's Day	public	01-01	1	sat>mon,sun>mon	1970	2050
-CA	boxing_day	Boxing Day	Boxing Day	optional	12-26	1	sat>mon,sun>mon	1970	2050
-CA	canada_day_optional	Canada Day	Canada Day	optional	07-01	1	sat>mon,sun>mon	1983	2050
-CA	christmas_day_optional	Christmas Day	Christmas Day	optional	12-25	1	sat>mon,sun>mon	1970	2050
-CA	dominion_day_optional	Dominion Day	Dominion Day	optional	07-01	1	sat>mon,sun>mon	1970	1982
-CA	good_friday_optional	Good Friday	Good Friday	optional	easter-2	1	none	1970	2050
-CA	labor_day_optional	Labour Day	Labor Day	optional	09:1:mon	1	none	1970	2050
+CA	boxing_day	Boxing Day	Boxing Day	optional	12-26	1	sat>mon,sun>tue	1970	2050
+CA	canada_day_observed	Canada Day (observed)	Canada Day (observed)	optional	event:ca_canada_day_observed	1	none	1984	2046
+CA	christmas_day_observed	Christmas Day (observed)	Christmas Day (observed)	optional	event:ca_christmas_day_observed	1	none	1977	2050
+CA	dominion_day_observed	Dominion Day (observed)	Dominion Day (observed)	optional	event:ca_dominion_day_observed	1	none	1972	1979
 CA	national_day_for_truth_and_reconciliation	National Day for Truth and Reconciliation	National Day for Truth and Reconciliation	optional	09-30	1	sat>mon,sun>mon	2021	2050
-CA	new_year_s_day_optional	New Year's Day	New Year's Day	optional	01-01	1	sat>mon,sun>mon	1970	2050
 CA	remembrance_day	Remembrance Day	Remembrance Day	optional	11-11	1	sat>mon,sun>mon	1970	2050
 CA	thanksgiving_day	Thanksgiving Day	Thanksgiving Day	optional	10:2:mon	1	none	1970	2050
 CA	victoria_day	Victoria Day	Victoria Day	optional	05-24<mon	1	none	1970	2050
@@ -1851,7 +1848,8 @@ EG	sinai_liberation_day	عيد تحرير سيناء	Sinai Liberation Day	public
 EG	sinai_liberation_day	عيد تحرير سيناء	Sinai Liberation Day	public	04-25	1	mon>thu,tue>thu,wed>thu,sun>thu	2030	2050
 EG	sinai_liberation_day_observed	عيد تحرير سيناء (يوم تعويضي)	Sinai Liberation Day (observed)	public	event:eg_sinai_liberation_day_observed	1	none	2029	2029
 EG	spring_festival	عيد شم النسيم	Spring Festival	public	orthodox+1	1	none	1970	2050
-EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2018	2050
+EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2018	2021
+EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2023	2050
 EG	eid_al_fitr_optional	عيد الفطر المبارك	Eid al-Fitr	optional	event:eg_eid_al_fitr_optional	1	none	2019	2050
 ER	eid_al_adha	Eid al-Adha	Eid al-Adha	public	event:eid_al_adha	1	none	1994	2050
 ER	eid_al_fitr	Eid al-Fitr	Eid al-Fitr	public	event:eid_al_fitr	1	none	1994	2050
@@ -3302,7 +3300,6 @@ LB	catholic_easter_monday_bank	اثنين الفصح عند الطوائف ال�
 LB	orthodox_easter_monday_bank	اثنين الفصح عند الطوائف الأرثوذكسية	Orthodox Easter Monday	bank	orthodox+1	1	none	2020	2050
 LB	rafik_hariri_memorial_day	يوم ذكرى رفيق الحريري	Rafik Hariri Memorial Day	bank	02-14	1	none	2020	2050
 LB	anniversary_of_the_tragedy_of_beirut_port_explosion	ذكرى مأساة انفجار مرفأ بيروت	Anniversary of the tragedy of Beirut port explosion	optional	08-04	1	none	2021	2050
-LB	rafik_hariri_memorial_day_optional	يوم ذكرى رفيق الحريري	Rafik Hariri Memorial Day	optional	02-14	1	none	2020	2050
 LC	boxing_day	Boxing Day	Boxing Day	public	12-26	1	sun>mon	1979	2050
 LC	christmas_day	Christmas Day	Christmas Day	public	12-25	1	sun>mon	1979	2050
 LC	corpus_christi	Corpus Christi	Corpus Christi	public	easter+60	1	none	1979	2050
@@ -3947,7 +3944,20 @@ NL	pentecost_monday	Tweede pinksterdag	Pentecost Monday	public	easter+50	1	none	
 NL	queen_s_day	Koninginnedag	Queen's Day	public	04-30	1	sun>mon	1970	1988
 NL	queen_s_day	Koninginnedag	Queen's Day	public	04-30	1	sun<sat,overlap	1989	2013
 NL	second_day_of_christmas	Tweede kerstdag	Second Day of Christmas	public	12-26	1	none	1970	2050
-NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1982	2050
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1982	1984
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1986	1989
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1991	1994
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1996	1999
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2001	2004
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2006	2009
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2011	2014
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2016	2019
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2021	2024
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2026	2029
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2031	2034
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2036	2039
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2041	2044
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2046	2049
 NO	ascension_day	Kristi himmelfartsdag	Ascension Day	public	easter+39	1	none	1970	2050
 NO	christmas_day	Første juledag	Christmas Day	public	12-25	1	none	1970	2050
 NO	constitution_day	Grunnlovsdag	Constitution Day	public	05-17	1	none	1970	2050
@@ -4637,13 +4647,9 @@ SE	midsummer_eve	Midsommarafton	Midsummer Eve	bank	06-25<fri	1	none	1970	2050
 SE	new_year_s_eve	Nyårsafton	New Year's Eve	bank	12-31	1	none	1970	2050
 SE	twelfth_night_from_2pm	Trettondagsafton (från kl. 14.00)	Twelfth Night (from 2pm)	bank	01-05	1	none	1970	2050
 SE	walpurgis_night_from_2pm	Valborgsmässoafton (från kl. 14.00)	Walpurgis Night (from 2pm)	bank	04-30	1	none	1970	2050
-SE	all_saints_eve_from_2pm_optional	Allahelgonsafton (från kl. 14.00)	All Saints' Eve (from 2pm)	optional	10-30>fri	1	none	1970	2050
 SE	holy_saturday	Påskafton	Holy Saturday	optional	easter-1	1	none	1970	2050
-SE	maundy_thursday_from_2pm_optional	Skärtorsdagen (från kl. 14.00)	Maundy Thursday (from 2pm)	optional	easter-3	1	none	1970	2050
 SE	pentecost_eve	Pingstafton	Pentecost Eve	optional	easter+48	1	none	1970	2050
 SE	squeeze_day	Klämdag	Squeeze day	optional	easter+40	1	none	1970	2050
-SE	twelfth_night_from_2pm_optional	Trettondagsafton (från kl. 14.00)	Twelfth Night (from 2pm)	optional	01-05	1	none	1970	2050
-SE	walpurgis_night_from_2pm_optional	Valborgsmässoafton (från kl. 14.00)	Walpurgis Night (from 2pm)	optional	04-30	1	none	1970	2050
 SG	chinese_new_year	Chinese New Year	Chinese New Year	public	event:lunar_new_year	2	none	1970	1999
 SG	chinese_new_year	Chinese New Year	Chinese New Year	public	event:lunar_new_year	2	sun>mon	2000	2050
 SG	christmas_day	Christmas Day	Christmas Day	public	12-25	1	none	1970	2004
@@ -5534,27 +5540,20 @@ US	veterans_day	Veterans Day	Veterans Day	public	11-11	1	sat<fri,sun>mon	1978	20
 US	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02-22	1	none	1970	1970
 US	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02:3:mon	1	none	1971	2050
 US	birthday_of_martin_luther_king_jr	Birthday of Martin Luther King, Jr.	Birthday of Martin Luther King, Jr.	optional	01:3:mon	1	none	1986	2050
-US	christmas_day_optional	Christmas Day	Christmas Day	optional	12-25	1	sat<fri,sun>mon	1970	2050
 US	christmas_eve	Christmas Eve	Christmas Eve	optional	event:us_christmas_eve	1	none	2001	2025
 US	christmas_eve_half_day_closing	Christmas Eve (half-day closing)	Christmas Eve (half-day closing)	optional	event:us_christmas_eve_half_day_closing	1	none	2002	2015
-US	columbus_day_optional	Columbus Day	Columbus Day	optional	10:2:mon	1	none	1971	2050
 US	day_after_christmas	Day After Christmas	Day After Christmas	optional	event:us_day_after_christmas	1	none	2003	2025
-US	independence_day_optional	Independence Day	Independence Day	optional	07-04	1	sat<fri,sun>mon	1970	2050
-US	juneteenth_national_independence_day_optional	Juneteenth National Independence Day	Juneteenth National Independence Day	optional	06-19	1	sat<fri,sun>mon	2021	2050
-US	labor_day_optional	Labor Day	Labor Day	optional	09:1:mon	1	none	1970	2050
-US	memorial_day_optional	Memorial Day	Memorial Day	optional	05:-1:mon	1	none	1971	2050
 US	national_day_of_mourning_for_former_president_george_h_w_bush	National Day of Mourning for former President George H. W. Bush	National Day of Mourning for former President George H. W. Bush	optional	12-05	1	none	2018	2018
 US	national_day_of_mourning_for_former_president_gerald_r_ford	National Day of Mourning for former President Gerald R. Ford	National Day of Mourning for former President Gerald R. Ford	optional	01-02	1	none	2007	2007
 US	national_day_of_mourning_for_former_president_jimmy_carter	National Day of Mourning for former President Jimmy Carter	National Day of Mourning for former President Jimmy Carter	optional	01-09	1	none	2025	2025
 US	national_day_of_mourning_for_former_president_ronald_reagan	National Day of Mourning for former President Ronald Reagan	National Day of Mourning for former President Ronald Reagan	optional	06-11	1	none	2004	2004
-US	new_year_s_day_optional	New Year's Day	New Year's Day	optional	01-01	1	sat<fri,sun>mon	1970	2050
-US	thanksgiving_day_optional	Thanksgiving Day	Thanksgiving Day	optional	11:4:thu	1	none	1970	2050
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	11-11	1	none	1970	1970
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	10:4:mon	1	none	1971	1977
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	11-11	1	sat<fri,sun>mon	1978	2050
-US	washington_s_birthday_optional	Washington's Birthday	Washington's Birthday	optional	02-22	1	sun>mon	1970	1970
-US	washington_s_birthday_optional	Washington's Birthday	Washington's Birthday	optional	02:3:mon	1	none	1971	2050
-US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
+US	washington_s_birthday_observed	Washington's Birthday (observed)	Washington's Birthday (observed)	optional	event:us_washington_s_birthday_observed	1	none	1970	1970
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2000
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2002	2006
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2008	2011
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2013	2017
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2021	2023
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2026	2050
 US	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 US	election_day	Election Day	Election Day	observance	event:us_election_day	1	none	1972	2048
 US	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050

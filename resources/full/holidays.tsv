@@ -1305,14 +1305,11 @@ CA	dominion_day	Dominion Day	Dominion Day	public	07-01	1	none	1970	1982
 CA	good_friday	Good Friday	Good Friday	public	easter-2	1	none	1970	2050
 CA	labor_day	Labour Day	Labor Day	public	09:1:mon	1	none	1970	2050
 CA	new_year_s_day	New Year's Day	New Year's Day	public	01-01	1	sat>mon,sun>mon	1970	2050
-CA	boxing_day	Boxing Day	Boxing Day	optional	12-26	1	sat>mon,sun>mon	1970	2050
-CA	canada_day_optional	Canada Day	Canada Day	optional	07-01	1	sat>mon,sun>mon	1983	2050
-CA	christmas_day_optional	Christmas Day	Christmas Day	optional	12-25	1	sat>mon,sun>mon	1970	2050
-CA	dominion_day_optional	Dominion Day	Dominion Day	optional	07-01	1	sat>mon,sun>mon	1970	1982
-CA	good_friday_optional	Good Friday	Good Friday	optional	easter-2	1	none	1970	2050
-CA	labor_day_optional	Labour Day	Labor Day	optional	09:1:mon	1	none	1970	2050
+CA	boxing_day	Boxing Day	Boxing Day	optional	12-26	1	sat>mon,sun>tue	1970	2050
+CA	canada_day_observed	Canada Day (observed)	Canada Day (observed)	optional	event:ca_canada_day_observed	1	none	1984	2046
+CA	christmas_day_observed	Christmas Day (observed)	Christmas Day (observed)	optional	event:ca_christmas_day_observed	1	none	1977	2050
+CA	dominion_day_observed	Dominion Day (observed)	Dominion Day (observed)	optional	event:ca_dominion_day_observed	1	none	1972	1979
 CA	national_day_for_truth_and_reconciliation	National Day for Truth and Reconciliation	National Day for Truth and Reconciliation	optional	09-30	1	sat>mon,sun>mon	2021	2050
-CA	new_year_s_day_optional	New Year's Day	New Year's Day	optional	01-01	1	sat>mon,sun>mon	1970	2050
 CA	remembrance_day	Remembrance Day	Remembrance Day	optional	11-11	1	sat>mon,sun>mon	1970	2050
 CA	thanksgiving_day	Thanksgiving Day	Thanksgiving Day	optional	10:2:mon	1	none	1970	2050
 CA	victoria_day	Victoria Day	Victoria Day	optional	05-24<mon	1	none	1970	2050
@@ -2187,7 +2184,8 @@ EG	sinai_liberation_day	عيد تحرير سيناء	Sinai Liberation Day	public
 EG	sinai_liberation_day	عيد تحرير سيناء	Sinai Liberation Day	public	04-25	1	mon>thu,tue>thu,wed>thu,sun>thu	2030	2050
 EG	sinai_liberation_day_observed	عيد تحرير سيناء (يوم تعويضي)	Sinai Liberation Day (observed)	public	event:eg_sinai_liberation_day_observed	1	none	2029	2029
 EG	spring_festival	عيد شم النسيم	Spring Festival	public	orthodox+1	1	none	1970	2050
-EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2018	2050
+EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2018	2021
+EG	eid_al_adha_optional	عيد الأضحى المبارك	Eid al-Adha	optional	event:eid_al_adha+3	1	none	2023	2050
 EG	eid_al_fitr_optional	عيد الفطر المبارك	Eid al-Fitr	optional	event:eg_eid_al_fitr_optional	1	none	2019	2050
 EH	commencement_of_the_armed_struggle	اندلاع الكفاح المسلح	Commencement of the Armed Struggle	public	05-20	1	none	2000	2050
 EH	creation_of_the_polisario_front	تأسيس الجبهة الشعبية لتحرير الساقية الحمراء ووادي الذهب	Creation of the Polisario Front	public	05-10	1	none	2000	2050
@@ -2786,7 +2784,6 @@ GU	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02:3
 GU	christmas_eve	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
 GU	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 GU	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050
-GU	good_friday_observance	Good Friday	Good Friday	observance	easter-2	1	none	1970	2050
 GU	halloween	Halloween	Halloween	observance	10-31	1	none	1970	2050
 GU	mother_s_day	Mother's Day	Mother's Day	observance	05:2:sun	1	none	1970	2050
 GU	new_year_s_eve	New Year's Eve	New Year's Eve	observance	12-31	1	none	1970	2050
@@ -2896,173 +2893,40 @@ HK	the_third_day_of_chinese_new_year	農曆年初三	The third day of Chinese Ne
 HK	the_third_day_of_chinese_new_year	農曆年初三	The third day of Chinese New Year	public	event:lunar_new_year+2	1	none	2049	2050
 HK	tomb_sweeping_day	清明節	Tomb-Sweeping Day	public	event:qingming	1	sun>mon	1970	2050
 HK	wedding_of_prince_charles_and_diana	英國王儲查理斯王子與戴安娜婚禮	Wedding of Prince Charles and Diana	public	07-29	1	none	1981	1981
-HK	70th_anniversary_of_the_victory_of_the_chinese_people_s_war_of_resistance_against_japanese_aggression_and_the_world_anti_fascist_war_optional	中國人民抗日戰爭勝利70周年紀念日	70th Anniversary of the Victory of the Chinese People's War of Resistance against Japanese Aggression and the World Anti-Fascist War	optional	09-03	1	none	2015	2015
 HK	additional_public_holiday	額外公眾假期	Additional public holiday	optional	12-31	1	none	1999	1999
 HK	anniversary_of_the_liberation_of_hong_kong	重光紀念日	Anniversary of the liberation of Hong Kong	optional	08:1:mon	1	none	1970	1982
 HK	anniversary_of_the_liberation_of_hong_kong	重光紀念日	Anniversary of the liberation of Hong Kong	optional	08-23>sat	1	none	1983	1996
 HK	anniversary_of_the_liberation_of_hong_kong_2	重光紀念日	Anniversary of the liberation of Hong Kong	optional	08:-1:mon	1	none	1970	1996
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	1970	1982
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	1984	1985
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	1987	2005
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2008	2009
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2011	2012
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2014	2022
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2024	2029
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2031	2033
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2035	2036
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2038	2039
-HK	chinese_new_year_optional	農曆年初一	Chinese New Year	optional	event:lunar_new_year	1	none	2041	2049
-HK	chinese_new_year_s_eve_optional	農曆年初一的前一日	Chinese New Year's Eve	optional	event:hk_chinese_new_year_s_eve_optional	1	none	1983	2010
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	1970	1976
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	1978	1982
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	1984	1987
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	1989	1993
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	1995	2004
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2006	2010
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2012	2015
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2017	2021
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2023	2032
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2034	2038
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2040	2043
-HK	christmas_day_optional	聖誕節	Christmas Day	optional	12-25	1	none	2045	2049
 HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1970	1971
 HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1973	1975
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1977	1985
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1987	1988
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1990	1991
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1993	1995
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1997	1998
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2000	2012
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2014	2015
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2017	2019
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2021	2025
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2027	2039
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2041	2042
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2044	2046
-HK	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2048	2050
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	1970	1986
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	1988	1990
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	1992	2007
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	2009	2027
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	2029	2034
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	2036	2041
-HK	dragon_boat_festival_optional	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	2043	2050
 HK	easter_monday_optional	復活節星期一	Easter Monday	optional	easter+1	1	none	1970	2014
 HK	easter_monday_optional	復活節星期一	Easter Monday	optional	easter+1	1	none	2016	2020
 HK	easter_monday_optional	復活節星期一	Easter Monday	optional	easter+1	1	none	2022	2025
-HK	easter_monday_optional	復活節星期一	Easter Monday	optional	easter+1	1	none	2027	2050
-HK	good_friday_optional	耶穌受難節	Good Friday	optional	easter-2	1	none	1970	2050
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	1997	2000
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2002	2006
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2008	2011
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2013	2017
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2019	2028
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2030	2034
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2036	2039
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2041	2045
-HK	hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日	Hong Kong S.A.R. Establishment Day	optional	07-01	1	none	2047	2050
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	1999	2004
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2006	2010
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2012	2015
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2017	2021
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2023	2032
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2034	2038
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2040	2043
-HK	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	2045	2049
-HK	mid_autumn_festival_optional	中秋節	Mid-Autumn Festival	optional	event:hk_mid_autumn_festival_optional	1	none	1995	2009
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	1997	1999
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2001	2005
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2007	2011
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2013	2016
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2018	2022
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2024	2027
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2029	2032
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2035	2044
-HK	national_day_optional	國慶日	National Day	optional	10-01	1	none	2046	2049
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1970	1977
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1979	1983
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1985	1988
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1990	1994
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1996	2005
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2007	2011
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2013	2016
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2018	2022
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2024	2033
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2035	2039
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2041	2044
-HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	2046	2050
+HK	good_friday_optional	耶穌受難節	Good Friday	optional	easter-2	1	none	1970	2027
+HK	new_year_s_day_optional	一月一日	New Year's Day	optional	01-01	1	none	1970	1976
 HK	queen_s_birthday	英女皇壽辰	Queen's Birthday	optional	event:hk_queen_s_birthday	1	none	1970	1997
-HK	second_day_of_queen_elizabeth_ii_and_her_husband_s_visit_to_hong_kong_optional	英女王伊利沙伯二世伉儷訪港的第二天	Second day of Queen Elizabeth II and her husband's visit to Hong Kong	optional	10-22	1	none	1986	1986
 HK	sino_japanese_war_victory_day	抗日戰爭勝利紀念日	Sino-Japanese War Victory Day	optional	08:3:mon	1	none	1997	1998
 HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	1999	2001
 HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2003	2004
 HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2006	2018
 HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2020	2021
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2023	2025
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2027	2028
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2030	2031
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2033	2045
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2047	2048
-HK	the_buddha_s_birthday_optional	佛誕	The Buddha's Birthday	optional	05-28	1	none	2050	2050
 HK	the_day_following_double_ninth_festival	重陽節翌日	The day following Double Ninth Festival	optional	event:hk_the_day_following_double_ninth_festival	1	none	1972	2047
 HK	the_day_following_dragon_boat_festival	端午節翌日	The day following Dragon Boat Festival	optional	event:hk_the_day_following_dragon_boat_festival	1	none	1987	2042
 HK	the_day_following_easter_monday	復活節星期一翌日	The day following Easter Monday	optional	event:hk_the_day_following_easter_monday	1	none	2015	2026
-HK	the_day_following_good_friday_optional	耶穌受難節翌日	The day following Good Friday	optional	easter-1	1	none	1970	2050
-HK	the_day_following_hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日翌日	The day following Hong Kong S.A.R. Establishment Day	optional	event:hk_the_day_following_hong_kong_s_a_r_establishment_day_optional	1	none	1997	2046
+HK	the_day_following_good_friday_optional	耶穌受難節翌日	The day following Good Friday	optional	easter-1	1	none	1970	2029
+HK	the_day_following_hong_kong_s_a_r_establishment_day_optional	香港特別行政區成立紀念日翌日	The day following Hong Kong S.A.R. Establishment Day	optional	event:hk_the_day_following_hong_kong_s_a_r_establishment_day_optional	1	none	2001	2046
 HK	the_day_following_labor_day	勞動節翌日	The day following Labor Day	optional	event:hk_the_day_following_labor_day	1	none	2005	2050
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1970	1974
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1976	1980
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1982	1994
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1996	2001
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2003	2008
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2010	2021
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2023	2028
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2030	2035
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2037	2045
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2047	2048
-HK	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	10-01	1	none	2050	2050
 HK	the_day_following_national_day	國慶日翌日	The day following National Day	optional	event:hk_the_day_following_national_day	1	none	1997	2050
 HK	the_day_following_new_year_s_day	一月一日翌日	The day following New Year's Day	optional	event:hk_the_day_following_new_year_s_day	1	none	1978	2045
 HK	the_day_following_the_buddha_s_birthday	佛誕翌日	The day following the Buddha's Birthday	optional	event:hk_the_day_following_the_buddha_s_birthday	1	none	2002	2049
 HK	the_day_following_tomb_sweeping_day	清明節翌日	The day following Tomb-Sweeping Day	optional	event:hk_the_day_following_tomb_sweeping_day	1	none	1970	2049
-HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	event:winter_solstice+4	1	none	1970	2050
-HK	the_fourth_day_of_chinese_new_year_optional	農曆年初四	The fourth day of Chinese New Year	optional	event:hk_the_fourth_day_of_chinese_new_year_optional	1	none	2013	2050
-HK	the_second_day_following_mid_autumn_festival_optional	中秋節後第二日	The Second Day following Mid-Autumn Festival	optional	event:hk_the_second_day_following_mid_autumn_festival_optional	1	none	1975	2049
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	1970	1989
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	1991	1992
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	1994	1999
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2001	2002
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2004	2016
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2018	2019
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2021	2023
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2025	2026
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2028	2043
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2045	2046
-HK	the_second_day_of_chinese_new_year_optional	農曆年初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	2048	2050
+HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	event:winter_solstice+4	1	none	1970	2023
+HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	12-27	1	none	2027	2027
+HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	12-27	1	none	2032	2032
+HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	12-27	1	none	2038	2038
+HK	the_first_weekday_after_christmas_day_optional	聖誕節後第一個周日	The first weekday after Christmas Day	optional	12-27	1	none	2049	2049
 HK	the_second_weekday_after_christmas_day	聖誕節後第二個周日	The second weekday after Christmas Day	optional	event:hk_the_second_weekday_after_christmas_day	1	none	1977	2050
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1970	1990
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1992	1996
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1998	2013
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2015	2017
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2019	2020
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2022	2040
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2042	2044
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2046	2047
-HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	2049	2050
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	04-05	1	none	1971	1975
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	1977	1980
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	1982	1986
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	1989	1997
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2000	2003
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2005	2009
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2011	2014
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2016	2020
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2022	2025
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2027	2031
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2033	2042
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2044	2048
-HK	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	04-04	1	none	2050	2050
-HK	wedding_of_prince_charles_and_diana_optional	英國王儲查理斯王子與戴安娜婚禮	Wedding of Prince Charles and Diana	optional	07-29	1	none	1981	1981
+HK	the_third_day_of_chinese_new_year_optional	農曆年初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1970	1976
 HN	army_day	Día de las Fuerzas Armadas	Army Day	public	10-21	1	none	1970	2014
 HN	christmas_day	Navidad	Christmas Day	public	12-25	1	none	1970	2050
 HN	columbus_day	Día de la Raza	Columbus Day	public	10-12	1	none	1970	2014
@@ -4203,7 +4067,6 @@ LB	catholic_easter_monday_bank	اثنين الفصح عند الطوائف ال�
 LB	orthodox_easter_monday_bank	اثنين الفصح عند الطوائف الأرثوذكسية	Orthodox Easter Monday	bank	orthodox+1	1	none	2020	2050
 LB	rafik_hariri_memorial_day	يوم ذكرى رفيق الحريري	Rafik Hariri Memorial Day	bank	02-14	1	none	2020	2050
 LB	anniversary_of_the_tragedy_of_beirut_port_explosion	ذكرى مأساة انفجار مرفأ بيروت	Anniversary of the tragedy of Beirut port explosion	optional	08-04	1	none	2021	2050
-LB	rafik_hariri_memorial_day_optional	يوم ذكرى رفيق الحريري	Rafik Hariri Memorial Day	optional	02-14	1	none	2020	2050
 LC	boxing_day	Boxing Day	Boxing Day	public	12-26	1	sun>mon	1979	2050
 LC	christmas_day	Christmas Day	Christmas Day	public	12-25	1	sun>mon	1979	2050
 LC	corpus_christi	Corpus Christi	Corpus Christi	public	easter+60	1	none	1979	2050
@@ -4637,7 +4500,6 @@ MO	the_day_following_mid_autumn_festival	中秋節翌日	The Day following Mid-A
 MO	the_second_day_of_chinese_new_year	農曆正月初二	The second day of Chinese New Year	public	event:lunar_new_year+1	1	none	1985	2050
 MO	the_third_day_of_chinese_new_year	農曆正月初三	The third day of Chinese New Year	public	event:lunar_new_year+2	1	none	1985	2050
 MO	tomb_sweeping_day	清明節	Tomb-Sweeping Day	public	event:qingming	1	none	1989	2050
-MO	70th_anniversary_of_the_victory_of_the_chinese_people_s_war_of_resistance_against_japanese_aggression_and_the_world_anti_fascist_war_optional	中國人民抗日戰爭暨世界反法西斯戰爭勝利七十周年紀念日	70th Anniversary of the Victory of the Chinese People's War of Resistance against Japanese Aggression and the World Anti-Fascist War	optional	09-03	1	none	2015	2015
 MO	additional_government_holiday	額外政府假期	Additional Government Holiday	optional	12-22	1	none	2008	2008
 MO	additional_half_day_public_holiday	額外公眾半日假	Additional Half-Day Public Holiday	optional	12-31	1	none	1998	1999
 MO	additional_half_day_public_holiday	額外公眾半日假	Additional Half-Day Public Holiday	optional	02-04	1	none	2000	2000
@@ -4646,8 +4508,8 @@ MO	all_saints_day	諸聖節	All Saints' Day	optional	11-01	1	none	1982	1986
 MO	all_souls_day	追思節	All Souls' Day	optional	11-02	1	none	1982	2012
 MO	all_souls_day	追思節	All Souls' Day	optional	11-02	1	sat>mon,sun>mon	2013	2050
 MO	assumption_day	聖母升天	Assumption Day	optional	08-15	1	none	1982	1986
-MO	chinese_new_year_s_day_optional	農曆正月初一	Chinese New Year's Day	optional	event:lunar_new_year	1	none	1982	2019
-MO	chinese_new_year_s_day_optional	農曆正月初一	Chinese New Year's Day	optional	event:lunar_new_year	1	sat>mon,sun>mon	2020	2050
+MO	chinese_new_year_s_day_optional	農曆正月初一	Chinese New Year's Day	optional	event:lunar_new_year	1	none	1982	1984
+MO	chinese_new_year_s_day_optional_observed	Chinese New Year's Day (observed)	Chinese New Year's Day (observed)	optional	event:mo_chinese_new_year_s_day_optional_observed	1	none	2020	2050
 MO	chinese_new_year_s_eve_afternoon	農曆除夕（下午）	Chinese New Year's Eve (Afternoon)	optional	02-08	1	none	2005	2005
 MO	chinese_new_year_s_eve_afternoon	農曆除夕（下午）	Chinese New Year's Eve (Afternoon)	optional	02-06	1	none	2008	2008
 MO	chinese_new_year_s_eve_afternoon	農曆除夕（下午）	Chinese New Year's Eve (Afternoon)	optional	02-02	1	none	2011	2011
@@ -4662,12 +4524,11 @@ MO	christmas_day	聖誕節	Christmas Day	optional	12-25	1	none	1982	2010
 MO	christmas_day	聖誕節	Christmas Day	optional	12-25	1	sat>mon,sun>mon	2011	2050
 MO	christmas_eve	聖誕節前日	Christmas Eve	optional	12-24	1	none	1982	2015
 MO	christmas_eve	聖誕節前日	Christmas Eve	optional	12-24	1	sat>mon,sun>mon	2016	2050
+MO	compensatory_rest_day_for_macao_s_a_r_establishment_day	Compensatory rest day for Macao S.A.R. Establishment Day	Compensatory rest day for Macao S.A.R. Establishment Day	optional	event:mo_compensatory_rest_day_for_macao_s_a_r_establishment_day	1	none	2020	2048
 MO	corpus_christi	基督聖體聖血節	Corpus Christi	optional	easter+60	1	none	1982	1987
-MO	day_of_portugal_camoes_and_the_portuguese_communities_optional	葡國日、賈梅士日暨葡僑日	Day of Portugal, Camões, and the Portuguese Communities	optional	06-10	1	none	1982	1999
-MO	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1982	2012
-MO	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	sat>mon,sun>mon	2013	2032
-MO	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	2033	2033
-MO	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	sat>mon,sun>mon	2034	2050
+MO	day_of_portugal_camoes_and_the_portuguese_communities_optional	葡國日、賈梅士日暨葡僑日	Day of Portugal, Camões, and the Portuguese Communities	optional	06-10	1	none	1982	1984
+MO	double_ninth_festival_optional	重陽節	Double Ninth Festival	optional	event:double_ninth	1	none	1982	1984
+MO	double_ninth_festival_optional_observed	Double Ninth Festival (observed)	Double Ninth Festival (observed)	optional	event:mo_double_ninth_festival_optional_observed	1	none	2013	2047
 MO	dragon_boat_festival	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	none	1982	2011
 MO	dragon_boat_festival	端午節	Dragon Boat Festival	optional	event:dragon_boat	1	sat>mon,sun>mon	2012	2050
 MO	freedom_day	自由日	Freedom Day	optional	04-25	1	none	1982	1999
@@ -4675,18 +4536,12 @@ MO	good_friday	耶穌受難日	Good Friday	optional	easter-2	1	none	1982	2050
 MO	holy_saturday	聖周星期六	Holy Saturday	optional	easter-1	1	none	1982	1999
 MO	immaculate_conception	聖母無原罪瞻禮	Immaculate Conception	optional	12-08	1	none	1982	2011
 MO	immaculate_conception	聖母無原罪瞻禮	Immaculate Conception	optional	12-08	1	sat>mon,sun>mon	2012	2050
-MO	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	1982	2010
-MO	labor_day_optional	勞動節	Labor Day	optional	05-01	1	sat>mon,sun>mon	2011	2050
-MO	macao_s_a_r_establishment_day_optional	澳門特別行政區成立紀念日	Macao S.A.R. Establishment Day	optional	12-20	1	none	2000	2013
-MO	macao_s_a_r_establishment_day_optional	澳門特別行政區成立紀念日	Macao S.A.R. Establishment Day	optional	12-20	1	sat>mon,sun>mon	2014	2050
-MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	none	1982	2015
-MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	sat>mon,sun>mon	2016	2032
-MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	none	2033	2033
-MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	sat>mon,sun>mon	2034	2049
-MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	none	2050	2050
-MO	national_day_of_the_people_s_republic_of_china_optional_observed	中華人民共和國國慶日	National Day of the People's Republic of China (observed)	optional	event:mo_national_day_of_the_people_s_republic_of_china_optional_observed	1	none	2033	2033
-MO	new_year_s_day_optional	元旦	New Year's Day	optional	01-01	1	none	1982	2011
-MO	new_year_s_day_optional	元旦	New Year's Day	optional	01-01	1	sat>mon,sun>mon	2012	2050
+MO	labor_day_optional	勞動節	Labor Day	optional	05-01	1	none	1982	1984
+MO	labor_day_optional_observed	Labor Day (observed)	Labor Day (observed)	optional	event:mo_labor_day_optional_observed	1	none	2011	2050
+MO	national_day_of_the_people_s_republic_of_china_optional	中華人民共和國國慶日	National Day of the People's Republic of China	optional	10-01	1	none	1982	1984
+MO	national_day_of_the_people_s_republic_of_china_optional_observed	National Day of the People's Republic of China (observed)	National Day of the People's Republic of China (observed)	optional	event:mo_national_day_of_the_people_s_republic_of_china_optional_observed	1	none	2016	2050
+MO	new_year_s_day_optional	元旦	New Year's Day	optional	01-01	1	none	1982	1984
+MO	new_year_s_day_optional_observed	New Year's Day (observed)	New Year's Day (observed)	optional	event:mo_new_year_s_day_optional_observed	1	none	2012	2050
 MO	new_year_s_eve	除夕	New Year's Eve	optional	12-31	1	none	2012	2012
 MO	new_year_s_eve_afternoon	除夕（下午）	New Year's Eve (Afternoon)	optional	12-31	1	none	2007	2011
 MO	new_year_s_eve_afternoon	除夕（下午）	New Year's Eve (Afternoon)	optional	12-31	1	none	2013	2050
@@ -4698,35 +4553,25 @@ MO	restoration_of_independence_day	恢復獨立紀念日	Restoration of Independ
 MO	the_buddha_s_birthday	佛誕節	The Buddha's Birthday	optional	event:buddha_birthday	1	none	2000	2011
 MO	the_buddha_s_birthday	佛誕節	The Buddha's Birthday	optional	event:buddha_birthday	1	sat>mon,sun>mon	2012	2050
 MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	none	2000	2011
-MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	sat>mon,sun>mon	2012	2036
-MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	none	2037	2037
-MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	sat>mon,sun>mon	2038	2047
-MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	none	2048	2048
-MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	sat>mon,sun>mon	2049	2050
-MO	the_day_before_easter_observed	復活節前日	The Day before Easter (observed)	optional	event:mo_the_day_before_easter_observed	1	none	2037	2048
-MO	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1982	2018
-MO	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	sat>mon,sun>mon	2019	2049
-MO	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	2050	2050
-MO	the_day_following_mid_autumn_festival_optional_observed	中秋節翌日	The Day following Mid-Autumn Festival (observed)	optional	event:mo_the_day_following_mid_autumn_festival_optional_observed	1	none	2050	2050
+MO	the_day_before_easter	復活節前日	The Day before Easter	optional	easter-1	1	sat>mon,sun>mon	2012	2050
+MO	the_day_following_mid_autumn_festival_optional	中秋節翌日	The Day following Mid-Autumn Festival	optional	event:mid_autumn+1	1	none	1982	1999
+MO	the_day_following_mid_autumn_festival_optional_observed	The Day following Mid-Autumn Festival (observed)	The Day following Mid-Autumn Festival (observed)	optional	event:mo_the_day_following_mid_autumn_festival_optional_observed	1	none	2019	2050
 MO	the_day_following_national_day_of_the_people_s_republic_of_china	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China	optional	10-02	1	none	2000	2010
-MO	the_day_following_national_day_of_the_people_s_republic_of_china	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China	optional	10-02	1	sat>mon,sun>mon	2011	2050
-MO	the_day_following_national_day_of_the_people_s_republic_of_china_observed	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China (observed)	optional	event:mo_the_day_following_national_day_of_the_people_s_republic_of_china_observed	1	none	2033	2050
+MO	the_day_following_national_day_of_the_people_s_republic_of_china	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China	optional	10-02	1	sat>mon,sun>mon	2011	2021
+MO	the_day_following_national_day_of_the_people_s_republic_of_china	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China	optional	10-02	1	sat>mon,sun>wed	2022	2043
+MO	the_day_following_national_day_of_the_people_s_republic_of_china	中華人民共和國國慶日翌日	The day following National Day of the People's Republic of China	optional	10-02	1	sat>mon,sun>mon	2044	2050
 MO	the_day_following_the_handover_of_macau_to_china_and_the_establishment_of_the_macau_special_administrative_region_of_the_people_s_republic_of_china	澳門回歸祖國暨中華人民共和國澳門特別行政區成立日翌日	The day following the Handover of Macau to China and the Establishment of the Macau Special Administrative Region of the People's Republic of China	optional	12-21	1	none	1999	1999
 MO	the_fifth_day_of_chinese_new_year	農曆正月初五	The fifth day of Chinese New Year	optional	event:lunar_new_year+4	1	none	2014	2015
 MO	the_fifth_day_of_chinese_new_year	農曆正月初五	The fifth day of Chinese New Year	optional	event:lunar_new_year+4	1	none	2017	2018
+MO	the_first_working_day_after_macao_s_a_r_establishment_day	The first working day after Macao S.A.R. Establishment Day	The first working day after Macao S.A.R. Establishment Day	optional	event:mo_the_first_working_day_after_macao_s_a_r_establishment_day	1	none	2014	2015
 MO	the_fourth_day_of_chinese_new_year	農曆正月初四	The fourth day of Chinese New Year	optional	event:mo_the_fourth_day_of_chinese_new_year	1	none	2006	2018
 MO	the_handover_of_macau_to_china_and_the_establishment_of_the_macau_special_administrative_region_of_the_people_s_republic_of_china	澳門回歸祖國暨中華人民共和國澳門特別行政區成立日	The Handover of Macau to China and the Establishment of the Macau Special Administrative Region of the People's Republic of China	optional	12-20	1	none	1999	1999
-MO	the_second_day_of_chinese_new_year_optional	農曆正月初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	1982	2019
-MO	the_second_day_of_chinese_new_year_optional	農曆正月初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	sat>mon,sun>mon	2020	2050
-MO	the_third_day_of_chinese_new_year_optional	農曆正月初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1982	2020
-MO	the_third_day_of_chinese_new_year_optional	農曆正月初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	sat>mon,sun>mon	2021	2050
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	1982	2013
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	sat>mon,sun>mon	2014	2036
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2037	2037
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	sat>mon,sun>mon	2038	2047
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	2048	2048
-MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	sat>mon,sun>mon	2049	2050
-MO	tomb_sweeping_day_optional_observed	清明節	Tomb-Sweeping Day (observed)	optional	event:mo_tomb_sweeping_day_optional_observed	1	none	2037	2048
+MO	the_second_day_of_chinese_new_year_optional	農曆正月初二	The second day of Chinese New Year	optional	event:lunar_new_year+1	1	none	1982	1984
+MO	the_second_day_of_chinese_new_year_optional_observed	The second day of Chinese New Year (observed)	The second day of Chinese New Year (observed)	optional	event:mo_the_second_day_of_chinese_new_year_optional_observed	1	none	2020	2048
+MO	the_third_day_of_chinese_new_year_optional	農曆正月初三	The third day of Chinese New Year	optional	event:lunar_new_year+2	1	none	1982	1984
+MO	the_third_day_of_chinese_new_year_optional_observed	The third day of Chinese New Year (observed)	The third day of Chinese New Year (observed)	optional	event:mo_the_third_day_of_chinese_new_year_optional_observed	1	none	2021	2048
+MO	tomb_sweeping_day_optional	清明節	Tomb-Sweeping Day	optional	event:qingming	1	none	1982	1988
+MO	tomb_sweeping_day_optional_observed	Tomb-Sweeping Day (observed)	Tomb-Sweeping Day (observed)	optional	event:mo_tomb_sweeping_day_optional_observed	1	none	2014	2049
 MO	winter_solstice	冬至	Winter Solstice	optional	event:winter_solstice	1	none	1982	2012
 MO	winter_solstice	冬至	Winter Solstice	optional	event:winter_solstice	1	sat>mon,sun>mon	2013	2050
 MP	christmas_day	Christmas Day	Christmas Day	public	12-25	1	sat<fri,sun>mon	1970	2050
@@ -4757,7 +4602,6 @@ MP	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02:3
 MP	christmas_eve	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
 MP	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 MP	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050
-MP	good_friday_observance	Good Friday	Good Friday	observance	easter-2	1	none	1970	2050
 MP	halloween	Halloween	Halloween	observance	10-31	1	none	1970	2050
 MP	mother_s_day	Mother's Day	Mother's Day	observance	05:2:sun	1	none	1970	2050
 MP	new_year_s_eve	New Year's Eve	New Year's Eve	observance	12-31	1	none	1970	2050
@@ -5074,7 +4918,20 @@ NL	pentecost_monday	Tweede pinksterdag	Pentecost Monday	public	easter+50	1	none	
 NL	queen_s_day	Koninginnedag	Queen's Day	public	04-30	1	sun>mon	1970	1988
 NL	queen_s_day	Koninginnedag	Queen's Day	public	04-30	1	sun<sat,overlap	1989	2013
 NL	second_day_of_christmas	Tweede kerstdag	Second Day of Christmas	public	12-26	1	none	1970	2050
-NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1982	2050
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1982	1984
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1986	1989
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1991	1994
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	1996	1999
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2001	2004
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2006	2009
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2011	2014
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2016	2019
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2021	2024
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2026	2029
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2031	2034
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2036	2039
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2041	2044
+NL	liberation_day_optional	Bevrijdingsdag	Liberation Day	optional	05-05	1	none	2046	2049
 NO	ascension_day	Kristi himmelfartsdag	Ascension Day	public	easter+39	1	none	1970	2050
 NO	christmas_day	Første juledag	Christmas Day	public	12-25	1	none	1970	2050
 NO	constitution_day	Grunnlovsdag	Constitution Day	public	05-17	1	none	1970	2050
@@ -5467,10 +5324,14 @@ PR	national_day_of_mourning_for_former_president_george_h_w_bush	National Day of
 PR	national_day_of_mourning_for_former_president_gerald_r_ford	National Day of Mourning for former President Gerald R. Ford	National Day of Mourning for former President Gerald R. Ford	optional	01-02	1	none	2007	2007
 PR	national_day_of_mourning_for_former_president_jimmy_carter	National Day of Mourning for former President Jimmy Carter	National Day of Mourning for former President Jimmy Carter	optional	01-09	1	none	2025	2025
 PR	national_day_of_mourning_for_former_president_ronald_reagan	National Day of Mourning for former President Ronald Reagan	National Day of Mourning for former President Ronald Reagan	optional	06-11	1	none	2004	2004
-PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2000
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2002	2006
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2008	2011
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2013	2017
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2021	2023
+PR	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2026	2050
 PR	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 PR	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050
-PR	good_friday_observance	Good Friday	Good Friday	observance	easter-2	1	none	1970	2050
 PR	halloween	Halloween	Halloween	observance	10-31	1	none	1970	2050
 PR	mother_s_day	Mother's Day	Mother's Day	observance	05:2:sun	1	none	1970	2050
 PR	new_year_s_eve	New Year's Eve	New Year's Eve	observance	12-31	1	none	1970	2050
@@ -5928,13 +5789,9 @@ SE	midsummer_eve	Midsommarafton	Midsummer Eve	bank	06-25<fri	1	none	1970	2050
 SE	new_year_s_eve	Nyårsafton	New Year's Eve	bank	12-31	1	none	1970	2050
 SE	twelfth_night_from_2pm	Trettondagsafton (från kl. 14.00)	Twelfth Night (from 2pm)	bank	01-05	1	none	1970	2050
 SE	walpurgis_night_from_2pm	Valborgsmässoafton (från kl. 14.00)	Walpurgis Night (from 2pm)	bank	04-30	1	none	1970	2050
-SE	all_saints_eve_from_2pm_optional	Allahelgonsafton (från kl. 14.00)	All Saints' Eve (from 2pm)	optional	10-30>fri	1	none	1970	2050
 SE	holy_saturday	Påskafton	Holy Saturday	optional	easter-1	1	none	1970	2050
-SE	maundy_thursday_from_2pm_optional	Skärtorsdagen (från kl. 14.00)	Maundy Thursday (from 2pm)	optional	easter-3	1	none	1970	2050
 SE	pentecost_eve	Pingstafton	Pentecost Eve	optional	easter+48	1	none	1970	2050
 SE	squeeze_day	Klämdag	Squeeze day	optional	easter+40	1	none	1970	2050
-SE	twelfth_night_from_2pm_optional	Trettondagsafton (från kl. 14.00)	Twelfth Night (from 2pm)	optional	01-05	1	none	1970	2050
-SE	walpurgis_night_from_2pm_optional	Valborgsmässoafton (från kl. 14.00)	Walpurgis Night (from 2pm)	optional	04-30	1	none	1970	2050
 SG	chinese_new_year	Chinese New Year	Chinese New Year	public	event:lunar_new_year	2	none	1970	1999
 SG	chinese_new_year	Chinese New Year	Chinese New Year	public	event:lunar_new_year	2	sun>mon	2000	2050
 SG	christmas_day	Christmas Day	Christmas Day	public	12-25	1	none	1970	2004
@@ -7046,27 +6903,20 @@ US	veterans_day	Veterans Day	Veterans Day	public	11-11	1	sat<fri,sun>mon	1978	20
 US	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02-22	1	none	1970	1970
 US	washington_s_birthday	Washington's Birthday	Washington's Birthday	public	02:3:mon	1	none	1971	2050
 US	birthday_of_martin_luther_king_jr	Birthday of Martin Luther King, Jr.	Birthday of Martin Luther King, Jr.	optional	01:3:mon	1	none	1986	2050
-US	christmas_day_optional	Christmas Day	Christmas Day	optional	12-25	1	sat<fri,sun>mon	1970	2050
 US	christmas_eve	Christmas Eve	Christmas Eve	optional	event:us_christmas_eve	1	none	2001	2025
 US	christmas_eve_half_day_closing	Christmas Eve (half-day closing)	Christmas Eve (half-day closing)	optional	event:us_christmas_eve_half_day_closing	1	none	2002	2015
-US	columbus_day_optional	Columbus Day	Columbus Day	optional	10:2:mon	1	none	1971	2050
 US	day_after_christmas	Day After Christmas	Day After Christmas	optional	event:us_day_after_christmas	1	none	2003	2025
-US	independence_day_optional	Independence Day	Independence Day	optional	07-04	1	sat<fri,sun>mon	1970	2050
-US	juneteenth_national_independence_day_optional	Juneteenth National Independence Day	Juneteenth National Independence Day	optional	06-19	1	sat<fri,sun>mon	2021	2050
-US	labor_day_optional	Labor Day	Labor Day	optional	09:1:mon	1	none	1970	2050
-US	memorial_day_optional	Memorial Day	Memorial Day	optional	05:-1:mon	1	none	1971	2050
 US	national_day_of_mourning_for_former_president_george_h_w_bush	National Day of Mourning for former President George H. W. Bush	National Day of Mourning for former President George H. W. Bush	optional	12-05	1	none	2018	2018
 US	national_day_of_mourning_for_former_president_gerald_r_ford	National Day of Mourning for former President Gerald R. Ford	National Day of Mourning for former President Gerald R. Ford	optional	01-02	1	none	2007	2007
 US	national_day_of_mourning_for_former_president_jimmy_carter	National Day of Mourning for former President Jimmy Carter	National Day of Mourning for former President Jimmy Carter	optional	01-09	1	none	2025	2025
 US	national_day_of_mourning_for_former_president_ronald_reagan	National Day of Mourning for former President Ronald Reagan	National Day of Mourning for former President Ronald Reagan	optional	06-11	1	none	2004	2004
-US	new_year_s_day_optional	New Year's Day	New Year's Day	optional	01-01	1	sat<fri,sun>mon	1970	2050
-US	thanksgiving_day_optional	Thanksgiving Day	Thanksgiving Day	optional	11:4:thu	1	none	1970	2050
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	11-11	1	none	1970	1970
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	10:4:mon	1	none	1971	1977
-US	veterans_day_optional	Veterans Day	Veterans Day	optional	11-11	1	sat<fri,sun>mon	1978	2050
-US	washington_s_birthday_optional	Washington's Birthday	Washington's Birthday	optional	02-22	1	sun>mon	1970	1970
-US	washington_s_birthday_optional	Washington's Birthday	Washington's Birthday	optional	02:3:mon	1	none	1971	2050
-US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
+US	washington_s_birthday_observed	Washington's Birthday (observed)	Washington's Birthday (observed)	optional	event:us_washington_s_birthday_observed	1	none	1970	1970
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2000
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2002	2006
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2008	2011
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2013	2017
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2021	2023
+US	christmas_eve_observance	Christmas Eve	Christmas Eve	observance	12-24	1	none	2026	2050
 US	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 US	election_day	Election Day	Election Day	observance	event:us_election_day	1	none	1972	2048
 US	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050
@@ -7356,7 +7206,6 @@ VI	veterans_day	Veterans Day	Veterans Day	public	11-11	1	sat<fri,sun>mon	1978	20
 VI	christmas_eve	Christmas Eve	Christmas Eve	observance	12-24	1	none	1970	2050
 VI	easter_sunday	Easter Sunday	Easter Sunday	observance	easter	1	none	1970	2050
 VI	father_s_day	Father's Day	Father's Day	observance	06:3:sun	1	none	1972	2050
-VI	good_friday_observance	Good Friday	Good Friday	observance	easter-2	1	none	1970	2050
 VI	halloween	Halloween	Halloween	observance	10-31	1	none	1970	2050
 VI	mother_s_day	Mother's Day	Mother's Day	observance	05:2:sun	1	none	1970	2050
 VI	new_year_s_eve	New Year's Eve	New Year's Eve	observance	12-31	1	none	1970	2050
