@@ -213,6 +213,20 @@ def tr_label(h, attr):
     return h.tr(getattr(h, attr)) if getattr(h, attr, None) else None
 
 
+def substituted(h):
+    """(regex, name) for python-holidays' substituted days, "Day off (substituted
+    from %s)": the name is the label's text before its parenthesis ("Day off",
+    "休息日"), so a country's transfer days are one series, not one per date."""
+    label = tr_label(h, "substituted_label")
+    if not label or "%s" not in label:
+        return None
+    return label_regex(label), re.split(r"\s*[(（]", label, maxsplit=1)[0]
+
+
+def unsubstitute(name, sub):
+    return sub[1] if sub and sub[0].match(name) else name
+
+
 class Country:
     """python-holidays' output for one country, grouped into series."""
 
@@ -253,11 +267,13 @@ class Country:
         obs_labels = [label_regex(x) for x in (tr_label(obs, "observed_estimated_label"),
                                                 tr_label(obs, "observed_label")) if x]
         self.observed_label.setdefault(kind, tr_label(native, "observed_label") or "%s")
+        sub_en, sub_native = substituted(en), substituted(native)
         for day in sorted(en):
             names_en, names_native = en.get_list(day), native.get_list(day)
             if len(names_en) != len(names_native):
                 names_native = names_en
             for n_en, n_native in zip(names_en, names_native):
+                n_en, n_native = unsubstitute(n_en, sub_en), unsubstitute(n_native, sub_native)
                 base = strip(n_en, est_en)
                 if self.claimed.setdefault((day, base), kind) != kind:
                     continue                    # a stronger kind lists it (US government repeats federal days)
@@ -887,6 +903,27 @@ def read_tsv(path):
     return [dict(zip(header, l.split("\t"))) for l in lines[1:]]
 
 
+def continued(rows):
+    """The rows with name and name_en left empty where the row above has the same
+    country, key and names (a run that changes only its years, rule or policy)."""
+    out, prev = [], None
+    for r in rows:
+        key = (r["country"], r["key"], r["name"], r["name_en"])
+        out.append({**r, "name": "", "name_en": ""} if key == prev else r)
+        prev = key
+    return out
+
+
+def filled(rows):
+    """continued() undone, as the library's loader does it."""
+    out = []
+    for r in rows:
+        if not r["name"] and not r["name_en"] and out and (out[-1]["country"], out[-1]["key"]) == (r["country"], r["key"]):
+            r = {**r, "name": out[-1]["name"], "name_en": out[-1]["name_en"]}
+        out.append(r)
+    return out
+
+
 def write(path, comment, columns, rows):
     out = [f"# {line}" for line in comment] + ["\t".join(columns)]
     out += ["\t".join(str(r[c]) for c in columns) for r in rows]
@@ -946,6 +983,7 @@ def main():
         return
 
     comment = [f"source: python-holidays {HOLIDAYS_VERSION} (MIT); rules inferred by scripts/prepare_holidays.py"]
+    holiday_comment = comment + ["an empty name and name_en repeat those of the row above, which has the same country and key"]
     for tier in (["lite", "full"] if a.tier == "both" else [a.tier]):
         in_tier = {r["cca2"] for r in read_tsv(Path(a.resources) / tier / "countries.tsv")}
         tier_rows = [{**r, "from_year": r["from"], "to_year": r["to"]} for r in rows if r["country"] in in_tier]
@@ -961,9 +999,11 @@ def main():
                     for d in sorted(changes.values())]
         ev_rows += [{"event": k, "country": cc, "date": d.isoformat()}
                     for (cc, k), dates in sorted(events.own.items()) if cc in in_tier for d in dates]
-        size = write(Path(a.resources) / tier / "holidays.tsv", comment,
-                     ["country", "key", "name", "name_en", "kind", "rule", "days", "observed",
-                      "from_year", "to_year"], tier_rows)
+        columns = ["country", "key", "name", "name_en", "kind", "rule", "days", "observed", "from_year", "to_year"]
+        size = write(Path(a.resources) / tier / "holidays.tsv", holiday_comment, columns, continued(tier_rows))
+        read_back = filled(read_tsv(Path(a.resources) / tier / "holidays.tsv"))
+        if read_back != [{c: str(r[c]) for c in columns} for r in tier_rows]:
+            raise SystemExit(f"{tier}/holidays.tsv does not read back as the rows written")
         ev_size = write(Path(a.resources) / tier / "holiday_events.tsv", comment,
                         ["event", "country", "date"], ev_rows)
         write(Path(a.resources) / tier / "holiday_years.tsv", comment, ["country", "from_year", "to_year"],
