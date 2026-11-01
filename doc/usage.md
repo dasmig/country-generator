@@ -82,6 +82,8 @@ On first access the singleton loads the `lite` tier (or `full` if `lite` is miss
 | 3 | `country-generator/resources/` |
 | 4 | `../country-generator/resources/` |
 
+The locale tables (`locales.tsv`, `zones.tsv` and the rest) are compiled in with `DASMIG_COUNTRY_EMBED_LOCALE`. Otherwise they are read from the first of these directories that has both the tier's `countries.tsv` and its `locales.tsv`. That way, a program that runs from another library's repository never reads that library's own `locales.tsv`.
+
 ### Explicit tier loading
 
 ```cpp

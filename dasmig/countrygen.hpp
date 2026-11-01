@@ -2426,7 +2426,9 @@ class cntg
     /// library is built with `DASMIG_COUNTRY_EMBED` (the countries) or
     /// `DASMIG_COUNTRY_EMBED_LOCALE` (the locale tables), otherwise searches
     /// `resources/`, `../resources`, `country-generator/resources` and
-    /// `../country-generator/resources`.
+    /// `../country-generator/resources`. The locale tables are read from the
+    /// first of those that has both the tier's `countries.tsv` and its
+    /// `locales.tsv`, so another library's `locales.tsv` is never read.
     ///
     /// @param tier The dataset size to load.
     /// @return `true` if the tier's `countries.tsv` was found and loaded.
@@ -2439,7 +2441,7 @@ class cntg
         auto doc = core::load_resource(path, embedded_files_(),
                                        core::find_resources(library_name_, path));
         if (!doc) return false;
-        const auto root = core::find_resources(library_name_, dir + "/" + std::string{file_name_(country_table::locales)});
+        const auto root = find_locale_resources_(dir);
         locale_documents docs;
         for (const auto t : locale_tables_)
         {
@@ -3362,6 +3364,25 @@ class cntg
             rebuild_(false);
             throw;
         }
+    }
+
+    // The first resources/ directory that holds this tier's countries.tsv and
+    // locales.tsv. Both are asked for because other libraries ship a file of
+    // either name (user-generator has its own locales.tsv, phone-generator its
+    // own countries.tsv), and a program that composes them runs from their
+    // repository, where `resources/` is theirs.
+    static std::optional<std::filesystem::path> find_locale_resources_(const std::string& dir)
+    {
+        for (const auto& root : core::resource_candidates(library_name_))
+        {
+            std::error_code ec;
+            if (std::filesystem::is_regular_file(root / dir / data_file_, ec) &&
+                std::filesystem::is_regular_file(root / dir / file_name_(country_table::locales), ec))
+            {
+                return root;
+            }
+        }
+        return std::nullopt;
     }
 
     static locale_documents read_locale_directory_(const std::filesystem::path& dir)
