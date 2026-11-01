@@ -17,7 +17,8 @@ not change.
 
 Usage:
   python embed.py RESOURCES_DIR --tier lite --name biodatagen \
-      --output dasmig/biodatagen_data.hpp [--include core.hpp] [--chunk-bytes 16000]       [--files a.tsv b.tsv]
+      --output dasmig/biodatagen_data.hpp [--include core.hpp] [--chunk-bytes 16000] \
+      [--files a.tsv b.tsv]
 
 Every file below RESOURCES_DIR/<tier>/ is embedded, in sorted order, under
 the path "<tier>/<relative path>"; with --files, only those files, so a
