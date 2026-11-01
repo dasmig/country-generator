@@ -210,6 +210,40 @@ TEST_CASE("a tier directory loads every table; countries.tsv alone loads none", 
     REQUIRE(by_tier.find_locale("ja-JP").to_json() == lite().find_locale("ja-JP").to_json());
 }
 
+TEST_CASE("another library's locales.tsv in the working directory is not read", "[locale][load]")
+{
+    // user-generator's layout: its own resources/lite/locales.tsv (another
+    // table) in the working directory, country-generator next to it.
+    const auto cwd = std::filesystem::current_path();
+    const auto work = std::filesystem::temp_directory_path() / "cntg_foreign_locales";
+    std::filesystem::remove_all(work);
+    std::filesystem::create_directories(work / "resources" / "lite");
+    std::ofstream{work / "resources" / "lite" / "locales.tsv"} << "country\tlocale\tweight\nUS\ten-US\t1\n";
+    std::filesystem::create_directories(work / "country-generator" / "resources");
+    std::filesystem::copy(tier_dir("lite"), work / "country-generator" / "resources" / "lite",
+                          std::filesystem::copy_options::recursive);
+
+    std::filesystem::current_path(work);
+    dasmig::cntg g;
+    bool loaded = false;
+    std::string error;
+    try
+    {
+        loaded = g.load(dasmig::dataset::lite);
+    }
+    catch (const std::exception& e)
+    {
+        error = e.what();
+    }
+    std::filesystem::current_path(cwd);
+    std::filesystem::remove_all(work);
+
+    REQUIRE(error.empty());
+    REQUIRE(loaded);
+    REQUIRE(g.has_locale_data());
+    REQUIRE(g.find_locale("pt-BR").to_json() == lite().find_locale("pt-BR").to_json());
+}
+
 TEST_CASE("the full tier loads and agrees with lite where both have data", "[locale][load]")
 {
     dasmig::cntg full;
