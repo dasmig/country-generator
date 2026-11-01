@@ -212,8 +212,10 @@ class country
     /// @return `demonym_m` or `demonym_f`, falling back to the other when empty.
     [[nodiscard]] const std::string& demonym(sex bio_sex) const
     {
-        const auto& wanted = bio_sex == sex::male ? demonym_m : demonym_f;
-        return wanted.empty() ? (bio_sex == sex::male ? demonym_f : demonym_m) : wanted;
+        const bool male = bio_sex == sex::male;
+        const auto& wanted = male ? demonym_m : demonym_f;
+        const auto& other = male ? demonym_f : demonym_m;
+        return wanted.empty() ? other : wanted;
     }
 
     /// @brief Retrieve the random seed used to generate this country.
@@ -323,7 +325,7 @@ class country
     // Calls visit(name, percent) for each "Name:percent" pair of a shares text and returns true;
     // returns false at the first malformed pair (no colon, empty name, or a percent not in (0, 100]).
     template <typename Visit>
-    [[nodiscard]] static bool for_each_share_(std::string_view text, Visit&& visit)
+    [[nodiscard]] static bool for_each_share_(std::string_view text, const Visit& visit)
     {
         while (!text.empty())
         {
@@ -459,6 +461,9 @@ inline constexpr std::array<std::string_view, 7> weekday_codes{"sun", "mon", "tu
 inline constexpr std::array<std::string_view, 7> weekday_names{"sunday",   "monday", "tuesday", "wednesday",
                                                                "thursday", "friday", "saturday"};
 
+// Measurement system names, by dasmig::measurement.
+inline constexpr std::array<std::string_view, 3> measurement_names{"metric", "us", "uk"};
+
 [[nodiscard]] inline std::optional<std::chrono::weekday> parse_weekday(std::string_view code)
 {
     for (unsigned i = 0; i < weekday_codes.size(); ++i)
@@ -469,6 +474,7 @@ inline constexpr std::array<std::string_view, 7> weekday_names{"sunday",   "mond
 }
 
 // Appends v (not negative) in base 10, padded with zeros to width digits.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 inline void append_padded(std::string& out, std::int64_t v, std::size_t width)
 {
     std::array<char, 24> buf{};
@@ -508,6 +514,7 @@ inline void append_padded(std::string& out, std::int64_t v, std::size_t width)
 // Walks a pattern: literal(text) for literal text (quotes resolved), field(letter, count) for each run
 // of one letter. Returns false for an unterminated quote.
 template <typename Literal, typename Field>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): one pass over the pattern
 bool walk_pattern(std::string_view p, const Literal& literal, const Field& field)
 {
     std::size_t i = 0;
@@ -560,6 +567,7 @@ bool walk_pattern(std::string_view p, const Literal& literal, const Field& field
 }
 
 // Whether a field is one the formatter writes, for a date or a time pattern.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 [[nodiscard]] constexpr bool supported_field(char c, unsigned n, bool time) noexcept
 {
     if (time)
@@ -622,6 +630,7 @@ struct number_format
 }
 
 // One subpattern into prefix, number body and suffix; false on an unsupported character.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters,readability-function-cognitive-complexity): one pass
 inline bool split_subpattern(std::string_view p, std::string& prefix, std::string& body, std::string& suffix)
 {
     constexpr std::string_view currency_sign = "\xC2\xA4";   // ¤
@@ -672,6 +681,7 @@ inline bool split_subpattern(std::string_view p, std::string& prefix, std::strin
 }
 
 // Parses a pattern; empty error when it is one the formatter writes.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): one check per pattern part
 [[nodiscard]] inline number_format parse_number_pattern(std::string_view text, bool currency, std::string& error)
 {
     number_format f;
@@ -751,9 +761,13 @@ inline bool split_subpattern(std::string_view p, std::string& prefix, std::strin
 {
     if (s.empty()) return 0;
     const auto b = static_cast<unsigned char>(s[0]);
-    const std::size_t n = b < 0x80 ? 1 : b < 0xE0 ? 2 : b < 0xF0 ? 3 : 4;
+    std::size_t n = 4;
+    if (b < 0x80) n = 1;
+    else if (b < 0xE0) n = 2;
+    else if (b < 0xF0) n = 3;
     if (s.size() < n) return 0;
-    char32_t cp = n == 1 ? b : n == 2 ? (b & 0x1FU) : n == 3 ? (b & 0x0FU) : (b & 0x07U);
+    constexpr std::array<unsigned, 5> lead_bits{0, 0x7FU, 0x1FU, 0x0FU, 0x07U};   // by sequence length
+    char32_t cp = b & lead_bits.at(n);
     for (std::size_t i = 1; i < n; ++i) cp = (cp << 6U) | (static_cast<char32_t>(static_cast<unsigned char>(s[i])) & 0x3FU);
     return cp;
 }
@@ -792,6 +806,7 @@ inline bool split_subpattern(std::string_view p, std::string& prefix, std::strin
 
 // The integer and fraction digits of |v|: the shortest decimal that reads back to v, rounded
 // half-even to at most max_fraction digits, on the text (design 5.2).
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 [[nodiscard]] inline std::pair<std::string, std::string> decimal_digits(double v, std::size_t max_fraction)
 {
     std::array<char, 400> buf{};
@@ -809,14 +824,14 @@ inline bool split_subpattern(std::string_view p, std::string& prefix, std::strin
     if (!up) return {integer, fraction};
     for (auto* digits : {&fraction, &integer})
     {
-        for (auto it = digits->rbegin(); it != digits->rend(); ++it)
+        for (char& c : std::views::reverse(*digits))
         {
-            if (*it != '9')
+            if (c != '9')
             {
-                ++*it;
+                ++c;
                 return {integer, fraction};
             }
-            *it = '0';
+            c = '0';
         }
     }
     integer.insert(integer.begin(), '1');
@@ -880,6 +895,7 @@ struct holiday_rule
     return std::chrono::year_month_day{std::chrono::year{2024}, std::chrono::month{month}, std::chrono::day{day}}.ok();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): one branch per rule form
 [[nodiscard]] inline std::optional<holiday_rule> parse_rule(std::string_view t)
 {
     holiday_rule r;
@@ -1113,6 +1129,7 @@ struct holiday_row
 // Moves one occurrence's days by its policy (design 8.4). taken: the days of the kind's holidays
 // and the moves so far; shared: the days moved under each policy, so holidays on one date move
 // together. moved[i] is the observed day of the occurrence's day i.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity): the observed-day algorithm of design 8.4
 inline void simulate(const observed_policy& p, std::chrono::sys_days start, unsigned days, std::set<int>& taken,
                      unsigned weekend, std::map<std::pair<int, std::string_view>, int>& shared,
                      std::vector<std::optional<std::chrono::sys_days>>& moved)
@@ -1240,13 +1257,12 @@ class locale
     /// @return The text, in UTF-8.
     /// @throws std::invalid_argument If @p d is not a valid date, or the
     ///         pattern holds a field the formatter does not write.
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity): one case per field
     [[nodiscard]] std::string format_date(std::chrono::year_month_day d, date_style style = date_style::short_) const
     {
         if (!d.ok()) throw std::invalid_argument("format_date: not a valid date");
-        const std::string& pattern = style == date_style::short_  ? date_short
-                                     : style == date_style::medium ? date_medium
-                                     : style == date_style::long_  ? date_long
-                                                                   : date_full;
+        const std::array<const std::string*, 4> patterns{&date_short, &date_medium, &date_long, &date_full};
+        const std::string& pattern = *patterns.at(static_cast<std::size_t>(style));
         const int y = static_cast<int>(d.year());
         const auto month = static_cast<unsigned>(d.month());
         const unsigned wd = std::chrono::weekday{std::chrono::sys_days{d}}.c_encoding();
@@ -1312,6 +1328,7 @@ class locale
     /// @return The text, in UTF-8.
     /// @throws std::invalid_argument If @p value is not finite or the pattern
     ///         is not one the formatter writes.
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     [[nodiscard]] std::string format_number(double value, unsigned max_fraction = 3) const
     {
         if (!std::isfinite(value)) throw std::invalid_argument("format_number: the value is not finite");
@@ -1408,9 +1425,7 @@ class locale
             .value(country_detail::weekday_names.at(weekend_start.c_encoding()))
             .value(country_detail::weekday_names.at(weekend_end.c_encoding()))
             .end_array()
-            .field("measurement", measurement == dasmig::measurement::us   ? "us"
-                                  : measurement == dasmig::measurement::uk ? "uk"
-                                                                           : "metric")
+            .field("measurement", country_detail::measurement_names.at(static_cast<std::size_t>(measurement)))
             .key("signature");
         _signature.to_json(w);
         w.end_object();
@@ -1470,6 +1485,7 @@ class locale
     }
 
     // The number with its affixes, the symbols in place of the marks and the currency spacing.
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity): one pass over the affixes
     [[nodiscard]] std::string render_(const country_detail::number_format& f, bool negative, std::string integer,
                                       std::string_view fraction, std::string_view symbol) const
     {
@@ -3024,44 +3040,66 @@ class cntg
     [[nodiscard]] locale_model build_locale_model_(const locale_table_set& t, bool strict) const
     {
         locale_model m;
-        const auto table = [&t](country_table which) -> const core::layered_table& { return t.at(index_(which)); };
-        const auto loaded = [&](const core::tsv_row& row) {
-            const auto cc = row["country"];
-            if (_cca2_index.contains(cc)) return true;
-            if (strict) throw row.error("country", "country " + std::string{cc} + " is not loaded");
-            return false;
-        };
-        const auto by_share = [](std::vector<std::size_t>& items, const auto& rows, auto name) {
-            std::ranges::sort(items, [&](std::size_t a, std::size_t b) {
-                if (rows[a].share != rows[b].share) return rows[a].share > rows[b].share;
-                return name(rows[a]) < name(rows[b]);
-            });
-        };
-        const auto weigh = [](pick_list& p, const std::vector<double>& weights) {
-            if (!weights.empty()) p.weighted = core::discrete{weights};
-        };
-        const auto countries_with = [this, &weigh](const auto& by_country) {
-            pick_list p;
-            std::vector<double> weights;
-            for (std::size_t i = 0; i < _countries.size(); ++i)
-            {
-                if (!by_country.contains(_countries[i].cca2)) continue;
-                p.items.push_back(i);
-                weights.push_back(weight_(_countries[i]));
-            }
-            weigh(p, weights);
-            return p;
-        };
+        build_locales_(m, t, strict);
+        build_zones_(m, t, strict);
+        build_holidays_(m, t, strict);
+        return m;
+    }
 
-        for (const auto& row : table(country_table::currencies).rows())
+    // Whether a row's country is loaded; when strict, a row of one that is not is an error.
+    [[nodiscard]] bool row_loaded_(const core::tsv_row& row, bool strict) const
+    {
+        const auto cc = row["country"];
+        if (_cca2_index.contains(cc)) return true;
+        if (strict) throw row.error("country", "country " + std::string{cc} + " is not loaded");
+        return false;
+    }
+
+    static void weigh_(pick_list& p, const std::vector<double>& weights)
+    {
+        if (!weights.empty()) p.weighted = core::discrete{weights};
+    }
+
+    // Sorts a country's rows by share, largest first, then by name, and weights the draw by share.
+    template <typename Row, typename Name>
+    static void order_by_share_(pick_list& p, const std::vector<Row>& rows, Name name)
+    {
+        std::ranges::sort(p.items, [&](std::size_t a, std::size_t b) {
+            if (rows[a].share != rows[b].share) return rows[a].share > rows[b].share;
+            return name(rows[a]) < name(rows[b]);
+        });
+        std::vector<double> weights;
+        weights.reserve(p.items.size());
+        for (const auto i : p.items) weights.push_back(rows[i].share);
+        weigh_(p, weights);
+    }
+
+    // The loaded countries that by_country has, weighted as get_country() weighs them.
+    template <typename ByCountry>
+    [[nodiscard]] pick_list countries_with_(const ByCountry& by_country) const
+    {
+        pick_list p;
+        std::vector<double> weights;
+        for (std::size_t i = 0; i < _countries.size(); ++i)
+        {
+            if (!by_country.contains(_countries[i].cca2)) continue;
+            p.items.push_back(i);
+            weights.push_back(weight_(_countries[i]));
+        }
+        weigh_(p, weights);
+        return p;
+    }
+
+    // Currencies, then locales, their indexes and their draws.
+    void build_locales_(locale_model& m, const locale_table_set& t, bool strict) const
+    {
+        for (const auto& row : t.at(index_(country_table::currencies)).rows())
         {
             m.currencies.emplace(std::string{row["code"]}, parse_currency_(row));
         }
-
-        // Locales.
-        for (const auto& row : table(country_table::locales).rows())
+        for (const auto& row : t.at(index_(country_table::locales)).rows())
         {
-            if (!loaded(row)) continue;
+            if (!row_loaded_(row, strict)) continue;
             auto l = parse_locale_(row);
             const auto currency = m.currencies.find(l.currency_code);
             if (currency == m.currencies.end())
@@ -3083,11 +3121,7 @@ class cntg
         }
         for (auto& [cc, p] : m.locales_by_country)
         {
-            by_share(p.items, m.locales, [](const locale& l) -> const std::string& { return l.tag; });
-            std::vector<double> weights;
-            weights.reserve(p.items.size());
-            for (const auto i : p.items) weights.push_back(m.locales[i].share);
-            weigh(p, weights);
+            order_by_share_(p, m.locales, [](const locale& l) -> const std::string& { return l.tag; });
         }
         for (const auto& [language, shares] : language_shares)
         {
@@ -3101,15 +3135,18 @@ class cntg
                 weights.push_back(weight_(_countries[i]) * it->second / 100.0);
             }
             if (p.items.empty()) continue;
-            weigh(p, weights);
+            weigh_(p, weights);
             m.locale_languages.emplace(language, std::move(p));
         }
-        m.locale_countries = countries_with(m.locales_by_country);
+        m.locale_countries = countries_with_(m.locales_by_country);
+    }
 
-        // Zones and links.
-        for (const auto& row : table(country_table::zones).rows())
+    // Zones, their indexes and draws, then the links to them.
+    void build_zones_(locale_model& m, const locale_table_set& t, bool strict) const
+    {
+        for (const auto& row : t.at(index_(country_table::zones)).rows())
         {
-            if (loaded(row)) m.zones.push_back(parse_zone_(row));
+            if (row_loaded_(row, strict)) m.zones.push_back(parse_zone_(row));
         }
         for (std::size_t i = 0; i < m.zones.size(); ++i)
         {
@@ -3121,14 +3158,10 @@ class cntg
         }
         for (auto& [cc, p] : m.zones_by_country)
         {
-            by_share(p.items, m.zones, [](const time_zone& z) -> const std::string& { return z.name; });
-            std::vector<double> weights;
-            weights.reserve(p.items.size());
-            for (const auto i : p.items) weights.push_back(m.zones[i].share);
-            weigh(p, weights);
+            order_by_share_(p, m.zones, [](const time_zone& z) -> const std::string& { return z.name; });
         }
-        m.zone_countries = countries_with(m.zones_by_country);
-        for (const auto& row : table(country_table::zone_links).rows())
+        m.zone_countries = countries_with_(m.zones_by_country);
+        for (const auto& row : t.at(index_(country_table::zone_links)).rows())
         {
             const auto target = row.get<std::string_view>("zone");
             if (!m.zone_by_name.contains(target))
@@ -3138,96 +3171,138 @@ class cntg
             }
             m.zone_links.emplace(std::string{row["link"]}, std::string{target});
         }
+    }
 
-        // Holidays: the shared event dates, the countries' own and overriding dates, the spans.
-        // Keyed by views into the tables, which outlive the build.
-        std::map<std::string_view, std::vector<std::chrono::sys_days>, std::less<>> shared;
-        std::map<std::pair<std::string_view, std::string_view>,
-                 std::vector<std::pair<std::chrono::sys_days, const core::tsv_row*>>>
-            own;
-        for (const auto& row : table(country_table::holiday_events).rows())
+    // Event dates, keyed by views into the tables, which outlive the build: the shared dates of
+    // each event, and each country's own and overriding dates with their rows.
+    using shared_events_ = std::map<std::string_view, std::vector<std::chrono::sys_days>, std::less<>>;
+    using own_events_ = std::map<std::pair<std::string_view, std::string_view>,
+                                 std::vector<std::pair<std::chrono::sys_days, const core::tsv_row*>>>;
+
+    // Replaces the shared date nearest each of a country's own dates, which must be within three days.
+    static void override_dates_(std::vector<std::chrono::sys_days>& dates,
+                                const std::vector<std::pair<std::chrono::sys_days, const core::tsv_row*>>& mine,
+                                const std::string& ev)
+    {
+        for (const auto& [date, row] : mine)
+        {
+            auto near = std::ranges::min_element(dates, {}, [date](std::chrono::sys_days d) {
+                return d > date ? (d - date).count() : (date - d).count();
+            });
+            const auto gap = near == dates.end() ? 4 : std::abs((*near - date).count());
+            if (gap > 3)
+            {
+                throw row->error("date", "no shared date of " + ev + " within three days");
+            }
+            *near = date;
+        }
+    }
+
+    // An event's dates for a country: the shared dates with the country's own replacing the one
+    // within three days of each; or, for an event with no shared dates, the country's own. Null
+    // when there are none (an error at the rule's row when strict).
+    [[nodiscard]] static const std::vector<std::chrono::sys_days>*
+    event_dates_(holiday_country& hc, const std::string& cc, const std::string& ev, const core::tsv_row& at,
+                 const shared_events_& shared, const own_events_& own, bool strict)
+    {
+        if (const auto it = hc.events.find(ev); it != hc.events.end()) return &it->second;
+        const auto mine = own.find({cc, ev});
+        const auto base = shared.find(ev);
+        std::vector<std::chrono::sys_days> dates;
+        if (base != shared.end())
+        {
+            dates = base->second;
+            if (mine != own.end()) override_dates_(dates, mine->second, ev);
+        }
+        else if (mine != own.end())
+        {
+            for (const auto& [date, row] : mine->second) dates.push_back(date);
+        }
+        else
+        {
+            if (strict) throw at.error("rule", "no holiday_events.tsv dates for event " + ev);
+            return nullptr;
+        }
+        std::ranges::sort(dates);
+        return &hc.events.emplace(ev, std::move(dates)).first->second;
+    }
+
+    // The weekend of a locale (CLDR weekData) as bits by c_encoding.
+    [[nodiscard]] static unsigned weekend_mask_(const locale& l)
+    {
+        unsigned mask = 0;
+        for (unsigned d = l.weekend_start.c_encoding();; d = (d + 1) % 7)
+        {
+            mask |= 1U << d;
+            if (d == l.weekend_end.c_encoding()) break;
+        }
+        return mask;
+    }
+
+    // A holiday row's names. A continuation row (both empty) takes those of the nearest row above
+    // with its country and key; names holds the last row's, as views into the table.
+    static void resolve_names_(country_detail::holiday_row& h, const core::tsv_row& row,
+                               std::pair<std::string_view, std::string_view>& names)
+    {
+        if (h.name.empty() && h.name_en.empty())
+        {
+            if (names.second.empty())
+            {
+                throw row.error("name_en", "empty names need a row above with the same country and key");
+            }
+            h.name = names.first;
+            h.name_en = names.second;
+            return;
+        }
+        if (h.name_en.empty()) throw row.error("name_en", "missing value");
+        names = {row[h.name.empty() ? "name_en" : "name"], row["name_en"]};
+        if (h.name.empty()) h.name = h.name_en;
+    }
+
+    // A country's holiday entry, made on first use with its span and the weekend of its first
+    // locale (else Saturday and Sunday).
+    static holiday_country& holiday_entry_(locale_model& m, const std::map<std::string, year_span, std::less<>>& spans,
+                                           const std::string& cc)
+    {
+        auto [it, added] = m.holidays.try_emplace(cc);
+        if (added)
+        {
+            it->second.years = spans.at(cc);
+            const auto l = std::ranges::find(m.locales, cc, &locale::country_code);
+            if (l != m.locales.end()) it->second.weekend = weekend_mask_(*l);
+        }
+        return it->second;
+    }
+
+    // Holidays: the event dates, the spans, then each country's rows, with its weekend.
+    void build_holidays_(locale_model& m, const locale_table_set& t, bool strict) const
+    {
+        shared_events_ shared;
+        own_events_ own;
+        for (const auto& row : t.at(index_(country_table::holiday_events)).rows())
         {
             const auto e = parse_event_(row);
             if (e.country == "*")
             {
                 shared[e.event].push_back(e.date);
             }
-            else if (loaded(row))
+            else if (row_loaded_(row, strict))
             {
                 own[{e.country, e.event}].emplace_back(e.date, &row);
             }
         }
         for (auto& [k, dates] : shared) std::ranges::sort(dates);
         std::map<std::string, year_span, std::less<>> spans;
-        for (const auto& row : table(country_table::holiday_years).rows())
+        for (const auto& row : t.at(index_(country_table::holiday_years)).rows())
         {
-            if (loaded(row)) spans.emplace(std::string{row["country"]}, parse_years_(row));
+            if (row_loaded_(row, strict)) spans.emplace(std::string{row["country"]}, parse_years_(row));
         }
-        const auto country_entry = [&](const std::string& cc) -> holiday_country& {
-            auto [it, added] = m.holidays.try_emplace(cc);
-            if (added)
-            {
-                it->second.years = spans.at(cc);
-                // The weekend of the country's first locale (CLDR weekData), else Saturday and Sunday.
-                const auto l = std::ranges::find(m.locales, cc, &locale::country_code);
-                if (l != m.locales.end())
-                {
-                    unsigned mask = 0;
-                    for (unsigned d = l->weekend_start.c_encoding();; d = (d + 1) % 7)
-                    {
-                        mask |= 1U << d;
-                        if (d == l->weekend_end.c_encoding()) break;
-                    }
-                    it->second.weekend = mask;
-                }
-            }
-            return it->second;
-        };
-        // An event's dates for a country: the shared dates with the country's own replacing the one
-        // within three days of each; or, for an event with no shared dates, the country's own.
-        const auto event_dates = [&](holiday_country& hc, const std::string& cc, const std::string& ev,
-                                     const core::tsv_row& at) -> const std::vector<std::chrono::sys_days>* {
-            if (const auto it = hc.events.find(ev); it != hc.events.end()) return &it->second;
-            const auto mine = own.find({cc, ev});
-            const auto base = shared.find(ev);
-            std::vector<std::chrono::sys_days> dates;
-            if (base != shared.end())
-            {
-                dates = base->second;
-                if (mine != own.end())
-                {
-                    for (const auto& [date, row] : mine->second)
-                    {
-                        auto near = std::ranges::min_element(dates, {}, [date](std::chrono::sys_days d) {
-                            return d > date ? (d - date).count() : (date - d).count();
-                        });
-                        const auto gap = near == dates.end() ? 4 : std::abs((*near - date).count());
-                        if (gap > 3)
-                        {
-                            throw row->error("date", "no shared date of " + ev + " within three days");
-                        }
-                        *near = date;
-                    }
-                }
-            }
-            else if (mine != own.end())
-            {
-                for (const auto& [date, row] : mine->second) dates.push_back(date);
-            }
-            else
-            {
-                if (strict) throw at.error("rule", "no holiday_events.tsv dates for event " + ev);
-                return nullptr;
-            }
-            std::ranges::sort(dates);
-            return &hc.events.emplace(ev, std::move(dates)).first->second;
-        };
-        // (country, key) -> the names of the last row with them, as views into the table.
+        // (country, key) -> the names of the last row with them.
         std::map<std::pair<std::string_view, std::string_view>, std::pair<std::string_view, std::string_view>>
             last_names;
-        for (const auto& row : table(country_table::holidays).rows())
+        for (const auto& row : t.at(index_(country_table::holidays)).rows())
         {
-            if (!loaded(row)) continue;
+            if (!row_loaded_(row, strict)) continue;
             const std::string cc{row["country"]};
             if (!spans.contains(cc))
             {
@@ -3235,33 +3310,16 @@ class cntg
                 continue;
             }
             auto h = parse_holiday_(row);
-            auto& names = last_names[{row["country"], row["key"]}];
-            if (h.name.empty() && h.name_en.empty())
-            {
-                // A continuation row: the names of the nearest row above with this country and key.
-                if (names.second.empty())
-                {
-                    throw row.error("name_en", "empty names need a row above with the same country and key");
-                }
-                h.name = names.first;
-                h.name_en = names.second;
-            }
-            else
-            {
-                if (h.name_en.empty()) throw row.error("name_en", "missing value");
-                names = {row[h.name.empty() ? "name_en" : "name"], row["name_en"]};
-                if (h.name.empty()) h.name = h.name_en;
-            }
-            auto& hc = country_entry(cc);
+            resolve_names_(h, row, last_names[{row["country"], row["key"]}]);
+            auto& hc = holiday_entry_(m, spans, cc);
             if (h.rule.form == country_detail::rule_form::event)
             {
-                h.events = event_dates(hc, cc, h.rule.event, row);
+                h.events = event_dates_(hc, cc, h.rule.event, row, shared, own, strict);
                 if (h.events == nullptr) continue;
             }
             hc.rows.push_back(std::move(h));
         }
-        for (const auto& [cc, span] : spans) (void)country_entry(cc);
-        return m;
+        for (const auto& [cc, span] : spans) (void)holiday_entry_(m, spans, cc);
     }
 
     locale_table_set _locale_tables{make_locale_tables_()};
@@ -3404,6 +3462,7 @@ class cntg
     // A year's holidays as design 8.3 and 8.4 compute them: every rule's days in the year and the years
     // either side, sorted by date, key and day; then, kind by kind, each occurrence's days moved by
     // its policy; the occurrences that start in the year, sorted by date, key and day.
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity): the year's evaluation of design 8.3 and 8.4
     [[nodiscard]] static std::vector<holiday> evaluate_(const holiday_country& hc, int year, bool optional,
                                                         bool observances)
     {
