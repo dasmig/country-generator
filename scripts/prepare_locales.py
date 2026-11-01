@@ -205,6 +205,17 @@ def clean(text, where):
     return text
 
 
+def own_names(cldr, folder):
+    """Whether a CLDR locale has month names of its own, not the root's M01 to M12.
+
+    cldr-json gives a locale with no confirmed Gregorian data the root's
+    values (M01, Sun, y-MM-dd); such a locale is treated as having no CLDR
+    data (decision 36 of the design).
+    """
+    g = cldr.json("cldr-dates-full", f"main/{folder}/ca-gregorian.json")["main"][folder]["dates"]["calendars"]["gregorian"]
+    return [g["months"]["format"]["wide"][str(m)] for m in range(1, 13)] != [f"M{m:02}" for m in range(1, 13)]
+
+
 def formats(cldr, folder, currency):
     where = f"CLDR {folder}"
     g = cldr.json("cldr-dates-full", f"main/{folder}/ca-gregorian.json")["main"][folder]["dates"]["calendars"]["gregorian"]
@@ -305,15 +316,19 @@ def build(cldr, ids, countries, iso_current, report):
             if resolved is None:
                 report.append(f"{cc}: {code} ({share:g}%) qualifies but CLDR has no locale data for it")
                 continue
+            if not own_names(cldr, resolved[0]):
+                report.append(f"{cc}: {code} ({share:g}%) qualifies but CLDR {resolved[0]} has only the root's names")
+                continue
             candidates.append((code, share, *resolved))
         if not candidates:
             # Fallback: the primary language of countries.tsv, with the formats of the
-            # most spoken language CLDR has, else en-001.
+            # most spoken language CLDR has names for, else en-001.
             primary = country["languages"].split(";")[0]
             lang = english.get(primary)
             spoken = sorted(((float(d["_populationPercent"]), c) for c, d in
                              territories.get(cc, {}).get("languagePopulation", {}).items()), reverse=True)
-            source = next((r[0] for _, c in spoken if c != "und" and (r := ids.resolve(c, cc))), "en-001")
+            source = next((r[0] for _, c in spoken if c != "und" and (r := ids.resolve(c, cc)) and own_names(cldr, r[0])),
+                          "en-001")
             if lang is None or currency is None:
                 report.append(f"{cc}: no locale (primary language {primary or '(none)'}, currency {currency or '(none)'})")
                 continue

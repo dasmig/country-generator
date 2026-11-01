@@ -811,7 +811,7 @@ TEST_CASE("known answers of get_locale", "[locale][kat]")
             R"("medium":"h:mm:ss a"},"number":"#,##0.###","currency":")" "\xc2\xa4" R"(#,##0.00"},)"
             R"("symbols":{"decimal":".","group":",","minus":"-"},"currency":{"code":"ETB","symbol":"Br","digits":2},)"
             R"("first_day":"sunday","weekend":["saturday","sunday"],"measurement":"metric",)"
-            R"("signature":{"seed":"0000000000000001","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000001","data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_locale({}, 2).to_json() ==
             R"({"tag":"fr-ML","language":"fr","script":"","language_name":"French","country":"ML",)"
             R"("share":17,"basis":"cldr","formats":{"date":{"short":"dd/MM/y","medium":"d MMM y",)"
@@ -819,7 +819,7 @@ TEST_CASE("known answers of get_locale", "[locale][kat]")
             R"("number":"#,##0.###","currency":"#,##0.00)" "\xc2\xa0\xc2\xa4" R"("},"symbols":{"decimal":",",)"
             R"("group":")" "\xe2\x80\xaf" R"(","minus":"-"},"currency":{"code":"XOF","symbol":"F)" "\xe2\x80\xaf" R"(CFA",)"
             R"("digits":0},"first_day":"monday","weekend":["saturday","sunday"],"measurement":"metric",)"
-            R"("signature":{"seed":"0000000000000002","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000002","data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_locale({}, 3).to_json() ==
             R"({"tag":"hi-IN","language":"hi","script":"","language_name":"Hindi","country":"IN",)"
             R"("share":41,"basis":"cldr","formats":{"date":{"short":"d/M/yy","medium":"d MMM y",)"
@@ -827,7 +827,7 @@ TEST_CASE("known answers of get_locale", "[locale][kat]")
             R"("number":"#,##,##0.###","currency":")" "\xc2\xa4" R"(#,##,##0.00"},"symbols":{"decimal":".",)"
             R"("group":",","minus":"-"},"currency":{"code":"INR","symbol":")" "\xe2\x82\xb9" R"(","digits":2},)"
             R"("first_day":"sunday","weekend":["sunday","sunday"],"measurement":"metric",)"
-            R"("signature":{"seed":"0000000000000003","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000003","data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_locale({}, 4).to_json() ==
             R"({"tag":"ru-KZ","language":"ru","script":"","language_name":"Russian","country":"KZ",)"
             R"("share":72,"basis":"cldr","formats":{"date":{"short":"dd.MM.y",)"
@@ -838,7 +838,7 @@ TEST_CASE("known answers of get_locale", "[locale][kat]")
             R"("symbols":{"decimal":",","group":")" "\xc2\xa0" R"(","minus":"-"},)"
             R"("currency":{"code":"KZT","symbol":")" "\xe2\x82\xb8" R"(","digits":2},)"
             R"("first_day":"monday","weekend":["saturday","sunday"],"measurement":"metric",)"
-            R"("signature":{"seed":"0000000000000004","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000004","data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_locale({}, 5).to_json() ==
             R"({"tag":"ff-GN","language":"ff","script":"","language_name":"Fula","country":"GN",)"
             R"("share":26,"basis":"cldr","formats":{"date":{"short":"d/M/y","medium":"d MMM, y",)"
@@ -846,11 +846,11 @@ TEST_CASE("known answers of get_locale", "[locale][kat]")
             R"("number":"#,##0.###","currency":"#,##0.00)" "\xc2\xa0\xc2\xa4" R"("},"symbols":{"decimal":",",)"
             R"("group":")" "\xc2\xa0" R"(","minus":"-"},"currency":{"code":"GNF","symbol":"FG","digits":0},)"
             R"("first_day":"monday","weekend":["saturday","sunday"],"measurement":"metric",)"
-            R"("signature":{"seed":"0000000000000005","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000005","data":"68b27f12d948e929"}})");
 
     std::uint64_t h = fnv_basis;
     for (std::uint64_t s = 0; s < 10000; ++s) h = fnv(h, lite().get_locale({}, s).to_json());
-    REQUIRE(h == 0xbaf42467e956b7aeULL);
+    REQUIRE(h == 0x4804d2abdf9e12c9ULL);
 }
 
 TEST_CASE("known answers of get_time_zone", "[zone][kat]")
@@ -858,27 +858,27 @@ TEST_CASE("known answers of get_time_zone", "[zone][kat]")
     REQUIRE(lite().get_time_zone({}, 1).to_json() ==
             R"({"name":"Africa/Addis_Ababa","country":"ET","share":100,"basis":"tzdata",)"
             R"("utc_offset":"+03:00","abbreviation":"EAT","dst":false,"observes_dst":false,)"
-            R"("signature":{"seed":"0000000000000001","data":"7e3c1fb013e6e881"}})");
+            R"("signature":{"seed":"0000000000000001","data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_time_zone({}, 2).to_json() ==
             R"({"name":"Africa/Bamako","country":"ML","share":100,"basis":"tzdata","utc_offset":"+00:00",)"
             R"("abbreviation":"GMT","dst":false,"observes_dst":false,"signature":{"seed":"0000000000000002",)"
-            R"("data":"7e3c1fb013e6e881"}})");
+            R"("data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_time_zone({}, 3).to_json() ==
             R"({"name":"Asia/Kolkata","country":"IN","share":100,"basis":"tzdata","utc_offset":"+05:30",)"
             R"("abbreviation":"IST","dst":false,"observes_dst":false,"signature":{"seed":"0000000000000003",)"
-            R"("data":"7e3c1fb013e6e881"}})");
+            R"("data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_time_zone({}, 4).to_json() ==
             R"({"name":"Asia/Almaty","country":"KZ","share":76.3,"basis":"tzdata","utc_offset":"+06:00",)"
             R"("abbreviation":"+06","dst":false,"observes_dst":false,"signature":{"seed":"0000000000000004",)"
-            R"("data":"7e3c1fb013e6e881"}})");
+            R"("data":"68b27f12d948e929"}})");
     REQUIRE(lite().get_time_zone({}, 5).to_json() ==
             R"({"name":"Africa/Conakry","country":"GN","share":100,"basis":"tzdata","utc_offset":"+00:00",)"
             R"("abbreviation":"GMT","dst":false,"observes_dst":false,"signature":{"seed":"0000000000000005",)"
-            R"("data":"7e3c1fb013e6e881"}})");
+            R"("data":"68b27f12d948e929"}})");
 
     std::uint64_t h = fnv_basis;
     for (std::uint64_t s = 0; s < 10000; ++s) h = fnv(h, lite().get_time_zone({}, s).to_json());
-    REQUIRE(h == 0x84dc11ac4b5b3f98ULL);
+    REQUIRE(h == 0xa7a8860ce8543b7cULL);
 }
 
 TEST_CASE("known answers of holidays: eight countries in 2024", "[holiday][kat]")
