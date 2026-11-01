@@ -65,6 +65,7 @@ DOW = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")      # date.weekday() or
 EASTER_SPAN = 100        # |N| for easter+N and orthodox+N
 EVENT_SPAN = 10          # |N| for event:KEY+N
 OVERRIDE_SPAN = 3        # a country's event date may differ from the shared one by this many days
+SHARED = "*"             # holiday_events.tsv's country for a date every country shares (a key cell cannot be empty)
 
 # The calendars the shared events come from, and a prefix where keys would clash.
 CALENDARS = {
@@ -559,14 +560,15 @@ def commit(how, result, country, key, events):
                 events.pinned.update((country, k, e) for e in events.shared.get(k, ())
                                      if a <= (own.get(e, e) + datetime.timedelta(days=n)).year <= b)
         return [(rule[1], days, a, b) for rule, days, a, b, _ in result]
-    out = []
-    lengths = sorted({d for _, d in result})
-    for days in lengths:
-        own = f"{country.lower()}_{key}" + (f"_{days}d" if len(lengths) > 1 else "")
-        starts = sorted(s for s, d in result if d == days)
-        events.own[(country, own)] = starts
-        out.append((f"event:{own}", days, starts[0].year, starts[-1].year))
-    return out
+    # One row per holiday key (holidays.tsv's key is country, key and from_year): occurrences of
+    # different lengths become one event of all their days, each a one-day holiday.
+    own = f"{country.lower()}_{key}"
+    lengths = {d for _, d in result}
+    days = lengths.pop() if len(lengths) == 1 else 1
+    starts = sorted({s + datetime.timedelta(days=i) for s, d in result for i in range(d)} if days == 1
+                    else {s for s, _ in result})
+    events.own[(country, own)] = starts
+    return [(f"event:{own}", days, starts[0].year, starts[-1].year)]
 
 
 def weekend_days(start, end):
@@ -768,10 +770,13 @@ def build_country(c, events, weekend, report):
             part_key = key if n_part == 0 else f"{key}_{n_part + 1}"
             keys.add(part_key)
             part_set = set(part_occ)
+            covered = {st + datetime.timedelta(days=i) for st, d in part_occ for i in range(d)}
             for rule, days, a, b in commit(how, result, c.code, part_key, events):
-                # The rule's occurrences, each with the observed days nearest it.
+                # The rule's occurrences (a flattened own event's are single days), each with the
+                # observed days nearest it.
                 mine = {st: [] for y in range(a, b + 1)
-                        for st in rule_dates(parse_rule(rule), y, c.code, events) if (st, days) in part_set}
+                        for st in rule_dates(parse_rule(rule), y, c.code, events)
+                        if (st, days) in part_set or (days == 1 and st in covered)}
                 rest = []
                 for o in observed:
                     near = min(mine, key=lambda st: (abs((o - st).days - (days - 1) / 2), st), default=None)
@@ -992,7 +997,7 @@ def main():
             if r["rule"].startswith("event:"):
                 need[event_parts(r["rule"])[0]].update(range(r["from"] - 1, r["to"] + 2))
         used = set(need)
-        ev_rows = [{"event": k, "country": "", "date": d.isoformat()}
+        ev_rows = [{"event": k, "country": SHARED, "date": d.isoformat()}
                    for k in sorted(used & set(events.shared)) for d in events.shared[k] if d.year in need[k]]
         ev_rows += [{"event": k, "country": cc, "date": d.isoformat()}
                     for (cc, k), changes in sorted(events.override.items()) if cc in in_tier and k in used

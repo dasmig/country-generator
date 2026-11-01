@@ -26,8 +26,7 @@ AE	death_of_sheikh_khalifa_bin_zayed_al_nahyan	وفاة الشيخ خليفة ب
 AE	eid_al_adha	عيد الأضحى	Eid al-Adha	public	event:eid_al_adha	1	none	1972	2050
 AE	eid_al_adha_holiday	عطلة عيد الأضحى	Eid al-Adha Holiday	public	event:eid_al_adha+1	2	none	1972	2050
 AE	eid_al_fitr	عيد الفطر	Eid al-Fitr	public	event:eid_al_fitr	1	none	1972	2050
-AE	eid_al_fitr_holiday	عطلة عيد الفطر	Eid al-Fitr Holiday	public	event:ae_eid_al_fitr_holiday_2d	2	none	1972	2050
-AE	eid_al_fitr_holiday			public	event:ae_eid_al_fitr_holiday_1d	1	none	2019	2023
+AE	eid_al_fitr_holiday	عطلة عيد الفطر	Eid al-Fitr Holiday	public	event:ae_eid_al_fitr_holiday	1	none	1972	2050
 AE	islamic_new_year	رأس السنة الهجرية	Islamic New Year	public	event:hijri_new_year	1	none	1972	2050
 AE	isra_and_mi_raj	ليلة المعراج	Isra' and Mi'raj	public	event:isra_and_miraj	1	none	1972	2018
 AE	national_day	اليوم الوطني	National Day	public	12-02	2	none	1972	2050
@@ -113,8 +112,7 @@ AM	day_of_remembrance_for_the_fallen_defenders_of_the_fatherland	Հայրենի�
 AM	day_of_remembrance_of_the_dead	Մեռելոց հիշատակի օր	Day of Remembrance of the Dead	public	01-07	1	none	2010	2021
 AM	day_of_remembrance_of_the_victims_of_armenian_genocide	Հայոց ցեղասպանության զոհերի հիշատակի օր	Day of Remembrance of the Victims of Armenian Genocide	public	04-24	1	none	2015	2050
 AM	day_of_remembrance_of_the_victims_of_genocide	Ցեղասպանության զոհերի հիշատակի օր	Day of Remembrance of the Victims of Genocide	public	04-24	1	none	1991	2014
-AM	day_off	Հանգստյան օր	Day off	public	event:am_day_off_1d	1	none	1998	2021
-AM	day_off			public	event:am_day_off_2d	2	none	2007	2018
+AM	day_off	Հանգստյան օր	Day off	public	event:am_day_off	1	none	1998	2021
 AM	independence_day	Անկախության օր	Independence Day	public	09-21	1	none	1992	2050
 AM	international_day_of_workers_solidarity	Աշխատավորների համերաշխության միջազգային օր	International Day of Workers' Solidarity	public	05-01	1	none	2001	2001
 AM	international_women_s_day	Կանանց միջազգային օր	International Women's Day	public	03-08	1	none	2001	2001
@@ -326,16 +324,22 @@ AU	new_year_s_day	New Year's Day	New Year's Day	public	01-01	1	none	1970	2050
 AZ	armed_forces_day	Azərbaycan Respublikasının Silahlı Qüvvələri günü	Armed Forces Day	public	10-09	1	none	1992	1997
 AZ	armed_forces_day			public	06-26	1	none	1998	2009
 AZ	armed_forces_day			public	06-26	1	sat>mon,sun>mon	2010	2050
-AZ	day_off	İstirahət günü	Day off	public	event:az_day_off_1d	1	none	2008	2025
-AZ	day_off			public	event:az_day_off_2d	2	none	2008	2025
-AZ	eid_al_adha	Qurban bayrami	Eid al-Adha	public	event:az_eid_al_adha_1d	1	none	1993	2006
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	none	2006	2008
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	sat>mon,sun>mon	2009	2025
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	none	2026	2026
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	sat>mon,sun>mon	2027	2031
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	none	2032	2032
-AZ	eid_al_adha			public	event:az_eid_al_adha_2d	2	sat>mon,sun>mon	2033	2050
-AZ	eid_al_adha_observed	Qurban bayrami (müşahidə olunur)	Eid al-Adha (observed)	public	event:az_eid_al_adha_observed	1	none	2007	2032
+AZ	day_off	İstirahət günü	Day off	public	event:az_day_off	1	none	2008	2025
+AZ	eid_al_adha	Qurban bayrami	Eid al-Adha	public	event:az_eid_al_adha	1	none	1993	2008
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	mon>tue,thu>fri,sat>mon	2009	2011
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	none	2012	2016
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	sat>mon,sun>mon	2017	2021
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	none	2022	2023
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	mon>tue,thu>fri,sat>mon	2024	2029
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	none	2030	2032
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	sat>mon,sun>mon	2033	2034
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	mon>tue,thu>fri,sat>mon	2035	2035
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	none	2036	2039
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	sat>mon,sun>mon	2040	2041
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	mon>tue,thu>fri,sat>mon	2042	2042
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	none	2043	2049
+AZ	eid_al_adha			public	event:az_eid_al_adha	1	mon>tue,thu>fri,sat>mon	2050	2050
+AZ	eid_al_adha_observed	Qurban bayrami (müşahidə olunur)	Eid al-Adha (observed)	public	event:az_eid_al_adha_observed	1	none	2007	2048
 AZ	eid_al_fitr	Ramazan bayrami	Eid al-Fitr	public	event:eid_al_fitr	1	none	1993	2005
 AZ	eid_al_fitr			public	event:eid_al_fitr	2	sat>mon,sun>mon	2006	2016
 AZ	eid_al_fitr			public	event:eid_al_fitr	2	none	2017	2019
@@ -486,8 +490,7 @@ BG	christmas_eve			public	12-24	1	sat>mon,sun>mon	2017	2050
 BG	day_of_bulgarian_enlightenment_and_culture_and_slavonic_alphabet	Ден на българската просвета и култура и на славянската писменост	Day of Bulgarian Enlightenment and Culture and Slavonic Alphabet	public	05-24	1	none	1991	2019
 BG	day_of_bulgarian_enlightenment_and_culture_and_slavonic_alphabet			public	05-24	1	sun>mon	2020	2020
 BG	day_of_slavonic_alphabet_bulgarian_enlightenment_and_culture	Ден на светите братя Кирил и Методий, на българската азбука, просвета и култура и на славянската книжовност	Day of Slavonic Alphabet, Bulgarian Enlightenment and Culture	public	05-24	1	sat>mon,sun>mon	2021	2050
-BG	day_off	Почивен ден	Day off	public	event:bg_day_off_1d	1	none	2004	2016
-BG	day_off			public	event:bg_day_off_2d	2	none	2009	2009
+BG	day_off	Почивен ден	Day off	public	event:bg_day_off	1	none	2004	2016
 BG	easter	Великден	Easter	public	orthodox	2	none	1991	2050
 BG	freedom_day	Ден на свободата	Freedom Day	public	09-09	1	none	1991	1991
 BG	good_friday	Велики петък	Good Friday	public	orthodox-2	1	none	2010	2050
@@ -874,8 +877,7 @@ BY	catholic_christmas_day	Нараджэнне Хрыстова (каталіц�
 BY	catholic_easter	Каталiцкi Вялiкдзень	Catholic Easter	public	easter	2	none	1992	1997
 BY	catholic_easter			public	easter	1	none	1998	2050
 BY	constitution_day	Дзень Канстытуцыі	Constitution Day	public	03-15	1	none	1995	1998
-BY	day_off	Выходны	Day off	public	event:by_day_off_1d	1	none	1998	2026
-BY	day_off			public	event:by_day_off_2d	2	none	2004	2004
+BY	day_off	Выходны	Day off	public	event:by_day_off	1	none	1998	2026
 BY	dzyady_all_souls_day	Дзень памяці	Dzyady (All Souls' Day)	public	11-02	1	none	1992	1997
 BY	independence_day_of_the_republic_of_belarus_day_of_the_republic	Дзень Незалежнасці Рэспублікі Беларусь (Дзень Рэспублікі)	Independence Day of the Republic of Belarus (Day of the Republic)	public	07-27	1	none	1991	1996
 BY	independence_day_of_the_republic_of_belarus_day_of_the_republic			public	07-03	1	none	1997	2050
@@ -1011,8 +1013,7 @@ CL	immaculate_conception	La Inmaculada Concepción	Immaculate Conception	public	
 CL	independence_day	Día de la Independencia	Independence Day	public	09-18	1	none	1970	2050
 CL	labor_day	Día Nacional del Trabajo	Labor Day	public	05-01	1	none	1970	2050
 CL	meeting_of_two_worlds_day	Día del Encuentro de dos Mundos	Meeting of Two Worlds' Day	public	10-12	1	tue<mon,wed<mon,thu<mon,fri>mon	2000	2050
-CL	national_holiday	Fiestas Patrias	National Holiday	public	event:cl_national_holiday_1d	1	none	1999	2050
-CL	national_holiday			public	event:cl_national_holiday_2d	2	none	2022	2022
+CL	national_holiday	Fiestas Patrias	National Holiday	public	event:cl_national_holiday	1	none	1999	2050
 CL	national_indigenous_peoples_day	Día Nacional de los Pueblos Indígenas	National Indigenous Peoples Day	public	event:cl_national_indigenous_peoples_day	1	none	2021	2050
 CL	national_liberation_day	Día de la Liberación Nacional	National Liberation Day	public	09-11	1	none	1981	1998
 CL	national_population_and_housing_census	Censo Nacional de Población y Vivienda	National Population and Housing Census	public	event:cl_national_population_and_housing_census	1	none	2002	2017
@@ -1047,8 +1048,7 @@ CN	chinese_new_year_spring_festival			public	event:lunar_new_year	3	sat>mon,sun>
 CN	chinese_new_year_spring_festival			public	event:lunar_new_year	3	none	2020	2020
 CN	chinese_new_year_spring_festival			public	event:lunar_new_year	3	sat>mon,sun>mon	2021	2050
 CN	chinese_new_year_spring_festival_observed	春节（补假）	Chinese New Year (Spring Festival) (observed)	public	event:cn_chinese_new_year_spring_festival_observed	1	none	2020	2020
-CN	day_off	休息日	Day off	public	event:cn_day_off_1d	1	none	2001	2026
-CN	day_off			public	event:cn_day_off_2d	2	none	2001	2026
+CN	day_off	休息日	Day off	public	event:cn_day_off	1	none	2001	2026
 CN	dragon_boat_festival	端午节	Dragon Boat Festival	public	event:dragon_boat	1	sat<fri,sun>mon	2008	2014
 CN	dragon_boat_festival			public	event:dragon_boat	1	sat>mon,sun>mon	2015	2050
 CN	labor_day	劳动节	Labor Day	public	05-01	1	none	1970	1999
@@ -1390,11 +1390,9 @@ EG	coptic_christmas_day	عيد الميلاد المجيد	Coptic Christmas Day	
 EG	coptic_christmas_day			public	01-07	1	none	2024	2050
 EG	coptic_christmas_day_observed	Coptic Christmas Day (observed)	Coptic Christmas Day (observed)	public	event:eg_coptic_christmas_day_observed	1	none	2022	2023
 EG	day_of_arafah	وقفة عيد الأضحى المبارك	Day of Arafah	public	event:eid_al_adha-1	1	none	1970	2050
-EG	eid_al_adha	عيد الأضحى المبارك	Eid al-Adha	public	event:eg_eid_al_adha_3d	3	none	1970	2022
-EG	eid_al_adha			public	event:eg_eid_al_adha_2d	2	none	2021	2021
-EG	eid_al_adha			public	event:eg_eid_al_adha_5d	5	none	2022	2022
-EG	eid_al_adha			public	event:eg_eid_al_adha_3d	3	next_weekday	2023	2024
-EG	eid_al_adha			public	event:eg_eid_al_adha_3d	3	none	2025	2050
+EG	eid_al_adha	عيد الأضحى المبارك	Eid al-Adha	public	event:eg_eid_al_adha	1	none	1970	2022
+EG	eid_al_adha			public	event:eg_eid_al_adha	1	next_weekday	2023	2024
+EG	eid_al_adha			public	event:eg_eid_al_adha	1	none	2025	2050
 EG	eid_al_fitr	عيد الفطر المبارك	Eid al-Fitr	public	event:eid_al_fitr	2	none	1970	2022
 EG	eid_al_fitr			public	event:eid_al_fitr	2	sat>mon,sun>mon	2023	2024
 EG	eid_al_fitr			public	event:eid_al_fitr	2	none	2025	2050
@@ -1574,9 +1572,7 @@ GA	liberation_day	Journée de la Libération	Liberation Day	public	08-30	1	none	
 GA	new_year_s_day	Jour de l'an	New Year's Day	public	01-01	1	none	1977	2050
 GA	pentecost	Pentecôte	Pentecost	public	easter+49	1	none	1977	2050
 GA	pentecost_monday	Lundi de Pentecôte	Pentecost Monday	public	easter+50	1	none	1977	2050
-GA	public_holiday	Jour férié	Public Holiday	public	event:ga_public_holiday_3d	3	none	2024	2024
-GA	public_holiday			public	event:ga_public_holiday_1d	1	none	2025	2025
-GA	public_holiday			public	event:ga_public_holiday_2d	2	none	2025	2025
+GA	public_holiday	Jour férié	Public Holiday	public	event:ga_public_holiday	1	none	2024	2025
 GA	renovation_day	Journée de la rénovation	Renovation Day	public	03-12	1	none	1977	1992
 GA	women_s_rights_day	Journée des droits de la femme	Women's Rights Day	public	04-17	1	none	2015	2050
 GA	youth_day	Fête de la Jeunesse	Youth Day	public	05:2:sun	1	none	1977	1991
@@ -1674,8 +1670,7 @@ GH	independence_day	Independence Day	Independence Day	public	03-06	1	none	2002	2
 GH	kwame_nkrumah_memorial_day	Kwame Nkrumah Memorial Day	Kwame Nkrumah Memorial Day	public	09-21	1	none	2019	2024
 GH	labour_day	Labour Day	Labour Day	public	05-01	1	none	2026	2050
 GH	new_year_s_day	New Year's Day	New Year's Day	public	01-01	1	none	2002	2050
-GH	public_holiday	Public Holiday	Public Holiday	public	event:gh_public_holiday_1d	1	none	2017	2026
-GH	public_holiday			public	event:gh_public_holiday_2d	2	none	2021	2025
+GH	public_holiday	Public Holiday	Public Holiday	public	event:gh_public_holiday	1	none	2017	2026
 GH	republic_day	Republic Day	Republic Day	public	07-01	1	none	2002	2018
 GH	republic_day			public	07-01	1	none	2025	2050
 GH	shaqq_day	Shaqq Day	Shaqq Day	public	event:eid_al_fitr+1	1	none	2026	2050
@@ -1957,11 +1952,7 @@ ID	ascension_joint_holiday			optional	easter+40	1	none	2024	2026
 ID	christmas_joint_holiday	Cuti Bersama Hari Raya Natal	Christmas Joint Holiday	optional	event:id_christmas_joint_holiday	1	none	2002	2027
 ID	day_of_silence_joint_holiday	Cuti Bersama Hari Suci Nyepi	Day of Silence Joint Holiday	optional	event:id_day_of_silence_joint_holiday	1	none	2006	2026
 ID	eid_al_adha_joint_holiday	Cuti Bersama Hari Raya Idul Adha	Eid al-Adha Joint Holiday	optional	event:id_eid_al_adha_joint_holiday	1	none	2013	2027
-ID	eid_al_fitr_joint_holiday	Cuti Bersama Hari Raya Idul Fitri	Eid al-Fitr Joint Holiday	optional	event:id_eid_al_fitr_joint_holiday_1d	1	none	2002	2027
-ID	eid_al_fitr_joint_holiday			optional	event:id_eid_al_fitr_joint_holiday_2d	2	none	2002	2026
-ID	eid_al_fitr_joint_holiday			optional	event:id_eid_al_fitr_joint_holiday_3d	3	none	2004	2025
-ID	eid_al_fitr_joint_holiday			optional	event:id_eid_al_fitr_joint_holiday_5d	5	none	2007	2007
-ID	eid_al_fitr_joint_holiday			optional	event:id_eid_al_fitr_joint_holiday_4d	4	none	2017	2018
+ID	eid_al_fitr_joint_holiday	Cuti Bersama Hari Raya Idul Fitri	Eid al-Fitr Joint Holiday	optional	event:id_eid_al_fitr_joint_holiday	1	none	2002	2027
 ID	eid_al_fitr_joint_holiday_observed	Eid al-Fitr Joint Holiday (observed)	Eid al-Fitr Joint Holiday (observed)	optional	event:id_eid_al_fitr_joint_holiday_observed	1	none	2020	2020
 ID	good_friday_joint_holiday	Cuti Bersama Wafat Yesus Kristus	Good Friday Joint Holiday	optional	03-25	1	none	2027	2027
 ID	independence_day_joint_holiday	Cuti Bersama Hari Kemerdekaan Republik Indonesia	Independence Day Joint Holiday	optional	event:id_independence_day_joint_holiday	1	none	2006	2025
@@ -2293,9 +2284,7 @@ JP	sports_day			public	10:2:mon	1	none	2022	2050
 JP	substitute_holiday	Substitute Holiday	Substitute Holiday	public	event:jp_substitute_holiday	1	none	1973	2050
 JP	the_crown_prince_marriage_ceremony	結婚の儀	The Crown Prince Marriage Ceremony	public	06-09	1	none	1993	1993
 JP	vernal_equinox_day	春分の日	Vernal Equinox Day	public	event:vernal_equinox	1	none	1970	2050
-JP	bank_holiday	銀行休業日	Bank Holiday	bank	event:jp_bank_holiday_3d	3	none	1970	1970
-JP	bank_holiday			bank	event:jp_bank_holiday_4d	4	none	1970	2049
-JP	bank_holiday			bank	event:jp_bank_holiday_1d	1	none	2050	2050
+JP	bank_holiday	銀行休業日	Bank Holiday	bank	event:jp_bank_holiday	1	none	1970	2050
 KE	boxing_day	Boxing Day	Boxing Day	public	12-26	1	none	1970	1992
 KE	boxing_day			public	12-26	1	sun>mon	1993	2050
 KE	christmas_day	Christmas Day	Christmas Day	public	12-25	1	none	1970	1987
@@ -2304,8 +2293,7 @@ KE	day_of_mourning_for_queen_elizabeth_ii	Day of Mourning for Queen Elizabeth II
 KE	easter_monday	Easter Monday	Easter Monday	public	easter+1	1	none	1970	2050
 KE	eid_al_fitr	Idd-ul-Fitr	Eid al-Fitr	public	event:eid_al_fitr	1	none	1970	1985
 KE	eid_al_fitr			public	event:eid_al_fitr	1	sun>mon	1986	2050
-KE	election_day	Election Day	Election Day	public	event:ke_election_day_1d	1	none	2017	2022
-KE	election_day			public	event:ke_election_day_2d	2	none	2017	2017
+KE	election_day	Election Day	Election Day	public	event:ke_election_day	1	none	2017	2022
 KE	good_friday	Good Friday	Good Friday	public	easter-2	1	none	1970	2050
 KE	inauguration_day	Inauguration Day	Inauguration Day	public	event:ke_inauguration_day	1	none	2017	2024
 KE	independence_day	Independence Day	Independence Day	public	12-12	1	none	1970	1992
@@ -2340,10 +2328,7 @@ KG	constitution_day			public	05-05	1	none	2013	2050
 KG	day_of_the_great_october_socialist_revolution	Улуу Октябрь социалисттик революциясынын күнү	Day of the Great October Socialist Revolution	public	11-07	1	sat>mon,sun>mon	2002	2017
 KG	day_of_the_people_s_april_revolution	Элдик Апрель революциясы күнү	Day of the People's April Revolution	public	04-07	1	sat>mon	2016	2024
 KG	day_of_the_people_s_revolution	Элдик революция күнү	Day of the People's Revolution	public	03-24	1	sat>mon,sun>mon	2008	2012
-KG	day_off	Эс алуу күнү	Day off	public	event:kg_day_off_1d	1	none	2006	2025
-KG	day_off			public	event:kg_day_off_2d	2	none	2007	2024
-KG	day_off			public	event:kg_day_off_3d	3	none	2008	2022
-KG	day_off			public	event:kg_day_off_4d	4	none	2012	2024
+KG	day_off	Эс алуу күнү	Day off	public	event:kg_day_off	1	none	2006	2025
 KG	days_of_history_and_commemoration_of_ancestors	Тарых жана ата-бабаларды эскерүү күндөрү	Days of History and Commemoration of Ancestors	public	11-07	2	sat>mon,sun>mon	2018	2024
 KG	eid_al_adha	Курман айт	Eid al-Adha	public	event:eid_al_adha	1	none	1992	2005
 KG	eid_al_adha			public	event:eid_al_adha	1	sat>mon,sun>mon	2006	2026
@@ -2643,9 +2628,7 @@ LA	new_year_s_day	ວັນປີໃໝ່ສາກົນ	New Year's Day	public	
 LA	new_year_s_day			public	01-01	1	sat>mon,sun>mon	2012	2050
 LA	establishment_day_of_the_bol	ວັນສ້າງຕັ້ງທະນາຄານແຫ່ງ ສປປ ລາວ	Establishment Day of the BOL	bank	10-07	1	none	1976	2011
 LA	establishment_day_of_the_bol			bank	10-07	1	sat>mon,sun>mon	2012	2050
-LA	lao_year_end_bank_holiday	ສາມວັນລັດຖະການສຸດທ້າຍຂອງທຸກໆປີ	Lao Year-End Bank Holiday	bank	event:la_lao_year_end_bank_holiday_3d	3	none	1976	2050
-LA	lao_year_end_bank_holiday			bank	event:la_lao_year_end_bank_holiday_1d	1	none	1979	2047
-LA	lao_year_end_bank_holiday			bank	event:la_lao_year_end_bank_holiday_2d	2	none	1979	2047
+LA	lao_year_end_bank_holiday	ສາມວັນລັດຖະການສຸດທ້າຍຂອງທຸກໆປີ	Lao Year-End Bank Holiday	bank	event:la_lao_year_end_bank_holiday	1	none	1976	2050
 LA	special_bank_holiday	ມື້ປິດການໃຫ້ບໍລິການຂອງທະນາຄານຕົວແທນ	Special Bank Holiday	bank	01-02	1	none	2015	2015
 LB	all_saints_day	عيد جميع القديسين	All Saints' Day	public	11-01	1	none	1985	1993
 LB	armenian_orthodox_christmas_day	عيد الميلاد عند الطوائف الارمنية الارثوذكسية	Armenian Orthodox Christmas Day	public	01-06	1	none	1995	2050
@@ -2748,9 +2731,7 @@ LK	prophet_s_birthday	නබි නායකතුමාගේ උපන් ද�
 LK	prophet_s_birthday			public	01-04	1	none	2015	2015
 LK	prophet_s_birthday			public	event:mawlid+1	1	none	2016	2026
 LK	sinhala_and_tamil_new_year	සිංහල හා දෙමළ අලුත් අවුරුදු දිනය	Sinhala and Tamil New Year	public	event:pohela_boishakh-1	1	none	2003	2026
-LK	special_public_holiday	විශේෂ රජයේ නිවාඩු දිනය	Special Public Holiday	public	event:lk_special_public_holiday_1d	1	none	2012	2024
-LK	special_public_holiday			public	event:lk_special_public_holiday_4d	4	none	2020	2020
-LK	special_public_holiday			public	event:lk_special_public_holiday_2d	2	none	2022	2022
+LK	special_public_holiday	විශේෂ රජයේ නිවාඩු දිනය	Special Public Holiday	public	event:lk_special_public_holiday	1	none	2012	2024
 LK	tamil_thai_pongal_day	දෙමළ තෛපොංැලල් දිනය	Tamil Thai Pongal Day	public	event:pongal	1	none	2003	2026
 LK	unduvap_full_moon_poya_day	උඳුවප් පුර පසළොස්වක පෝය දිනය	Unduvap Full Moon Poya Day	public	event:unduvap_poya	1	none	2003	2026
 LK	vap_full_moon_poya_day	වප් පුර පසළොස්වක පෝය දිනය	Vap Full Moon Poya Day	public	event:vap_poya	1	none	2003	2026
@@ -3400,8 +3381,7 @@ NZ	queen_s_birthday	Queen's Birthday	Queen's Birthday	public	06:1:mon	1	none	197
 NZ	waitangi_day	Waitangi Day	Waitangi Day	public	02-06	1	none	1977	2015
 NZ	waitangi_day			public	02-06	1	sat>mon,sun>mon	2016	2050
 OM	eid_al_adha	عيد الأضحى	Eid al-Adha	public	event:eid_al_adha-1	4	none	1970	2050
-OM	eid_al_fitr	عيد الفطر	Eid al-Fitr	public	event:om_eid_al_fitr_4d	4	none	1970	2050
-OM	eid_al_fitr			public	event:om_eid_al_fitr_5d	5	none	1971	2048
+OM	eid_al_fitr	عيد الفطر	Eid al-Fitr	public	event:om_eid_al_fitr	1	none	1970	2050
 OM	islamic_new_year	رأس السنة الهجرية	Islamic New Year	public	event:hijri_new_year	1	none	1970	2050
 OM	isra_and_mi_raj	الإسراء والمعراج	Isra' and Mi'raj	public	event:isra_and_miraj	1	none	1970	2050
 OM	national_day	يوم وطني	National Day	public	11-18	2	none	2020	2024
@@ -3516,10 +3496,7 @@ PH	rizal_day			public	12-27	1	none	2010	2010
 PH	rizal_day			public	12-30	1	none	2011	2050
 PK	ashura	Ashura	Ashura	public	event:ashura	2	none	1970	2050
 PK	benazir_bhutto_s_martyrdom_day	Benazir Bhutto's Martyrdom Day	Benazir Bhutto's Martyrdom Day	public	12-27	1	none	2008	2008
-PK	eid_al_adha	Eid-ul-Adha	Eid al-Adha	public	event:pk_eid_al_adha_3d	3	none	1970	2050
-PK	eid_al_adha			public	event:pk_eid_al_adha_4d	4	none	2009	2025
-PK	eid_al_adha			public	event:pk_eid_al_adha_2d	2	none	2011	2011
-PK	eid_al_adha			public	event:pk_eid_al_adha_5d	5	none	2022	2022
+PK	eid_al_adha	Eid-ul-Adha	Eid al-Adha	public	event:pk_eid_al_adha	1	none	1970	2050
 PK	eid_al_fitr	Eid-ul-Fitr	Eid al-Fitr	public	event:eid_al_fitr+1	3	none	1970	2006
 PK	eid_al_fitr			public	10-13	4	none	2007	2007
 PK	eid_al_fitr			public	event:eid_al_fitr+1	3	none	2008	2009
@@ -3638,8 +3615,7 @@ PY	patriots_day			public	02:4:mon	1	none	2022	2023
 PY	patriots_day			public	03-01	1	none	2024	2024
 PY	patriots_day			public	03-03	1	none	2025	2025
 PY	patriots_day			public	03-01	1	none	2026	2050
-PY	public_holiday	Asueto adicional	Public Holiday	public	event:py_public_holiday_1d	1	none	2007	2013
-PY	public_holiday			public	event:py_public_holiday_2d	2	none	2015	2015
+PY	public_holiday	Asueto adicional	Public Holiday	public	event:py_public_holiday	1	none	2007	2015
 PY	workers_day	Día de los Trabajadores	Workers' Day	public	05-01	1	none	1991	2050
 PY	public_sector_holiday	Asueto de la Administración Pública	Public sector holiday	optional	event:py_public_sector_holiday	1	none	2010	2025
 QA	eid_al_adha	عيد الأضحى	Eid al-Adha	public	event:eid_al_adha	3	none	1971	2050
@@ -3678,8 +3654,7 @@ RU	christmas_day			public	01-07	1	none	2017	2050
 RU	constitution_day	День Конституции Российской Федерации	Constitution Day	public	12-12	1	sat>mon,sun>mon	1994	2004
 RU	day_of_consent_and_reconciliation	День согласия и примирения	Day of consent and reconciliation	public	11-07	1	sat>mon,sun>mon	1996	2004
 RU	day_of_the_adoption_of_the_declaration_of_sovereignty_of_the_russian_federation	День принятия Декларации о государственном суверенитете Российской Федерации	Day of the Adoption of the Declaration of Sovereignty of the Russian Federation	public	06-12	1	sat>mon,sun>mon	1992	2001
-RU	day_off	Выходной	Day off	public	event:ru_day_off_1d	1	none	1991	2027
-RU	day_off			public	event:ru_day_off_2d	2	none	2012	2024
+RU	day_off	Выходной	Day off	public	event:ru_day_off	1	none	1991	2027
 RU	defender_of_the_fatherland_day	День защитника Отечества	Defender of the Fatherland Day	public	02-23	1	sat>mon,sun>mon	2002	2012
 RU	defender_of_the_fatherland_day			public	02-23	1	none	2013	2019
 RU	defender_of_the_fatherland_day			public	02-23	1	sun>mon	2020	2024
@@ -3692,10 +3667,12 @@ RU	international_women_s_day			public	03-08	1	sat>mon,sun>mon	1997	2013
 RU	international_women_s_day			public	03-08	1	sun>mon	2014	2036
 RU	international_women_s_day			public	03-08	1	none	2037	2050
 RU	international_workers_solidarity_day	День международной солидарности трудящихся	International Workers' Solidarity Day	public	05-01	2	none	1991	1991
-RU	new_year_holidays	Новогодние каникулы	New Year Holidays	public	event:ru_new_year_holidays_5d	5	none	2005	2007
-RU	new_year_holidays			public	event:ru_new_year_holidays_5d	5	sat>mon,sun>mon	2008	2012
-RU	new_year_holidays			public	event:ru_new_year_holidays_1d	1	none	2013	2050
-RU	new_year_holidays			public	event:ru_new_year_holidays_6d	6	none	2013	2050
+RU	new_year_holidays	Новогодние каникулы	New Year Holidays	public	event:ru_new_year_holidays	1	none	2005	2007
+RU	new_year_holidays			public	event:ru_new_year_holidays	1	sat>mon,sun>mon	2008	2008
+RU	new_year_holidays			public	event:ru_new_year_holidays	1	none	2009	2011
+RU	new_year_holidays			public	event:ru_new_year_holidays	1	thu>fri,sat>tue	2012	2012
+RU	new_year_holidays			public	event:ru_new_year_holidays	1	none	2013	2050
+RU	new_year_holidays_observed	Новогодние каникулы (выходной)	New Year Holidays (observed)	public	event:ru_new_year_holidays_observed	1	none	2009	2011
 RU	new_year_s_day	Новый год	New Year's Day	public	01-01	1	none	1991	1992
 RU	new_year_s_day			public	01-01	2	sat>mon,sun>mon	1993	2004
 RU	new_year_s_day_observed	New Year's Day (observed)	New Year's Day (observed)	public	event:ru_new_year_s_day_observed	1	none	2005	2006
@@ -4173,8 +4150,7 @@ TH	asarnha_bucha			public	event:thai_asarnha_bucha	1	none	1976	1996
 TH	asarnha_bucha			public	event:thai_asarnha_bucha	1	sat>mon,sun>mon	1997	1999
 TH	asarnha_bucha			public	event:thai_asarnha_bucha	1	none	2000	2002
 TH	asarnha_bucha			public	event:thai_asarnha_bucha	1	sat>mon,sun>mon	2003	2050
-TH	bridge_public_holiday	วันหยุดพิเศษ (เพิ่มเติม)	Bridge Public Holiday	public	event:th_bridge_public_holiday_1d	1	none	2009	2026
-TH	bridge_public_holiday			public	event:th_bridge_public_holiday_2d	2	none	2010	2020
+TH	bridge_public_holiday	วันหยุดพิเศษ (เพิ่มเติม)	Bridge Public Holiday	public	event:th_bridge_public_holiday	1	none	2009	2026
 TH	buddhist_lent_day	วันเข้าพรรษา	Buddhist Lent Day	public	event:thai_khao_phansa	1	none	1970	2010
 TH	buddhist_lent_day			public	event:thai_khao_phansa	1	sat>mon	2011	2017
 TH	buddhist_lent_day			public	event:thai_khao_phansa	1	none	2018	2018
@@ -4322,12 +4298,9 @@ TL	25th_anniversary_celebrations_of_the_popular_consultation	Celebrações do 25
 TL	centenary_of_the_revolt_of_dom_boaventura	Centenário da Revolta de Dom Boaventura	Centenary of the Revolt of Dom Boaventura	optional	event:tl_centenary_of_the_revolt_of_dom_boaventura	1	none	2012	2012
 TL	funeral_ceremonies_of_fernando_la_sama_de_araujo	Cerimónias Fúnebres de Fernando 'La Sama' de Araújo	Funeral Ceremonies of Fernando 'La Sama' de Araújo	optional	06-05	1	none	2015	2015
 TL	local_election_day	Dia de eleições locais	Local Election Day	optional	event:tl_local_election_day	1	none	2023	2023
-TL	national_holidays_special	Feriados Nacionais (Especiais)	National Holidays (Special)	optional	event:tl_national_holidays_special_1d	1	none	2010	2025
-TL	national_holidays_special			optional	event:tl_national_holidays_special_2d	2	none	2014	2023
+TL	national_holidays_special	Feriados Nacionais (Especiais)	National Holidays (Special)	optional	event:tl_national_holidays_special	1	none	2010	2025
 TL	parliamentary_election_day	Dia de Eleições Parlamentares	Parliamentary Election Day	optional	event:tl_parliamentary_election_day	1	none	2012	2023
-TL	presidential_election_day	Dia da Eleição Presidencial	Presidential Election Day	optional	event:tl_presidential_election_day_1d	1	none	2012	2022
-TL	presidential_election_day			optional	event:tl_presidential_election_day_2d	2	none	2012	2017
-TL	presidential_election_day			optional	event:tl_presidential_election_day_3d	3	none	2022	2022
+TL	presidential_election_day	Dia da Eleição Presidencial	Presidential Election Day	optional	event:tl_presidential_election_day	1	none	2012	2022
 TL	visit_of_his_holiness_pope_francis_to_timor_leste	Visita de Sua Santidade o Papa Francisco a Timor-Leste	Visit of His Holiness Pope Francis to Timor-Leste	optional	09-09	3	none	2024	2024
 TM	constitution_and_state_flag_day	Türkmenistanyň Konstitusiýasynyň we Döwlet baýdagynyň güni	Constitution and State Flag Day	public	05-18	1	sun>mon	2018	2050
 TM	day_of_revival_unity_and_poetry_of_magtymguly_pyragy	Galkynyş, Agzybirlik we Magtymguly Pyragynyň şygryýet güni	Day of Revival, Unity and Poetry of Magtymguly Pyragy	public	05-18	1	sun>mon	2009	2014
@@ -4628,10 +4601,7 @@ UA	day_of_the_constitution_of_ukraine	День Конституції Украї
 UA	day_of_the_constitution_of_ukraine			public	06-28	1	none	1998	2002
 UA	day_of_the_constitution_of_ukraine			public	06-28	1	sat>mon,sun>mon	2003	2021
 UA	day_of_victory_over_nazism_in_world_war_ii_victory_day	День перемоги над нацизмом у Другій світовій війні (День перемоги)	Day of Victory over Nazism in World War II (Victory Day)	public	05-09	1	sat>mon,sun>mon	2016	2021
-UA	day_off	Вихідний день	Day off	public	event:ua_day_off_1d	1	none	1991	2022
-UA	day_off			public	event:ua_day_off_2d	2	none	1997	2019
-UA	day_off			public	event:ua_day_off_4d	4	none	2006	2007
-UA	day_off			public	event:ua_day_off_3d	3	none	2008	2010
+UA	day_off	Вихідний день	Day off	public	event:ua_day_off	1	none	1991	2022
 UA	defender_of_ukraine_day	День захисника України	Defender of Ukraine Day	public	10-14	1	sat>mon,sun>mon	2015	2020
 UA	easter_sunday_pascha	Великдень (Пасха)	Easter Sunday (Pascha)	public	orthodox	1	none	1991	1994
 UA	easter_sunday_pascha			public	orthodox	1	sun>mon	1995	1997
@@ -4759,14 +4729,12 @@ UY	landing_of_the_33_patriots			bank	04-19	1	none	2011	2011
 UY	landing_of_the_33_patriots			bank	04-19	1	tue<mon,wed<mon,thu>mon,fri>mon	2012	2050
 UY	landing_of_the_33_patriots_observed	Desembarco de los 33 Orientales	Landing of the 33 Patriots (observed)	bank	event:uy_landing_of_the_33_patriots_observed	1	none	2000	2011
 UY	tourism_week	Semana de Turismo	Tourism Week	bank	easter-6	5	none	1970	2050
-UZ	additional_day_off_by_presidential_decree	Prezidentining farmoni bilan qoʻshimcha dam olish kuni	Additional day off by Presidential decree	public	event:uz_additional_day_off_by_presidential_decree_1d	1	none	2018	2026
-UZ	additional_day_off_by_presidential_decree			public	event:uz_additional_day_off_by_presidential_decree_2d	2	none	2021	2026
+UZ	additional_day_off_by_presidential_decree	Prezidentining farmoni bilan qoʻshimcha dam olish kuni	Additional day off by Presidential decree	public	event:uz_additional_day_off_by_presidential_decree	1	none	2018	2026
 UZ	constitution_day	Oʻzbekiston Respublikasi Konstitutsiyasi kuni	Constitution Day	public	12-08	1	none	1993	2023
 UZ	constitution_day			public	12-08	1	sat>mon,sun>mon	2024	2050
 UZ	day_of_memory_and_honor	Xotira va qadrlash kuni	Day of Memory and Honor	public	05-09	1	none	1999	2025
 UZ	day_of_memory_and_honor			public	05-09	1	sat>mon,sun>mon	2026	2050
-UZ	day_off	Dam olish kuni	Day off	public	event:uz_day_off_1d	1	none	2018	2026
-UZ	day_off			public	event:uz_day_off_2d	2	none	2018	2021
+UZ	day_off	Dam olish kuni	Day off	public	event:uz_day_off	1	none	2018	2026
 UZ	eid_al_adha	Qurbon hayit	Eid al-Adha	public	event:eid_al_adha	1	none	1992	2023
 UZ	eid_al_adha			public	event:eid_al_adha	1	sat>mon,sun>mon	2024	2050
 UZ	eid_al_fitr	Roʻza hayit	Eid al-Fitr	public	event:eid_al_fitr	1	none	1992	2024
@@ -4856,9 +4824,7 @@ VE	good_friday	Viernes Santo	Good Friday	public	easter-2	1	none	1970	2050
 VE	independence_day	Día de la Independencia	Independence Day	public	07-05	1	none	1970	2050
 VE	international_worker_s_day	Dia Mundial del Trabajador	International Worker's Day	public	05-01	1	none	1970	2050
 VE	maundy_thursday	Jueves Santo	Maundy Thursday	public	easter-3	1	none	1970	2050
-VE	national_holidays	Fiesta Nacional	National Holidays	public	event:ve_national_holidays_3d	3	none	2010	2017
-VE	national_holidays			public	event:ve_national_holidays_2d	2	none	2014	2019
-VE	national_holidays			public	event:ve_national_holidays_1d	1	none	2016	2019
+VE	national_holidays	Fiesta Nacional	National Holidays	public	event:ve_national_holidays	1	none	2010	2019
 VE	new_year_s_day	Año Nuevo	New Year's Day	public	01-01	1	none	1970	2050
 VE	new_year_s_eve	Fiesta de Fin de Año	New Year's Eve	public	12-31	1	none	1970	2050
 VN	day_off	Ngày nghỉ	Day off	public	event:vn_day_off	1	none	2010	2026
@@ -4910,8 +4876,7 @@ VN	third_day_of_lunar_new_year	Mùng ba Tết Nguyên Đán	Third Day of Lunar N
 VN	third_day_of_lunar_new_year			public	01-23	1	none	1985	1985
 VN	third_day_of_lunar_new_year			public	event:lunar_new_year+2	1	none	1986	2050
 VN	vietnam_cultural_day	Ngày Văn hóa Việt Nam	Vietnam Cultural Day	public	11-24	1	sat>mon,sun>mon	2026	2050
-VU	40th_independence_anniversary	40th Independence Anniversary	40th Independence Anniversary	public	event:vu_40th_independence_anniversary_1d	1	none	2020	2020
-VU	40th_independence_anniversary			public	event:vu_40th_independence_anniversary_3d	3	none	2020	2020
+VU	40th_independence_anniversary	40th Independence Anniversary	40th Independence Anniversary	public	event:vu_40th_independence_anniversary	1	none	2020	2020
 VU	ascension_day	Ascension Day	Ascension Day	public	easter+39	1	none	1981	2050
 VU	assumption_day	Assumption Day	Assumption Day	public	08-15	1	sun>mon	1981	2050
 VU	children_s_day	Children's Day	Children's Day	public	07-24	1	sun>mon	1981	2050
@@ -5025,52 +4990,40 @@ YE	eid_al_adha			public	event:eid_al_adha-1	5	none	2047	2047
 YE	eid_al_adha			public	event:eid_al_adha-1	5	sun>mon	2048	2048
 YE	eid_al_adha			public	event:eid_al_adha-1	5	none	2049	2050
 YE	eid_al_adha_observed	عيد الأضحى (يوم تعويضي)	Eid al-Adha (observed)	public	event:ye_eid_al_adha_observed	1	none	1996	2049
-YE	eid_al_fitr	عيد الفطر	Eid al-Fitr	public	event:ye_eid_al_fitr_4d	4	none	1991	1996
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	1992	1992
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday,overlap	1993	1993
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	1994	1994
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	1995	2000
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	1997	2001
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2001	2002
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2002	2014
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2003	2003
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2004	2004
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2005	2006
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2007	2007
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday,overlap	2008	2009
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2010	2012
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2013	2015
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2015	2016
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday	2016	2017
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2017	2022
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2018	2019
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2020	2020
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2021	2023
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2023	2024
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday	2024	2025
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2025	2027
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2026	2029
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2028	2028
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	next_weekday	2029	2030
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2030	2031
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2031	2032
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday	2032	2032
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2033	2037
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2033	2033
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2034	2034
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2035	2035
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday	2036	2039
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2038	2040
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2040	2044
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2041	2042
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2043	2043
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	next_weekday	2044	2045
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	none	2045	2046
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	sun>mon	2046	2048
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	next_weekday	2047	2047
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_5d	5	sun>mon	2048	2048
-YE	eid_al_fitr			public	event:ye_eid_al_fitr_4d	4	none	2049	2050
-YE	eid_al_fitr_observed	عيد الفطر (يوم تعويضي)	Eid al-Fitr (observed)	public	event:ye_eid_al_fitr_observed	1	none	1995	2049
+YE	eid_al_fitr	عيد الفطر	Eid al-Fitr	public	event:ye_eid_al_fitr	1	none	1991	1992
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday,overlap	1993	1993
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	1994	2007
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday,overlap	2008	2008
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2009	2009
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2010	2011
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2012	2014
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2015	2015
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2016	2016
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2017	2017
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2018	2019
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2020	2022
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2023	2023
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2024	2024
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2025	2025
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2026	2027
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2028	2028
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2029	2029
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2030	2030
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2031	2031
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2032	2032
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2033	2035
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2036	2036
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2037	2037
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2038	2038
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2039	2039
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2040	2042
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2043	2043
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2044	2044
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2045	2045
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	sun>mon	2046	2046
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	next_weekday	2047	2047
+YE	eid_al_fitr			public	event:ye_eid_al_fitr	1	none	2048	2050
+YE	eid_al_fitr_observed	عيد الفطر (يوم تعويضي)	Eid al-Fitr (observed)	public	event:ye_eid_al_fitr_observed	1	none	1992	2049
 YE	evacuation_day	عيد الجلاء	Evacuation Day	public	11-30	1	none	1991	2000
 YE	evacuation_day			public	11-30	1	next_weekday,overlap	2001	2001
 YE	evacuation_day			public	11-30	1	none	2002	2006

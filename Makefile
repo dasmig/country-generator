@@ -8,7 +8,7 @@ HEADERS := dasmig/countrygen.hpp dasmig/core.hpp $(wildcard dasmig/core/*.hpp)
 EXAMPLE_SRC := examples/example.cpp
 EXAMPLE_BIN := $(BUILD)/example
 
-TEST_SRC := tests/tests.cpp tests/catch_amalgamated.cpp
+TEST_SRC := tests/tests.cpp tests/locale_tests.cpp tests/catch_amalgamated.cpp
 TEST_BIN := $(BUILD)/test_runner
 
 BENCH_SRC   := bench/bench.cpp
@@ -30,14 +30,19 @@ $(TEST_BIN): $(TEST_SRC) $(HEADERS) | $(BUILD)
 test: $(TEST_BIN)
 	./$(TEST_BIN)
 
-# The same tests with the lite tier compiled in (DASMIG_COUNTRY_EMBED).
-test-embed: $(TEST_SRC) $(HEADERS) dasmig/countrygen_data.hpp | $(BUILD)
-	$(CXX) $(CXXFLAGS) -DDASMIG_COUNTRY_EMBED -o $(BUILD)/test_embed $(TEST_SRC)
+# The same tests with the lite tier compiled in (DASMIG_COUNTRY_EMBED and
+# DASMIG_COUNTRY_EMBED_LOCALE).
+test-embed: $(TEST_SRC) $(HEADERS) dasmig/countrygen_data.hpp dasmig/countrygen_locale_data.hpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -DDASMIG_COUNTRY_EMBED -DDASMIG_COUNTRY_EMBED_LOCALE -o $(BUILD)/test_embed $(TEST_SRC)
 	./$(BUILD)/test_embed
 
-# Regenerate the compiled-in copy of the lite tier.
+# Regenerate the compiled-in copy of the lite tier: countries.tsv behind
+# DASMIG_COUNTRY_EMBED, the locale tables behind DASMIG_COUNTRY_EMBED_LOCALE.
+LOCALE_TABLES := locales.tsv zones.tsv zone_links.tsv currencies.tsv holidays.tsv holiday_events.tsv holiday_years.tsv
+
 embed:
-	$(PYTHON) scripts/embed.py resources --tier lite --name countrygen --output dasmig/countrygen_data.hpp
+	$(PYTHON) scripts/embed.py resources --tier lite --name countrygen --output dasmig/countrygen_data.hpp --files countries.tsv
+	$(PYTHON) scripts/embed.py resources --tier lite --name countrygen_locale --output dasmig/countrygen_locale_data.hpp --files $(LOCALE_TABLES)
 
 # Benchmarks (bench/): an optimized build run on each tier, and again with
 # the lite tier compiled in where the library has data. Results in
