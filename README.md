@@ -13,7 +13,7 @@
 
 **[API Reference](https://dasmig.github.io/country-generator/)** · **[Usage Guide](doc/usage.md)** · **[Data and Method](doc/data.md)** · **[Releases](https://github.com/dasmig/country-generator/releases)**
 
-Countries drawn by population, with names, codes, capital, region, languages, currency and other fields.
+Countries drawn by population, with names, codes, capital, region, languages, currency and other fields, and each country's locales, time zones, currencies and public holidays.
 
 ## Features
 
@@ -29,6 +29,14 @@ Countries drawn by population, with names, codes, capital, region, languages, cu
 
 - **CCA2 Lookup**. Look up a specific country by its ISO 3166-1 alpha-2 code with `find_country("US")`.
 
+- **Locales**. Each country's locale tags (`en-CA`, `fr-CA`) drawn by speakers, with Unicode CLDR's date, time, number and currency formats, names, week and measurement system, and `format_date`, `format_time`, `format_number` and `format_money` that use them.
+
+- **Time Zones**. Each country's IANA zones drawn by population, with their rules (tzdata 2026f) for converting between UTC and local time, the same on every platform. Old zone names (`Asia/Calcutta`) are followed.
+
+- **Public Holidays**. A country's national holidays in any year python-holidays covers it, within 1970 to 2050, in its language and in English, with the days a weekend moves them to, and `is_holiday`. Rules inferred from python-holidays and checked against it for every country and year.
+
+- **Currencies**. The ISO 4217 minor unit of every currency, for `core::money`.
+
 - **Deterministic Seeding**. Per-call `get_country(request, seed)` for reproducible results, and `country::seed()` for replaying a previous generation with the same request.
 
 - **Batch Generation**. Generate thousands of results from one seed, on several threads with the same output for any thread count, optionally unique by a key, and stream them as JSON Lines or CSV (see the usage guide).
@@ -39,7 +47,7 @@ Countries drawn by population, with names, codes, capital, region, languages, cu
 
 - **JSON and Replay**. `to_json()` on every result, and a `signature()` recording the seed and the data it came from.
 
-- **Compiled-in Data**. Define `DASMIG_COUNTRY_EMBED` to build the `lite` tier into the program, for WebAssembly and other builds without files.
+- **Compiled-in Data**. Define `DASMIG_COUNTRY_EMBED` to build the `lite` tier's countries into the program, for WebAssembly and other builds without files, and `DASMIG_COUNTRY_EMBED_LOCALE` to add its locale tables.
 
 - **Multi-Instance Support**. Construct independent `cntg` instances with their own data and random engine — ideal for embedding inside other generators.
 
@@ -102,6 +110,22 @@ auto uniform = cntg::instance().get_country({.weighted = false});
 cntg my_gen;
 my_gen.load("path/to/countries.tsv");
 auto c = my_gen.get_country({});
+
+// A locale of Canada, by speakers, and its formats.
+using namespace std::chrono;
+auto loc = cntg::instance().get_locale({.country = "CA"}, 42);   // fr-CA
+std::cout << loc.format_date(2024y / December / 31) << '\n';
+auto price = dasmig::core::money::from_minor(123450, "CAD",
+                                              cntg::instance().currency_digits("CAD"));
+std::cout << loc.format_money(price) << '\n';
+
+// A time zone of Brazil, by population, and local time.
+auto tz = cntg::instance().get_time_zone({.country = "BR"}, 42);   // America/Sao_Paulo
+auto local = tz.to_local(sys_days{2024y / March / 1} + 15h);       // 12:00 local
+
+// Brazil's holidays in 2025.
+for (const auto& h : cntg::instance().holidays({.country = "BR", .year = 2025}))
+    std::cout << h.date << ' ' << h.name << '\n';
 ```
 
 `country_request{}` selects from all loaded countries with population weighting.
@@ -128,7 +152,17 @@ The country data is aggregated from multiple open-data sources:
 | [Unicode CLDR](https://cldr.unicode.org/) | Unicode License v3 | Share of the population that speaks each language |
 | [SIL ISO 639-3](https://iso639-3.sil.org/) | Free to use | Names of languages CLDR does not name |
 
-Because the data is adapted from an ODbL database, the ODbL applies to it. Output generated with the library needs a notice that it uses mledoze/countries data under the ODbL. If you publish the data itself, or a database adapted from it, you must also offer that database under the ODbL (share-alike). `LICENSE_DATA.txt` gives the details. The column-by-column sources are in [`doc/data.md`](doc/data.md).
+The locale tables come from:
+
+| Source | License | Contribution |
+|--------|---------|--------------|
+| [Unicode CLDR](https://cldr.unicode.org/) 47 | Unicode License v3 | Locales: formats, names, week and measurement data; cash digits |
+| [ISO 4217](https://www.six-group.com/en/products-services/financial-information/data-standards.html) (SIX) | Published list | Currency codes and minor units |
+| [IANA tzdata](https://www.iana.org/time-zones) 2026f | Public domain | Time zones and their rules |
+| [GeoNames](https://www.geonames.org/) | CC BY 4.0 | The population share of each zone |
+| [python-holidays](https://github.com/vacanza/holidays) 0.107 | MIT | Holidays, from which the rules are inferred |
+
+Because the data is adapted from an ODbL database, the ODbL applies to it. Output generated with the library needs a notice that it uses mledoze/countries data under the ODbL. If you publish the data itself, or a database adapted from it, you must also offer that database under the ODbL (share-alike). `LICENSE_DATA.txt` gives the details, the locale tables' sources included. The column-by-column sources are in [`doc/data.md`](doc/data.md).
 
 To regenerate datasets:
 
@@ -136,6 +170,9 @@ To regenerate datasets:
 python scripts/prepare_countries.py            # generate both tiers
 python scripts/prepare_countries.py --tier lite # lite only
 python scripts/prepare_countries.py --tier full # full only
+python scripts/prepare_locales.py              # locales and currencies
+python scripts/prepare_zones.py                # time zones
+python scripts/prepare_holidays.py             # holidays
 ```
 
 ## Building
@@ -145,10 +182,12 @@ make            # example
 make test       # tests
 make bench      # benchmarks, results in build/bench.tsv
 make test-embed # tests with the lite tier compiled in
+make test-embed-countries # tests with only the lite countries compiled in
 make coverage   # code coverage
 make lint       # clang-tidy
 make docs       # API docs
-make embed      # regenerate dasmig/countrygen_data.hpp from resources/lite
+make embed      # regenerate both compiled-in headers from resources/lite
+make dump       # the binary the validation scripts read (see doc/data.md)
 ```
 
 ## Compiler Support

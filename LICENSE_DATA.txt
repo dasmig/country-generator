@@ -1,5 +1,5 @@
-The country data in the resources/ directory, and its compiled-in copy in
-dasmig/countrygen_data.hpp, is a database built from:
+The country data in the resources/ directory (countries.tsv), and its
+compiled-in copy in dasmig/countrygen_data.hpp, is a database built from:
 
 1. mledoze/countries (https://github.com/mledoze/countries)
    Licensed under the Open Database License (ODbL) v1.0.
@@ -43,3 +43,64 @@ to it. In short, and not as legal advice (the licence texts govern):
 - The CLDR language data is under the Unicode License v3, which asks that
   the copyright and permission notice (https://www.unicode.org/license.txt)
   stay with copies of the data.
+
+
+Locale tables
+-------------
+
+The locale tables (locales.tsv, currencies.tsv, zones.tsv, zone_links.tsv,
+holidays.tsv, holiday_events.tsv and holiday_years.tsv in resources/, and
+their compiled-in copy in dasmig/countrygen_locale_data.hpp) are built by
+scripts/prepare_locales.py, prepare_zones.py and prepare_holidays.py from:
+
+6. Unicode CLDR 47 (cldr-json), for locales.tsv and the cash digits of
+   currencies.tsv: date, time, number and currency formats, names, week
+   data and measurement systems. Copyright (c) Unicode, Inc. Licensed under
+   the Unicode License v3 (https://www.unicode.org/license.txt), whose
+   notice must stay with copies of the data.
+
+7. ISO 4217 lists one and three, as published by SIX Group
+   (https://www.six-group.com/en/products-services/financial-information/data-standards.html),
+   for currencies.tsv: the codes, numeric codes and minor units.
+
+8. The IANA time zone database (https://www.iana.org/time-zones), release
+   2026f as compiled in the PyPI tzdata package 2026.6, for zones.tsv and
+   zone_links.tsv. In the public domain.
+
+9. GeoNames (https://www.geonames.org/), cities1000, for the population
+   share of each zone in zones.tsv and the zones of countries IANA does not
+   list. Licensed under Creative Commons Attribution 4.0 International
+   (CC BY 4.0), which requires credit to GeoNames.
+
+10. python-holidays 0.107 (https://github.com/vacanza/holidays), for the
+    holiday tables: the rules are inferred from its holidays and their
+    names, and the dated events come from its calendars. Licensed under
+    the MIT License:
+
+    Copyright (c) Vacanza Team and individual contributors (see CONTRIBUTORS file)
+    Copyright (c) dr-prodigy <dr.prodigy.github@gmail.com>, 2017-2023
+    Copyright (c) ryanss <ryanssdev@icloud.com>, 2014-2017
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+From countries.tsv above, the locale tables take each country's code and
+currency code, and, where the sources above have nothing, its first
+language (a fallback locale) and its first UTC offset (a fallback zone).
+Each locale table names its sources in its first lines.
