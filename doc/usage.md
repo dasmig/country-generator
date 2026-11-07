@@ -102,7 +102,7 @@ dasmig::cntg::instance().load("/opt/data/countries.tsv");  // a file: the countr
 Each `load()` replaces the data loaded before (use `extend()` to add on top; see Extending Data).
 `load(dataset)` returns `bool` (`true` if the tier's `countries.tsv` was found and loaded).
 `load(path)` returns `void` and does nothing if the path is neither a file nor a directory holding `countries.tsv`. A directory's missing locale tables are cleared; a file leaves the locale tables as they are. A malformed file throws `dasmig::core::tsv_error` with its file, line and column, and nothing changes.
-`has_locale_data()` says whether any locale table is loaded.
+`has_locale_data()` says whether any locale table is loaded. `locale_data_hash()` identifies those tables, as `data_hash()` does `countries.tsv`. It is the `data` in the signature of a `get_locale` or `get_time_zone` result, so a library that composes those results can combine it into its own.
 
 ## Generating Countries
 
