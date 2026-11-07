@@ -2568,6 +2568,13 @@ class cntg
     /// @return The hash; 0 when nothing is loaded.
     [[nodiscard]] std::uint64_t data_hash() const { return _table.data_hash(); }
 
+    /// @brief Hash of the loaded locale tables (locales, zones, currencies and
+    ///        holidays), the one a result drawn for a given country records in
+    ///        its signature(). A library that composes this one combines it with
+    ///        data_hash() when its results depend on those tables.
+    /// @return The hash; 0 when none is loaded.
+    [[nodiscard]] std::uint64_t locale_data_hash() const { return locale_hash_(); }
+
   private:
     static constexpr std::string_view library_name_ = "country-generator";
     static constexpr std::string_view data_file_ = "countries.tsv";

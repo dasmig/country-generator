@@ -168,6 +168,11 @@ TEST_CASE("with the locale tables loaded, get_country's known answers are unchan
 {
     // The values of tests.cpp's known answers for countries.tsv alone.
     REQUIRE(lite().data_hash() == 0xba0f78d3ad63fb46ULL);
+    // The locale tables have their own hash, the one results for a given country record.
+    REQUIRE(lite().locale_data_hash() == lite().get_locale({.country = "BR"}, 1).signature().data);
+    REQUIRE(lite().locale_data_hash() == lite().get_time_zone({.country = "BR"}, 1).signature().data);
+    REQUIRE(lite().locale_data_hash() != lite().data_hash());
+    REQUIRE(dasmig::cntg{}.locale_data_hash() == 0);
     dasmig::cntg only_countries;
     only_countries.load(tier_dir("lite") / "countries.tsv");
     REQUIRE(lite().get_country({}, std::uint64_t{1}).to_json() == only_countries.get_country({}, std::uint64_t{1}).to_json());
